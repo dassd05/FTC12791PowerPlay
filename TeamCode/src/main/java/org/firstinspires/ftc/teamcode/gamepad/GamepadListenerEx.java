@@ -1,11 +1,18 @@
 package org.firstinspires.ftc.teamcode.gamepad;
 
 import androidx.annotation.CallSuper;
+
 import com.qualcomm.robotcore.hardware.Gamepad;
 
 import java.util.HashSet;
 import java.util.Set;
 
+/**
+ * Extends the functionality of the {@link GamepadListener} class and does
+ * all the input handling internally. To use it, extend the class like you normally
+ * would for {@link GamepadListener}. But, call {@link #update()} on each new frame
+ * and this will handle the gamepad's inputs and call the corresponding methods.
+ */
 public class GamepadListenerEx extends GamepadListener {
 
     protected Gamepad gamepad;
@@ -49,10 +56,19 @@ public class GamepadListenerEx extends GamepadListener {
         pressedButtons.remove(button);
     }
 
+    /**
+     * Detects if the given {@link Button} is currently being pressed.
+     * @param button {@link Button} to see the state of.
+     * @return True if the button is being pressed and false if it isn't.
+     */
     public final boolean isButtonPressed(Button button) {
         return pressedButtons.contains(button);
     }
 
+    /**
+     * Handles the gamepad's inputs, updates all the stored states, and invokes the
+     * necessary listener methods.
+     */
     public void update() {
         // the movement stuff (sticks / triggers)
         if (gamepad.left_stick_x != lastLeftStickX || gamepad.left_stick_y != lastLeftStickY)
@@ -96,6 +112,5 @@ public class GamepadListenerEx extends GamepadListener {
         if (!gamepad.guide && pressedButtons.contains(Button.guide))                           onButtonRelease(Button.guide);
         if (!gamepad.start && pressedButtons.contains(Button.start))                           onButtonRelease(Button.start);
         if (!gamepad.back && pressedButtons.contains(Button.back))                             onButtonRelease(Button.back);
-
     }
 }

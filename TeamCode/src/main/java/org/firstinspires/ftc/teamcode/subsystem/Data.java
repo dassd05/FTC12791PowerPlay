@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.robot;
+package org.firstinspires.ftc.teamcode.subsystem;
 
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 
@@ -17,4 +17,6 @@ public class Data {
 
     public static Pose2d position = new Pose2d(0, 0, 0);
 
+    // we can just migrate this to Constants and it'll be the same
+    // but perhaps this way it's clearer
 }

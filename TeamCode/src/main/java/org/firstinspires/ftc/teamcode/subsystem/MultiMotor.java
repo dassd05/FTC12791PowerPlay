@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.robot;
+package org.firstinspires.ftc.teamcode.subsystem;
 
 
 import com.qualcomm.robotcore.hardware.DcMotorController;
@@ -48,6 +48,14 @@ public class MultiMotor implements DcMotorEx {
         return true;
     }
 
+    public boolean[] isMotorEnableds() {
+        boolean[] enableds = new boolean[motors.length];
+        for (int i = 0; i < motors.length; i ++) {
+            enableds[i] = motors[i].isMotorEnabled();
+        }
+        return enableds;
+    }
+
     @Override
     public void setVelocity(double angularRate) {
         for (DcMotorEx motor: motors) {
@@ -68,7 +76,15 @@ public class MultiMotor implements DcMotorEx {
         for (DcMotorEx motor: motors) {
             avg += motor.getVelocity();
         }
-        return avg / 3;
+        return avg / motors.length;
+    }
+
+    public double[] getVelocities() {
+        double[] velocities = new double[motors.length];
+        for (int i = 0; i < motors.length; i ++) {
+            velocities[i] = motors[i].getVelocity();
+        }
+        return velocities;
     }
 
     @Override
@@ -77,7 +93,15 @@ public class MultiMotor implements DcMotorEx {
         for (DcMotorEx motor: motors) {
             avg += motor.getVelocity(unit);
         }
-        return avg / 3;
+        return avg / motors.length;
+    }
+
+    public double[] getVelocities(AngleUnit unit) {
+        double[] velocities = new double[motors.length];
+        for (int i = 0; i < motors.length; i ++) {
+            velocities[i] = motors[i].getVelocity(unit);
+        }
+        return velocities;
     }
 
     @Override
@@ -120,6 +144,14 @@ public class MultiMotor implements DcMotorEx {
         return motors[0].getPIDFCoefficients(mode);
     }
 
+    public PIDFCoefficients[] getPIDFCoefficientses(RunMode mode) {
+        PIDFCoefficients[] coefficients = new PIDFCoefficients[motors.length];
+        for (int i = 0; i < motors.length; i ++) {
+            coefficients[i] = motors[i].getPIDFCoefficients(mode);
+        }
+        return coefficients;
+    }
+
     @Override
     public void setTargetPositionTolerance(int tolerance) {
         for (DcMotorEx motor: motors) {
@@ -132,18 +164,42 @@ public class MultiMotor implements DcMotorEx {
         return motors[0].getTargetPositionTolerance();
     }
 
+    public int[] getTargetPositionTolerances() {
+        int[] tolerances = new int[motors.length];
+        for (int i = 0; i < motors.length; i ++) {
+            tolerances[i] = motors[i].getTargetPositionTolerance();
+        }
+        return tolerances;
+    }
+
     @Override
     public double getCurrent(CurrentUnit unit) {
         double avg = 0;
         for (DcMotorEx motor: motors) {
             avg += motor.getCurrent(unit);
         }
-        return avg / 3;
+        return avg / motors.length;
+    }
+
+    public double[] getCurrents(CurrentUnit unit) {
+        double[] currents = new double[motors.length];
+        for (int i = 0; i < motors.length; i ++) {
+            currents[i] = motors[i].getCurrent(unit);
+        }
+        return currents;
     }
 
     @Override
     public double getCurrentAlert(CurrentUnit unit) {
         return motors[0].getCurrentAlert(unit);
+    }
+
+    public double[] getCurrentAlerts(CurrentUnit unit) {
+        double[] alerts = new double[motors.length];
+        for (int i = 0; i < motors.length; i ++) {
+            alerts[i] = motors[i].getCurrentAlert(unit);
+        }
+        return alerts;
     }
 
     @Override
@@ -161,9 +217,25 @@ public class MultiMotor implements DcMotorEx {
         return false;
     }
 
+    public boolean[] isOverCurrents() {
+        boolean[] overCurrents = new boolean[motors.length];
+        for (int i = 0; i < motors.length; i ++) {
+            overCurrents[i] = motors[i].isOverCurrent();
+        }
+        return overCurrents;
+    }
+
     @Override
     public MotorConfigurationType getMotorType() {
         return motors[0].getMotorType();
+    }
+
+    public MotorConfigurationType[] getMotorTypes() {
+        MotorConfigurationType[] types = new MotorConfigurationType[motors.length];
+        for (int i = 0; i < motors.length; i ++) {
+            types[i] = motors[i].getMotorType();
+        }
+        return types;
     }
 
     @Override
@@ -211,6 +283,14 @@ public class MultiMotor implements DcMotorEx {
         return motors[0].getZeroPowerBehavior();
     }
 
+    public ZeroPowerBehavior[] getZeroPowerBehaviors() {
+        ZeroPowerBehavior[] behaviors = new ZeroPowerBehavior[motors.length];
+        for (int i = 0; i < motors.length; i ++) {
+            behaviors[i] = motors[i].getZeroPowerBehavior();
+        }
+        return behaviors;
+    }
+
     @Override
     @Deprecated
     public void setPowerFloat() {
@@ -222,6 +302,14 @@ public class MultiMotor implements DcMotorEx {
     @Override
     public boolean getPowerFloat() {
         return motors[0].getPowerFloat();
+    }
+
+    public boolean[] getPowerFloats() {
+        boolean[] floats = new boolean[motors.length];
+        for (int i = 0; i < motors.length; i ++) {
+            floats[i] = motors[i].getPowerFloat();
+        }
+        return floats;
     }
 
     @Override
@@ -236,6 +324,14 @@ public class MultiMotor implements DcMotorEx {
         return motors[0].getTargetPosition();
     }
 
+    public int[] getTargetPositions() {
+        int[] targets = new int[motors.length];
+        for (int i = 0; i < motors.length; i ++) {
+            targets[i] = motors[i].getTargetPosition();
+        }
+        return targets;
+    }
+
     @Override
     public boolean isBusy() {
         for (DcMotorEx motor: motors) {
@@ -244,13 +340,30 @@ public class MultiMotor implements DcMotorEx {
         return false;
     }
 
+    public boolean[] isBusys() {
+        boolean[] busys = new boolean[motors.length];
+        for (int i = 0; i < motors.length; i ++) {
+            busys[i] = motors[i].isBusy();
+        }
+        return busys;
+    }
+
     @Override
     public int getCurrentPosition() {
         int avg = 0;
         for (DcMotorEx motor: motors) {
             avg += motor.getCurrentPosition();
         }
-        return avg / 3;    }
+        return avg / motors.length;
+    }
+
+    public int[] getCurrentPositions() {
+        int[] positions = new int[motors.length];
+        for (int i = 0; i < motors.length; i ++) {
+            positions[i] = motors[i].getCurrentPosition();
+        }
+        return positions;
+    }
 
     @Override
     public void setMode(RunMode mode) {
@@ -262,6 +375,14 @@ public class MultiMotor implements DcMotorEx {
     @Override
     public RunMode getMode() {
         return motors[0].getMode();
+    }
+
+    public RunMode[] getModes() {
+        RunMode[] modes = new RunMode[motors.length];
+        for (int i = 0; i < motors.length; i ++) {
+            modes[i] = motors[i].getMode();
+        }
+        return modes;
     }
 
     @Override
@@ -306,11 +427,28 @@ public class MultiMotor implements DcMotorEx {
         for (DcMotorEx motor: motors) {
             avg += motor.getPower();
         }
-        return avg / 3;    }
+        return avg / motors.length;
+    }
+
+    public double[] getPowers() {
+        double[] powers = new double[motors.length];
+        for (int i = 0; i < motors.length; i ++) {
+            powers[i] = motors[i].getPower();
+        }
+        return powers;
+    }
 
     @Override
     public Manufacturer getManufacturer() {
         return motors[0].getManufacturer();
+    }
+
+    public Manufacturer[] getManufacturers() {
+        Manufacturer[] manufacturers = new Manufacturer[motors.length];
+        for (int i = 0; i < motors.length; i ++) {
+            manufacturers[i] = motors[i].getManufacturer();
+        }
+        return manufacturers;
     }
 
     @Override
@@ -342,6 +480,14 @@ public class MultiMotor implements DcMotorEx {
     @Override
     public int getVersion() {
         return motors[0].getVersion();
+    }
+
+    public int[] getVersions() {
+        int[] versions = new int[motors.length];
+        for (int i = 0; i < motors.length; i ++) {
+            versions[i] = motors[i].getVersion();
+        }
+        return versions;
     }
 
     @Override

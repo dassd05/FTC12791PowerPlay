@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.robot.vision;
+package org.firstinspires.ftc.teamcode.subsystem.vision;
 
 import org.opencv.core.Mat;
 import org.openftc.easyopencv.OpenCvPipeline;
@@ -9,6 +9,7 @@ public class JunctionDetectionPipeline extends OpenCvPipeline {
 
     @Override
     public Mat processFrame(Mat input) {
-        return null;
+
+        return input;
     }
 }

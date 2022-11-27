@@ -2,17 +2,20 @@ package org.firstinspires.ftc.teamcode.gamepad;
 
 import com.qualcomm.robotcore.hardware.Gamepad;
 
-import java.util.Collection;
 import java.util.HashSet;
+import java.util.Set;
 
+/**
+ * A class utilizing {@link GamepadListenerEx} that detects whether a button
+ * has been pressed in the last frame. Requires the user to call {@link #update()}
+ * each frame.
+ */
 public class JustPressed {
 
-    public Gamepad gamepad;
     public GamepadListenerEx listener;
-    public Collection<GamepadListener.Button> justPressed;
+    public Set<GamepadListener.Button> justPressed;
 
     public JustPressed(Gamepad gamepad) {
-        this.gamepad = gamepad;
         this.listener = new GamepadListenerEx(gamepad) {
             @Override
             public void onButtonPress(Button button) {
@@ -20,6 +23,10 @@ public class JustPressed {
                 justPressed.add(button);
             }
         };
+    }
+
+    public JustPressed(GamepadListenerEx gamepadListener) {
+        this.listener = gamepadListener;
     }
 
     public void update() {
