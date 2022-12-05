@@ -63,8 +63,8 @@ public class SliderCrankLinkage {
      *
      * <p>*Make sure you read the assumptions outlined in {@link SliderCrankLinkage}!*</p>
      *
-     * @param a The current angle of the crank.
-     * @param angleVelo The current angular velocity of the crank.
+     * @param a The current angle of the crank, in radians.
+     * @param angleVelo The current angular velocity of the crank, in radians/second.
      * @return Velocity of the slider.
      */
     public double velocity(double a, double angleVelo) {
@@ -80,8 +80,8 @@ public class SliderCrankLinkage {
      *
      * <p>*Make sure you read the assumptions outlined in {@link SliderCrankLinkage}!*</p>
      *
-     * @param a The current angle of the crank.
-     * @param angleAccel The current angular acceleration of the crank.
+     * @param a The current angle of the crank, in radians.
+     * @param angleAccel The current angular acceleration of the crank, in radians/second<sup>2</sup>.
      * @return Acceleration of the slider.
      */
     public double acceleration(double a, double angleAccel) {
@@ -100,8 +100,8 @@ public class SliderCrankLinkage {
      *
      * <p>*Make sure you read the assumptions outlined in {@link SliderCrankLinkage}!*</p>
      *
-     * @param a The current angle of the crank.
-     * @param torque THe current torque on the crank.
+     * @param a The current angle of the crank, radians.
+     * @param torque The current torque on the crank.
      * @return Force on the slider.
      */
     public double force(double a, double torque) {
@@ -111,18 +111,60 @@ public class SliderCrankLinkage {
     //todo the inverses of all of these
     //ie calculate crank angle given slider position.
 
+    /**
+     * The angle of the crank given at a distance between the slider and the base.
+     * <p>*Make sure you read the assumptions outlined in {@link SliderCrankLinkage}!*</p>
+     *
+     * @param d The current distance between the slider and the base.
+     * @return Angle of the crank.
+     */
     public double positionInv(double d) {
         throw new NotImplementedError();
     }
 
+    /**
+     * The angular velocity of the crank at a given distance between the slider and the base with
+     * the specified slider velocity. This is just the derivative of the
+     * {@link #positionInv(double)} and doesn't take into account other factors like torque or mass.
+     *
+     * <p>*Make sure you read the assumptions outlined in {@link SliderCrankLinkage}!*</p>
+     *
+     * @param d The current distance between the slider and the base.
+     * @param velocity The current velocity of the slider.
+     * @return Angular velocity of the crank, in radians/second.
+     */
     public double velocityInv(double d, double velocity) {
         throw new NotImplementedError();
     }
 
+    /**
+     * The angular acceleration of the crank at a given distance between the slider and the base
+     * with the given slider acceleration. This is just the second derivative of the
+     * {@link #position(double)} and doesn't take into account other factors like torque or mass.
+     *
+     * <p>*Make sure you read the assumptions outlined in {@link SliderCrankLinkage}!*</p>
+     *
+     * @param d The current distance between the slider and the base.
+     * @param acceleration The current acceleration of the slider
+     * @return Angular acceleration of the crank, radians/second<sup>2</sup>.
+     */
     public double accelerationInv(double d, double acceleration) {
         throw new NotImplementedError();
     }
 
+    /**
+     * The torque on the crank at a given distance between the slider and the base with the
+     * specified force on the slider.
+     *
+     * <p>NOTE: This only works for in-line slider-crank linkages, and it is also only a rough
+     * approximation.</p>
+     *
+     * <p>*Make sure you read the assumptions outlined in {@link SliderCrankLinkage}!*</p>
+     *
+     * @param d The current distance between the slider and the base.
+     * @param force The current force on the slider.
+     * @return Torque on the crank.
+     */
     public double torque(double d, double force) {
         throw new NotImplementedError();
     }

@@ -1,12 +1,15 @@
 package org.firstinspires.ftc.teamcode.subsystem.io;
 
+import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 
 import org.firstinspires.ftc.teamcode.subsystem.MultiMotor;
 
+@Config
 public class Vertical {
+    public static PIDFCoefficients pidfCoefficients = new PIDFCoefficients();
 
     public HardwareMap hardwareMap;
     public MultiMotor motors;
@@ -40,7 +43,6 @@ public class Vertical {
         position = motors.getCurrentPosition();
         motors.setTargetPosition(target);
     }
-
 
     public static double ticksToMM(int ticks) {
         return ticks;

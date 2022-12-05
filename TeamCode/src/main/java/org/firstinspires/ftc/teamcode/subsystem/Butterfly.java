@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.subsystem;
 
+import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.roadrunner.drive.Drive;
 import com.acmerobotics.roadrunner.drive.DriveSignal;
 import com.acmerobotics.roadrunner.drive.MecanumDrive;
@@ -17,7 +18,24 @@ import com.qualcomm.robotcore.hardware.Servo;
 import java.util.List;
 import java.util.function.Supplier;
 
+@Config
 public class Butterfly {
+
+    public static double FRONT_LEFT_IN = 0;
+    public static double FRONT_LEFT_OUT = 0;
+    public static double FRONT_LEFT_SS = 0;
+    public static double BACK_LEFT_IN = 0;
+    public static double BACK_LEFT_OUT = 0;
+    public static double BACK_LEFT_SS = 0;
+    public static double BACK_RIGHT_IN = 0;
+    public static double BACK_RIGHT_OUT = 0;
+    public static double BACK_RIGHT_SS = 0;
+    public static double FRONT_RIGHT_IN = 0;
+    public static double FRONT_RIGHT_OUT = 0;
+    public static double FRONT_RIGHT_SS = 0;
+    public static double IN_OUT_DISTANCE = 0;
+    public static double IN_STILL_DISTANCE = 0;
+
 
     public HardwareMap hardwareMap;
     public DcMotorEx frontLeft;
@@ -61,7 +79,7 @@ public class Butterfly {
         servoBackRight = hardwareMap.get(Servo.class, "servoBackRight");
         servoFrontRight = hardwareMap.get(Servo.class, "servoFrontRight");
 
-        mecanum = new SimpleMecanumDrive(0, 0, 0, 0, 0, 0);
+        mecanum = new SimpleMecanumDrive(0, 0, 0, 0, 0, 0);  // todo look at cad
         tank = new SimpleTankDrive(0, 0, 0, 0);
     }
 
@@ -73,43 +91,65 @@ public class Butterfly {
         this.state = state;
     }
 
-    public void drive(double forward, double turn) {
-        // scales motor power proportionally so it doesn't exceed 1
-        double limiter = Math.max(Math.abs(forward) + Math.abs(turn), 1);
+    public void setMotorPowers(List<Double> powers) {
+        assert powers.size() == 4;  // keep?
+        frontLeftPower = powers.get(0);
+        backLeftPower = powers.get(1);
+        backRightPower = powers.get(2);
+        frontRightPower = powers.get(3);
+    }
 
-        frontLeftPower = (forward + turn) / limiter;
-        backLeftPower = (forward + turn) / limiter;
-        backRightPower = (forward - turn) / limiter;
-        frontRightPower = (forward - turn) / limiter;
+    public void drive(double forward, double turn) {
+        if (getState() == State.STANDSTILL) brake();
+        else if (getState() == State.MECANUM) drive(forward, 0, turn);
+        else setMotorPowers(tank.setDrivePower(new Pose2d(forward, 0, turn)));
+
+//        // scales motor power proportionally so it doesn't exceed 1
+//        double limiter = Math.max(Math.abs(forward) + Math.abs(turn), 1);
+//
+//        frontLeftPower = (forward + turn) / limiter;
+//        backLeftPower = (forward + turn) / limiter;
+//        backRightPower = (forward - turn) / limiter;
+//        frontRightPower = (forward - turn) / limiter;
     }
 
     public void drive(double forward, double strafe, double turn) {
-        strafe *= 1.1; // Counteract imperfect strafing maybe~~
+        if (getState() != State.MECANUM) drive(forward, turn);
+        else setMotorPowers(mecanum.setDrivePower(new Pose2d(forward, strafe, turn)));
 
-        // scales motor power proportionally so it doesn't exceed 1
-        double limiter = Math.max(Math.abs(forward) + Math.abs(strafe) + Math.abs(turn), 1);
-
-        frontLeftPower = (forward + strafe + turn) / limiter;
-        backLeftPower = (forward - strafe + turn) / limiter;
-        backRightPower = (forward + strafe - turn) / limiter;
-        frontRightPower = (forward - strafe - turn) / limiter;
+//        strafe *= 1.1; // Counteract imperfect strafing maybe~~
+//
+//        // scales motor power proportionally so it doesn't exceed 1
+//        double limiter = Math.max(Math.abs(forward) + Math.abs(strafe) + Math.abs(turn), 1);
+//
+//        frontLeftPower = (forward + strafe + turn) / limiter;
+//        backLeftPower = (forward - strafe + turn) / limiter;
+//        backRightPower = (forward + strafe - turn) / limiter;
+//        frontRightPower = (forward - strafe - turn) / limiter;
     }
 
     public void driveFieldCentric(double forward, double strafe, double turn) {
         // Read inverse IMU heading, as the IMU heading is CW positive
         double heading = -imu.getAngularOrientation().firstAngle;
-
         double rotX = strafe * Math.cos(heading) - forward * Math.sin(heading);
         double rotY = strafe * Math.sin(heading) + forward * Math.cos(heading);
 
         drive(rotY, rotX, turn);
     }
 
-    public void setServos(double position) {
-        servoFrontLeft.setPosition(position);
-        servoBackLeft.setPosition(position);
-        servoBackRight.setPosition(position);
-        servoFrontRight.setPosition(position);
+    public void brake() {
+        frontLeftPower = 0;
+        backLeftPower = 0;
+        backRightPower = 0;
+        frontRightPower = 0;
+    }
+
+    public void setServos(List<Double> positions) {
+        assert positions.size() == 4;
+        servoFrontLeft.setPosition(positions.get(0));
+        servoBackLeft.setPosition(positions.get(1));
+        servoBackRight.setPosition(positions.get(2));
+        servoFrontRight.setPosition(positions.get(3));
     }
 
     public void update() {
@@ -118,11 +158,25 @@ public class Butterfly {
         backRight.setPower(backRightPower);
         frontRight.setPower(frontRightPower);
 
-        // replace with arrow syntax if high enough java version :P
         switch (state) {
-            case MECANUM: setServos(Constants.BUTTERFLY_IN); break;
-            case TRACTION: setServos(Constants.BUTTERFLY_OUT); break;
-            case STANDSTILL: setServos(Constants.BUTTERFLY_STILL); break;
+            case MECANUM:
+                servoFrontLeft.setPosition(FRONT_LEFT_IN);
+                servoBackLeft.setPosition(BACK_LEFT_IN);
+                servoBackRight.setPosition(BACK_RIGHT_IN);
+                servoFrontRight.setPosition(FRONT_RIGHT_IN);
+                break;
+            case TRACTION:
+                servoFrontLeft.setPosition(FRONT_LEFT_OUT);
+                servoBackLeft.setPosition(BACK_LEFT_OUT);
+                servoBackRight.setPosition(BACK_RIGHT_OUT);
+                servoFrontRight.setPosition(FRONT_RIGHT_OUT);
+                break;
+            case STANDSTILL:
+                servoFrontLeft.setPosition(FRONT_LEFT_SS);
+                servoBackLeft.setPosition(BACK_LEFT_SS);
+                servoBackRight.setPosition(BACK_RIGHT_SS);
+                servoFrontRight.setPosition(FRONT_RIGHT_SS);
+                break;
         }
     }
 
@@ -222,7 +276,7 @@ public class Butterfly {
          */
         @Override
         public List<Double> setDrivePower(Pose2d drivePower) {
-            return MecanumKinematics.robotToWheelVelocities(drivePower, 1.0, 1.0, lateralMultiplier);
+            return MecanumKinematics.robotToWheelVelocities(drivePower, trackWidth, wheelBase, lateralMultiplier);
         }
     }
 
@@ -267,7 +321,7 @@ public class Butterfly {
          */
         @Override
         public List<Double> setDrivePower(Pose2d drivePower) {
-            return TankKinematics.robotToWheelVelocities(drivePower, 2.0);
+            return TankKinematics.robotToWheelVelocities(drivePower, trackWidth);
         }
     }
 }

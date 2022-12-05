@@ -7,7 +7,6 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 
 public class Turret {
     public HardwareMap hardwareMap;
-
     public DcMotorEx motor;
     public AnalogInput encoder;
 
@@ -26,10 +25,10 @@ public class Turret {
     public int getSector() {
         return sector;
     }
+    //rad ccw
     public double getPosition() {
         return position;
     }
-
     public double getTarget() {
         return target;
     }

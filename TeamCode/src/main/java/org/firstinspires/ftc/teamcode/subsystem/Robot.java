@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.subsystem;
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
+import com.outoftheboxrobotics.photoncore.PhotonCore;
 import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.hardware.lynx.LynxModule;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -67,6 +68,8 @@ public class Robot {
         this.telemetry.setDisplayFormat(Telemetry.DisplayFormat.HTML);
         this.telemetry.update();
         this.telemetry.clearAll();
+
+        PhotonCore.enable();
     }
 
     public void initWebcam(OpenCvPipeline pipeline) {
