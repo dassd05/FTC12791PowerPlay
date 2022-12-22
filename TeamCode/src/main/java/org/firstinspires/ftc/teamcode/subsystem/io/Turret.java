@@ -33,7 +33,7 @@ public class Turret {
         return target;
     }
     public void setTarget(double angle) {
-        target = angle;
+        target = Angle.norm(angle);
     }
 
     public void update() {

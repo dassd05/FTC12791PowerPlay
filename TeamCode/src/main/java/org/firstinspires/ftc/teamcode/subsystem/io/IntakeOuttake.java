@@ -1,6 +1,8 @@
 package org.firstinspires.ftc.teamcode.subsystem.io;
 
 import com.acmerobotics.roadrunner.geometry.Pose2d;
+import com.acmerobotics.roadrunner.util.Angle;
+import com.qualcomm.hardware.rev.RevColorSensorV3;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import java.util.function.Supplier;
@@ -13,6 +15,7 @@ public class IntakeOuttake {
     public Horizontal horizontal;
     public Turret turret;
     public Arm arm;
+    public RevColorSensorV3 colorSensor;
 
     public Supplier<Pose2d> position;
 
@@ -30,6 +33,7 @@ public class IntakeOuttake {
         horizontal = new Horizontal(hardwareMap);
         turret = new Turret(hardwareMap);
         arm = new Arm(hardwareMap);
+        colorSensor = hardwareMap.get(RevColorSensorV3.class, "intakeSensor");
     }
 
     // mm
@@ -82,6 +86,33 @@ public class IntakeOuttake {
             intaked = false;
             arm.outtake();
         }
+    }
+
+    public void deploy(int row, int col) {
+        double height;
+
+        if (row % 2 == 1 && col % 2 == 1) height = 0;
+        else if (row % 2 == 0 && col % 2 == 0) height = 2;
+        else if (Math.abs(row - 3) == 1 && Math.abs(col - 3) == 1) height = 3;
+        else height = 1;
+
+
+    }
+
+    //relative, mm
+    public void setTarget(double x, double y, double z) {
+        double angle = Math.atan2(x, y);
+        double angleOffset = Angle.normDelta(angle - turret.getPosition());
+        double flatDistance = Math.sqrt(x*x + y*y);
+        boolean forward = Math.abs(angleOffset) < Math.PI * .5 || flatDistance > Horizontal.MAX_BACKWARD + Arm.ARM_LENGTH;
+
+        setTurretTarget(Angle.norm(angle + (forward ? 0 : Math.PI)));
+
+        double armAngle = Math.atan2(z, flatDistance);
+        setArmTarget(Angle.norm(armAngle + (forward ? 0 : Math.PI)));
+
+        setVerticalTarget(z - Math.sin(armAngle) * Arm.ARM_LENGTH);
+        setHorizontalTarget((flatDistance - Math.cos(armAngle) * Arm.ARM_LENGTH) * (forward ? 1 : -1));
     }
 
     public void update() {

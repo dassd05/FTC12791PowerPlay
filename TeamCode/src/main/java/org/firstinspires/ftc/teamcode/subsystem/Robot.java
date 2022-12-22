@@ -25,6 +25,7 @@ public class Robot {
     public Telemetry telemetry;
     public Butterfly butterfly;
     public IntakeOuttake intakeOuttake;
+    public Odometry odometry;
     public BNO055IMU imu;
     public Webcam webcam;
     public FtcDashboard dashboard;
@@ -40,6 +41,7 @@ public class Robot {
 
         butterfly = new Butterfly(hardwareMap, () -> position);
         intakeOuttake = new IntakeOuttake(hardwareMap, () -> position);
+        odometry = new Odometry(hardwareMap);
 
         BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
         parameters.angleUnit = BNO055IMU.AngleUnit.RADIANS;
@@ -125,9 +127,11 @@ public class Robot {
 
     public void update() {
         orientation = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.RADIANS);
+        position = odometry.getPoseEstimate();
         clearCache();
         butterfly.update();
         intakeOuttake.update();
+        odometry.update();
         telemetry.update();
     }
 }

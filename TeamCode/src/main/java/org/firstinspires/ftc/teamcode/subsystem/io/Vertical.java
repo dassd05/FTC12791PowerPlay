@@ -25,7 +25,7 @@ public class Vertical {
         motors.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         motors.setTargetPosition(0);
         motors.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        motors.setPIDFCoefficients(DcMotor.RunMode.RUN_TO_POSITION, new PIDFCoefficients()); // is this fine, or do we need our own pidf?
+//        motors.setPIDFCoefficients(DcMotor.RunMode.RUN_TO_POSITION, new PIDFCoefficients()); // is this fine, or do we need our own pidf controller?
     }
 
     // mm
@@ -42,6 +42,7 @@ public class Vertical {
     public void update() {
         position = motors.getCurrentPosition();
         motors.setTargetPosition(target);
+        motors.setPower(.7);
     }
 
     public static double ticksToMM(int ticks) {

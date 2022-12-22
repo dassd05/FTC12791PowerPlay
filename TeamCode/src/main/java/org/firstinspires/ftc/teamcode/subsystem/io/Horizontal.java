@@ -3,7 +3,9 @@ package org.firstinspires.ftc.teamcode.subsystem.io;
 import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.hardware.ServoImplEx;
 
+import org.firstinspires.ftc.teamcode.subsystem.ServoStuff;
 import org.firstinspires.ftc.teamcode.subsystem.SliderCrankLinkage;
 
 @Config
@@ -14,11 +16,14 @@ public class Horizontal {
     public static double BACKWARD1_OFFSET = 0;
     public static double BACKWARD2_OFFSET = 0;
 
+    public static final double MAX_FORWARD = 0;
+    public static final double MAX_BACKWARD = 0;
+
     public HardwareMap hardwareMap;
-    public Servo forward1;
-    public Servo forward2;
-    public Servo backward1;
-    public Servo backward2;
+    public ServoImplEx forward1;
+    public ServoImplEx forward2;
+    public ServoImplEx backward1;
+    public ServoImplEx backward2;
 
     public SliderCrankLinkage forward;
     public SliderCrankLinkage backward;
@@ -29,10 +34,15 @@ public class Horizontal {
     public Horizontal(HardwareMap hardwareMap) {
         this.hardwareMap = hardwareMap;
 
-        forward1 = hardwareMap.get(Servo.class, "forward1");
-        forward2 = hardwareMap.get(Servo.class, "forward2");
-        backward1 = hardwareMap.get(Servo.class, "backward1");
-        backward2 = hardwareMap.get(Servo.class, "backward2");
+        forward1 = hardwareMap.get(ServoImplEx.class, "forward1");
+        forward2 = hardwareMap.get(ServoImplEx.class, "forward2");
+        backward1 = hardwareMap.get(ServoImplEx.class, "backward1");
+        backward2 = hardwareMap.get(ServoImplEx.class, "backward2");
+
+        forward1.setPwmRange(ServoStuff.AxonMaxServo.servoModePwmRange);
+        forward2.setPwmRange(ServoStuff.AxonMaxServo.servoModePwmRange);
+        backward1.setPwmRange(ServoStuff.AxonMaxServo.servoModePwmRange);
+        backward2.setPwmRange(ServoStuff.AxonMaxServo.servoModePwmRange);
 
         // positive position = outwards
         forward1.setDirection(Servo.Direction.REVERSE);  // todo
