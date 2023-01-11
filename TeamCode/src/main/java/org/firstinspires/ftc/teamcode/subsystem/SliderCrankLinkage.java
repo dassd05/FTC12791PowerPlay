@@ -1,6 +1,8 @@
 package org.firstinspires.ftc.teamcode.subsystem;
 
-import kotlin.NotImplementedError;
+import org.firstinspires.ftc.teamcode.util.GraphFunction;
+
+import java.util.List;
 
 /**
  * <p>A slider-crank linkage is a type of linkage with one point of rotation which translates to
@@ -16,9 +18,13 @@ import kotlin.NotImplementedError;
  */
 public class SliderCrankLinkage {
 
-    public double r;
-    public double l;
-    public double o;
+    public double crank;
+    public double rod;
+    public double offset;
+    private GraphFunction positionCache;
+    private GraphFunction velocityCache;
+    private GraphFunction accelerationCache;
+    private GraphFunction torqueCache;
 
     /**
      * Models an offset slider-crank linkage with the given values. Ensure that all the values use consistent units.
@@ -29,9 +35,9 @@ public class SliderCrankLinkage {
      * @param offset How far the crank's point of rotation is below the axis
      */
     public SliderCrankLinkage(double crank, double rod, double offset) {
-        this.r = crank;
-        this.l = rod;
-        this.o = offset;
+        this.crank = crank;
+        this.rod = rod;
+        this.offset = offset;
     }
 
     /**
@@ -53,7 +59,7 @@ public class SliderCrankLinkage {
      * @return Distance between the slider and the base.
      */
     public double position(double a) {
-        return r * Math.cos(a) + Math.sqrt(sq(l) - sq(r * Math.sin(a) - o));
+        return crank * Math.cos(a) + Math.sqrt(sq(rod) - sq(crank * Math.sin(a) - offset));
     }
 
     /**
@@ -68,8 +74,8 @@ public class SliderCrankLinkage {
      * @return Velocity of the slider.
      */
     public double velocity(double a, double angleVelo) {
-        double x = r * Math.sin(a) + o;
-        double rawVelo = -r * Math.cos(a) * x / Math.sqrt(sq(l) - sq(x)) - (x - o);
+        double x = crank * Math.sin(a) + offset;
+        double rawVelo = -crank * Math.cos(a) * x / Math.sqrt(sq(rod) - sq(x)) - (x - offset);
         return rawVelo * angleVelo;
     }
 
@@ -85,10 +91,10 @@ public class SliderCrankLinkage {
      * @return Acceleration of the slider.
      */
     public double acceleration(double a, double angleAccel) {
-        double x = r * Math.sin(a) + o;
-        double y = r * Math.cos(a);
-        double rawAccel = ((x - o) * x - sq(y)) / Math.sqrt(sq(l) - sq(x))
-                - sq(y * x) / Math.pow(sq(l) - sq(x), 1.5) - y;
+        double x = crank * Math.sin(a) + offset;
+        double y = crank * Math.cos(a);
+        double rawAccel = ((x - offset) * x - sq(y)) / Math.sqrt(sq(rod) - sq(x))
+                - sq(y * x) / Math.pow(sq(rod) - sq(x), 1.5) - y;
         return rawAccel * angleAccel;
     }
 
@@ -105,11 +111,20 @@ public class SliderCrankLinkage {
      * @return Force on the slider.
      */
     public double force(double a, double torque) {
-        return torque / (r * Math.sin(a + Math.asin(r * Math.sin(a) / l)));
+        return torque / (crank * Math.sin(a + Math.asin(crank * Math.sin(a) / rod)));
     }
 
-    //todo the inverses of all of these
+    //todox the inverses of all of these
     //ie calculate crank angle given slider position.
+    // the inversion functions are complicated as fuck :/
+    // also there'll be two valid angles per position, so how tf do we calculate??
+
+    public void calculateInverses(double refinement) {
+        positionCache = new GraphFunction(this::position, 0, 2*Math.PI, refinement);
+        velocityCache = positionCache.derivative();
+        accelerationCache = velocityCache.derivative();
+        torqueCache = new GraphFunction((Double x) -> force(x, 1), 0, 2*Math.PI, refinement);
+    }
 
     /**
      * The angle of the crank given at a distance between the slider and the base.
@@ -118,8 +133,8 @@ public class SliderCrankLinkage {
      * @param d The current distance between the slider and the base.
      * @return Angle of the crank.
      */
-    public double positionInv(double d) {
-        throw new NotImplementedError();
+    public List<Double> positionInv(double d) {
+        return positionCache.findAllX(d);
     }
 
     /**
@@ -133,8 +148,10 @@ public class SliderCrankLinkage {
      * @param velocity The current velocity of the slider.
      * @return Angular velocity of the crank, in radians/second.
      */
-    public double velocityInv(double d, double velocity) {
-        throw new NotImplementedError();
+    public List<Double> velocityInv(double d, double velocity) {
+        List<Double> velocities = velocityCache.findAllX(d);
+        velocities.replaceAll((Double x) -> x * velocity);
+        return velocities;
     }
 
     /**
@@ -148,8 +165,10 @@ public class SliderCrankLinkage {
      * @param acceleration The current acceleration of the slider
      * @return Angular acceleration of the crank, radians/second<sup>2</sup>.
      */
-    public double accelerationInv(double d, double acceleration) {
-        throw new NotImplementedError();
+    public List<Double> accelerationInv(double d, double acceleration) {
+        List<Double> accelerations = accelerationCache.findAllX(d);
+        accelerations.replaceAll((Double x) -> x * acceleration);
+        return accelerations;
     }
 
     /**
@@ -165,11 +184,13 @@ public class SliderCrankLinkage {
      * @param force The current force on the slider.
      * @return Torque on the crank.
      */
-    public double torque(double d, double force) {
-        throw new NotImplementedError();
+    public List<Double> torque(double d, double force) {
+        List<Double> torques = torqueCache.findAllX(d);
+        torques.replaceAll((Double x) -> x * force);
+        return torques;
     }
 
-    private static double sq(double x) {
-        return x*x;
+    private static double sq(double n) {
+        return n*n;
     }
 }

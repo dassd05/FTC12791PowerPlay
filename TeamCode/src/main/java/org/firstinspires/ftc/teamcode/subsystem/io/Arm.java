@@ -6,15 +6,18 @@ import com.qualcomm.robotcore.hardware.CRServoImplEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.ServoImplEx;
+import com.qualcomm.robotcore.util.Range;
 
 import org.apache.commons.math3.geometry.euclidean.twod.Vector2D;
 import org.firstinspires.ftc.teamcode.subsystem.ServoStuff;
 
 @Config
 public class Arm {
-    public static double ARM_OFFSET = 0;
-    public static double INTAKE_SPEED = 0;
-    public static double ARM_LENGTH = 0;
+//    public static double ARM_OFFSET = 0;
+    public static double ARM_BACKWARD = .994;
+    public static double ARM_FORWARD = .462;
+    public static double INTAKE_SPEED = .8;
+    public static double ARM_LENGTH = 250;
 
     public HardwareMap hardwareMap;
     public ServoImplEx arm;
@@ -27,12 +30,14 @@ public class Arm {
     public Arm(HardwareMap hardwareMap) {
         this.hardwareMap = hardwareMap;
 
-        arm = hardwareMap.get(ServoImplEx.class, "armLeft");
-        intake = hardwareMap.get(CRServoImplEx.class, "armRight");
+        arm = hardwareMap.get(ServoImplEx.class, "arm");
+        intake = hardwareMap.get(CRServoImplEx.class, "intake");
 
         arm.setPwmRange(ServoStuff.AxonMaxServo.servoModePwmRange);
-        intake.setPwmRange(ServoStuff.GobildaTorqueServo.continuousModePwmRange);
-        intake.setDirection(DcMotorSimple.Direction.REVERSE);  // todo change so positive is ccw/forward
+        intake.setPwmRange(ServoStuff.GobildaSpeedServo.continuousModePwmRange);
+
+        // no use for this since we use Range.scale from angle to position
+//        intake.setDirection(DcMotorSimple.Direction.REVERSE);  // change so positive is ccw/forward
     }
 
     //rad ccw
@@ -43,7 +48,8 @@ public class Arm {
         return target;
     }
     public void setTarget(double angle) {
-        target = Angle.norm(angle);
+        target = Range.clip(angle, -.5, Math.PI + .5);
+        // todo find acceptable arm positions, and also make it accessible
     }
 
     public void intake() {
@@ -57,7 +63,7 @@ public class Arm {
     }
 
     public void update() {
-        arm.setPosition(angleToServo(target) + ARM_OFFSET);
+        arm.setPosition(Range.scale(target, 0, Math.PI, ARM_FORWARD, ARM_BACKWARD));
         intake.setPower(intakePower);
     }
 

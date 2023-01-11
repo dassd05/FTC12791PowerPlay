@@ -1,20 +1,39 @@
 package org.firstinspires.ftc.teamcode.opmode.test;
 
+import android.annotation.SuppressLint;
+
 import com.acmerobotics.dashboard.config.Config;
+import com.qualcomm.hardware.lynx.LynxDcMotorController;
 import com.qualcomm.hardware.lynx.LynxModule;
+import com.qualcomm.hardware.lynx.LynxNackException;
+import com.qualcomm.hardware.lynx.LynxServoController;
+import com.qualcomm.hardware.lynx.commands.core.LynxGetADCCommand;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.hardware.DcMotorControllerEx;
+import com.qualcomm.robotcore.hardware.AnalogInput;
+import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
-import com.qualcomm.robotcore.hardware.ServoControllerEx;
+import com.qualcomm.robotcore.hardware.DigitalChannel;
+import com.qualcomm.robotcore.hardware.HardwareDevice;
+import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.hardware.ServoImplEx;
+import com.qualcomm.robotcore.hardware.configuration.LynxConstants;
 
 import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.TempUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.VoltageUnit;
+import org.firstinspires.ftc.teamcode.util.TelemetryUtil;
+
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Locale;
+import java.util.function.Predicate;
 
 @Config
 @TeleOp(group = "test")
 public class HardwareTest extends LinearOpMode {
+    public static boolean CONTROL_HUB_SELECTED = true;
     public static double MOTOR0_POWER = 0;
     public static double MOTOR1_POWER = 0;
     public static double MOTOR2_POWER = 0;
@@ -26,49 +45,127 @@ public class HardwareTest extends LinearOpMode {
     public static double SERVO4_POSITION = -1;
     public static double SERVO5_POSITION = -1;
 
+    public boolean controlHubLastSelected = CONTROL_HUB_SELECTED;
+
+    public void resetValues() {
+        MOTOR0_POWER = 0;
+        MOTOR1_POWER = 0;
+        MOTOR2_POWER = 0;
+        MOTOR3_POWER = 0;
+        SERVO0_POSITION = -1;
+        SERVO1_POSITION = -1;
+        SERVO2_POSITION = -1;
+        SERVO3_POSITION = -1;
+        SERVO4_POSITION = -1;
+        SERVO5_POSITION = -1;
+    }
+
+    @SuppressLint("DefaultLocale")
     @Override
     public void runOpMode() throws InterruptedException {
-//        DcMotorEx motor0 = hardwareMap.get(DcMotorEx.class, "0");
-//        DcMotorEx motor1 = hardwareMap.get(DcMotorEx.class, "1");
-//        DcMotorEx motor2 = hardwareMap.get(DcMotorEx.class, "2");
-//        DcMotorEx motor3 = hardwareMap.get(DcMotorEx.class, "3");
+        CONTROL_HUB_SELECTED = true;
 
-        LynxModule lynxModule = hardwareMap.getAll(LynxModule.class).get(0);
-        DcMotorControllerEx motorController = hardwareMap.getAll(DcMotorControllerEx.class).get(0);
-        ServoControllerEx servoController = hardwareMap.getAll(ServoControllerEx.class).get(0);
+        List<LynxModule> lynxModules = hardwareMap.getAll(LynxModule.class);
+        List<LynxDcMotorController> motorControllers = hardwareMap.getAll(LynxDcMotorController.class);
+        List<LynxServoController> servoControllers = hardwareMap.getAll(LynxServoController.class);
+
+        assert lynxModules.size() == motorControllers.size() && lynxModules.size() == servoControllers.size();
+        assert lynxModules.size() >= 1 && lynxModules.size() <= 2;
+
+        boolean MUST_BE_CONTROL_HUB = lynxModules.size() == 1;
+
+        LynxModule activeLynxModule = null;
+        LynxDcMotorController activeMotorController = null;
+        LynxServoController activeServoController = null;
+
+        double[] motorPowers;
+        double[] servoPositions;
+        List<DcMotorEx> activeMotors = new ArrayList<>();
+        List<ServoImplEx> activeServos = new ArrayList<>();
+
+        List<AnalogInput> analogInputs = hardwareMap.getAll(AnalogInput.class);
+        List<DigitalChannel> digitalChannels = hardwareMap.getAll(DigitalChannel.class);
+
+        telemetry = TelemetryUtil.initTelemetry(telemetry);
 
         waitForStart();
+        hardwareMap.logDevices();
+        controlHubLastSelected = !CONTROL_HUB_SELECTED;
 
         while (opModeIsActive()) {
-            motorController.setMotorPower(0, MOTOR0_POWER);
-            motorController.setMotorPower(1, MOTOR1_POWER);
-            motorController.setMotorPower(2, MOTOR2_POWER);
-            motorController.setMotorPower(3, MOTOR3_POWER);
-            if (SERVO0_POSITION != -1) servoController.setServoPosition(0, SERVO0_POSITION);
-            if (SERVO1_POSITION != -1) servoController.setServoPosition(1, SERVO1_POSITION);
-            if (SERVO2_POSITION != -1) servoController.setServoPosition(2, SERVO2_POSITION);
-            if (SERVO3_POSITION != -1) servoController.setServoPosition(3, SERVO3_POSITION);
-            if (SERVO4_POSITION != -1) servoController.setServoPosition(4, SERVO4_POSITION);
-            if (SERVO5_POSITION != -1) servoController.setServoPosition(5, SERVO5_POSITION);
+            if (MUST_BE_CONTROL_HUB) CONTROL_HUB_SELECTED = true;
 
-            telemetry.addData(lynxModule.getDeviceName() + " connection info", lynxModule.getConnectionInfo());
-            telemetry.addData(lynxModule.getDeviceName() + " auxiliary voltage", lynxModule.getAuxiliaryVoltage(VoltageUnit.VOLTS) + " V");
-            telemetry.addData(lynxModule.getDeviceName() + " input voltage", lynxModule.getInputVoltage(VoltageUnit.VOLTS) + " V");
-            telemetry.addData(lynxModule.getDeviceName() + " current", lynxModule.getCurrent(CurrentUnit.AMPS) + " A");
-            telemetry.addData(lynxModule.getDeviceName() + " temperature", lynxModule.getTemperature(TempUnit.CELSIUS) + " oC");
-            telemetry.addData(motorController.getDeviceName() + " connection info", motorController.getConnectionInfo());
-            telemetry.addData("motor " + motorController.getMotorType(0).getName() + " current", motorController.getMotorCurrent(0, CurrentUnit.AMPS) + " A");
-            telemetry.addData("motor " + motorController.getMotorType(1).getName() + " current", motorController.getMotorCurrent(1, CurrentUnit.AMPS) + " A");
-            telemetry.addData("motor " + motorController.getMotorType(2).getName() + " current", motorController.getMotorCurrent(2, CurrentUnit.AMPS) + " A");
-            telemetry.addData("motor " + motorController.getMotorType(3).getName() + " current", motorController.getMotorCurrent(3, CurrentUnit.AMPS) + " A");
-            telemetry.addData(servoController.getDeviceName() + " connection info", servoController.getConnectionInfo());
-            telemetry.addData("servo 0 position", servoController.getServoPosition(0));
-            telemetry.addData("servo 1 position", servoController.getServoPosition(1));
-            telemetry.addData("servo 2 position", servoController.getServoPosition(2));
-            telemetry.addData("servo 3 position", servoController.getServoPosition(3));
-            telemetry.addData("servo 4 position", servoController.getServoPosition(4));
-            telemetry.addData("servo 5 position", servoController.getServoPosition(5));
+            if (controlHubLastSelected != CONTROL_HUB_SELECTED) {
+                controlHubLastSelected = CONTROL_HUB_SELECTED;
+                resetValues();
+
+                for (LynxModule lynxModule : lynxModules) {
+                    if (LynxConstants.isEmbeddedSerialNumber(lynxModule.getSerialNumber()) == CONTROL_HUB_SELECTED) {
+                        activeLynxModule = lynxModule;
+                        break;
+                    }
+                }
+                for (LynxDcMotorController motorController : motorControllers) {
+                    if (LynxConstants.isEmbeddedSerialNumber(motorController.getSerialNumber()) == CONTROL_HUB_SELECTED) {
+                        activeMotorController = motorController;
+                        break;
+                    }
+                }
+                for (LynxServoController servoController : servoControllers) {
+                    if (LynxConstants.isEmbeddedSerialNumber(servoController.getSerialNumber()) == CONTROL_HUB_SELECTED) {
+                        activeServoController = servoController;
+                        break;
+                    }
+                }
+
+                activeMotors.clear();
+                activeServos.clear();
+                for (DcMotorEx motor : hardwareMap.getAll(DcMotorEx.class)) if (motor.getController() == activeMotorController) activeMotors.add(motor);
+                for (ServoImplEx servo : hardwareMap.getAll(ServoImplEx.class)) if (servo.getController() == activeServoController) activeServos.add(servo);
+            }
+
+            motorPowers = new double[]{ MOTOR0_POWER, MOTOR1_POWER, MOTOR2_POWER, MOTOR3_POWER };
+            servoPositions = new double[]{ SERVO0_POSITION, SERVO1_POSITION, SERVO2_POSITION, SERVO3_POSITION, SERVO4_POSITION, SERVO5_POSITION };
+
+            assert activeLynxModule != null && activeMotorController != null && activeServoController != null;
+
+            for (DcMotorEx motor : activeMotors) motor.setPower(motorPowers[motor.getPortNumber()]);
+            for (ServoImplEx servo : activeServos) if (servoPositions[servo.getPortNumber()] == -1) servo.setPwmDisable(); else servo.setPosition(servoPositions[servo.getPortNumber()]);
+
+
+            telemetry.addData("currently operating hub", (CONTROL_HUB_SELECTED ? "control hub " : "expansion hub ") + formatName(activeLynxModule));
+            telemetry.addData(formatName(activeLynxModule) + " connection info", activeLynxModule.getConnectionInfo());
+            telemetry.addData(formatName(activeLynxModule) + " auxiliary voltage (volts)", activeLynxModule.getAuxiliaryVoltage(VoltageUnit.VOLTS));
+            telemetry.addData(formatName(activeLynxModule) + " input voltage (volts)", activeLynxModule.getInputVoltage(VoltageUnit.VOLTS));  // uses the EXACT SAME LynxCommand as the one in VoltageSensor
+            telemetry.addData(formatName(activeLynxModule) + " current (amps)", activeLynxModule.getCurrent(CurrentUnit.AMPS));
+            telemetry.addData(formatName(activeLynxModule) + " I2C current (amps)", activeLynxModule.getI2cBusCurrent(CurrentUnit.AMPS));
+            telemetry.addData(formatName(activeLynxModule) + " temperature (°C)", activeLynxModule.getTemperature(TempUnit.CELSIUS));
+            telemetry.addData(formatName(activeMotorController) + " connection info", activeMotorController.getConnectionInfo());
+            for (DcMotorEx motor : activeMotors) {
+//                telemetry.addLine(String.format("motor %d %s", motor.getPortNumber(), formatName(motor)))
+                telemetry.addData(String.format("motor %d %s current (amps)", motor.getPortNumber(), formatName(motor)), motor.getCurrent(CurrentUnit.AMPS));
+                telemetry.addData(String.format("motor %d %s position (ticks)", motor.getPortNumber(), formatName(motor)), motor.getCurrentPosition());
+                telemetry.addData(String.format("motor %d %s velocity (ticks/sec)", motor.getPortNumber(), formatName(motor)), motor.getVelocity());
+            }
+            telemetry.addData(formatName(activeServoController) + " connection info", activeServoController.getConnectionInfo());
+            for (ServoImplEx servo : activeServos) telemetry.addData(String.format("servo %d %s position", servo.getPortNumber(), formatName(servo)), servo.getPosition());
+            telemetry.addData("Servo current owo", servoCurrent(activeLynxModule));
+            for (AnalogInput analogInput : analogInputs) telemetry.addData(String.format("analog input %s (volts)", formatName(analogInput)), analogInput.getVoltage());
+            for (DigitalChannel digitalChannel : digitalChannels) telemetry.addData(String.format("digital channel %s state", formatName(digitalChannel)), digitalChannel.getState());
             telemetry.update();
+        }
+    }
+
+    public String formatName(HardwareDevice hardwareDevice) {
+        return String.format("<code>%s</code> \"%s\"", hardwareDevice.getDeviceName(), hardwareMap.getNamesOf(hardwareDevice).iterator().next());
+    }
+
+    public static double servoCurrent(LynxModule lynxModule) throws InterruptedException {
+        try {
+            return CurrentUnit.MILLIAMPS.toAmps(new LynxGetADCCommand(lynxModule, LynxGetADCCommand.Channel.SERVO_CURRENT, LynxGetADCCommand.Mode.ENGINEERING).sendReceive().getValue());// + " A";
+        } catch (LynxNackException e) {
+            return -1;
+//            return "Error: " + e.getMessage() + " - " + e.getNack().getNackReasonCodeAsEnum().name();
         }
     }
 }

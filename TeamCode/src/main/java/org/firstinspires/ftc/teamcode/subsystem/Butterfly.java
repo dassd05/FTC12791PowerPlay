@@ -14,6 +14,7 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.hardware.ServoImplEx;
 
 import java.util.List;
 import java.util.function.Supplier;
@@ -21,20 +22,20 @@ import java.util.function.Supplier;
 @Config
 public class Butterfly {
 
-    public static double FRONT_LEFT_IN = 0;
-    public static double FRONT_LEFT_OUT = 0;
-    public static double FRONT_LEFT_SS = 0;
-    public static double BACK_LEFT_IN = 0;
-    public static double BACK_LEFT_OUT = 0;
-    public static double BACK_LEFT_SS = 0;
-    public static double BACK_RIGHT_IN = 0;
-    public static double BACK_RIGHT_OUT = 0;
-    public static double BACK_RIGHT_SS = 0;
-    public static double FRONT_RIGHT_IN = 0;
-    public static double FRONT_RIGHT_OUT = 0;
-    public static double FRONT_RIGHT_SS = 0;
-    public static double IN_OUT_DISTANCE = 0;
-    public static double IN_STILL_DISTANCE = 0;
+//    public static double FRONT_LEFT_IN = 0;
+//    public static double FRONT_LEFT_OUT = 0;
+    public static double FRONT_LEFT_SS = .29;
+//    public static double BACK_LEFT_IN = 0;
+//    public static double BACK_LEFT_OUT = 0;
+    public static double BACK_LEFT_SS = .74;
+//    public static double BACK_RIGHT_IN = 0;
+//    public static double BACK_RIGHT_OUT = 0;
+    public static double BACK_RIGHT_SS = .49;
+//    public static double FRONT_RIGHT_IN = 0;
+//    public static double FRONT_RIGHT_OUT = 0;
+    public static double FRONT_RIGHT_SS = .61;
+    public static double OUT_STAND_DISTANCE = .31;
+    public static double IN_STAND_DISTANCE = .2;
 
 
     public HardwareMap hardwareMap;
@@ -42,45 +43,60 @@ public class Butterfly {
     public DcMotorEx backLeft;
     public DcMotorEx backRight;
     public DcMotorEx frontRight;
-    public Servo servoFrontLeft;
-    public Servo servoBackLeft;
-    public Servo servoBackRight;
-    public Servo servoFrontRight;
-    public BNO055IMU imu;
+    public ServoImplEx servoFrontLeft;
+    public ServoImplEx servoBackLeft;
+    public ServoImplEx servoBackRight;
+    public ServoImplEx servoFrontRight;
+//    public BNO055IMU imu;
 
     public SimpleMecanumDrive mecanum;
     public SimpleTankDrive tank;
 
     public Supplier<Pose2d> position;
+    public Supplier<Pose2d> velocity;
 
-    private State state;
+    private State state = State.MECANUM;
 
     private double frontLeftPower;
     private double backLeftPower;
     private double backRightPower;
     private double frontRightPower;
 
-    public Butterfly(HardwareMap hardwareMap, Supplier<Pose2d> position) {
+    public Butterfly(HardwareMap hardwareMap, Supplier<Pose2d> position, Supplier<Pose2d> velocity) {
         this.hardwareMap = hardwareMap;
         this.position = position;
+        this.velocity = velocity;
 
-        frontLeft = hardwareMap.get(DcMotorEx.class, "frontLeft");
-        backLeft = hardwareMap.get(DcMotorEx.class, "backLeft");
-        backRight = hardwareMap.get(DcMotorEx.class, "backRight");
-        frontRight = hardwareMap.get(DcMotorEx.class, "frontRight");
+        frontLeft = hardwareMap.get(DcMotorEx.class, "fl");
+        backLeft = hardwareMap.get(DcMotorEx.class, "bl");
+        backRight = hardwareMap.get(DcMotorEx.class, "br");
+        frontRight = hardwareMap.get(DcMotorEx.class, "fr");
 
         frontLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         backLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         backRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         frontRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
-        servoFrontLeft = hardwareMap.get(Servo.class, "servoFrontLeft");
-        servoBackLeft = hardwareMap.get(Servo.class, "servoBackLeft");
-        servoBackRight = hardwareMap.get(Servo.class, "servoBackRight");
-        servoFrontRight = hardwareMap.get(Servo.class, "servoFrontRight");
+        servoFrontLeft = hardwareMap.get(ServoImplEx.class, "fl");
+        servoBackLeft = hardwareMap.get(ServoImplEx.class, "bl");
+        servoBackRight = hardwareMap.get(ServoImplEx.class, "br");
+        servoFrontRight = hardwareMap.get(ServoImplEx.class, "fr");
 
-        mecanum = new SimpleMecanumDrive(0, 0, 0, 0, 0, 0);  // todo look at cad
-        tank = new SimpleTankDrive(0, 0, 0, 0);
+        servoFrontLeft.setPwmRange(ServoStuff.GobildaTorqueServo.servoModePwmRange);
+        servoBackLeft.setPwmRange(ServoStuff.GobildaTorqueServo.servoModePwmRange);
+        servoBackRight.setPwmRange(ServoStuff.GobildaTorqueServo.servoModePwmRange);
+        servoFrontRight.setPwmRange(ServoStuff.GobildaTorqueServo.servoModePwmRange);
+
+        mecanum = new SimpleMecanumDrive(0, 0, 0, 349.5, 304, 0);
+        tank = new SimpleTankDrive(0, 0, 0, 349.5);
+    }
+
+    public Butterfly(HardwareMap hardwareMap, Supplier<Pose2d> position) {
+        this(hardwareMap, position, () -> null);
+    }
+
+    public Butterfly(HardwareMap hardwareMap) {
+        this(hardwareMap, Pose2d::new);
     }
 
     public State getState() {
@@ -92,11 +108,17 @@ public class Butterfly {
     }
 
     public void setMotorPowers(List<Double> powers) {
-        assert powers.size() == 4;  // keep?
-        frontLeftPower = powers.get(0);
-        backLeftPower = powers.get(1);
-        backRightPower = powers.get(2);
-        frontRightPower = powers.get(3);
+        if (powers.size() == 4) {
+            frontLeftPower = powers.get(0);
+            backLeftPower = powers.get(1);
+            backRightPower = powers.get(2);
+            frontRightPower = powers.get(3);
+        } else if (powers.size() == 2) {
+            frontLeftPower = backLeftPower = powers.get(0);
+            backRightPower = frontRightPower = powers.get(1);
+        } else {
+            throw new IllegalArgumentException("powers must be a list of size two or four.");
+        }
     }
 
     public void drive(double forward, double turn) {
@@ -130,7 +152,8 @@ public class Butterfly {
 
     public void driveFieldCentric(double forward, double strafe, double turn) {
         // Read inverse IMU heading, as the IMU heading is CW positive
-        double heading = -imu.getAngularOrientation().firstAngle;
+//        double heading = -imu.getAngularOrientation().firstAngle;
+        double heading = position.get().getHeading();
         double rotX = strafe * Math.cos(heading) - forward * Math.sin(heading);
         double rotY = strafe * Math.sin(heading) + forward * Math.cos(heading);
 
@@ -153,6 +176,7 @@ public class Butterfly {
     }
 
     public void update() {
+        // todo make it always brake when state is STANDSTILL?
         frontLeft.setPower(frontLeftPower);
         backLeft.setPower(backLeftPower);
         backRight.setPower(backRightPower);
@@ -160,16 +184,24 @@ public class Butterfly {
 
         switch (state) {
             case MECANUM:
-                servoFrontLeft.setPosition(FRONT_LEFT_IN);
-                servoBackLeft.setPosition(BACK_LEFT_IN);
-                servoBackRight.setPosition(BACK_RIGHT_IN);
-                servoFrontRight.setPosition(FRONT_RIGHT_IN);
+//                servoFrontLeft.setPosition(FRONT_LEFT_IN);
+//                servoBackLeft.setPosition(BACK_LEFT_IN);
+//                servoBackRight.setPosition(BACK_RIGHT_IN);
+//                servoFrontRight.setPosition(FRONT_RIGHT_IN);
+                servoFrontLeft.setPosition(FRONT_LEFT_SS + IN_STAND_DISTANCE);
+                servoBackLeft.setPosition(BACK_LEFT_SS - IN_STAND_DISTANCE);
+                servoBackRight.setPosition(BACK_RIGHT_SS + IN_STAND_DISTANCE);
+                servoFrontRight.setPosition(FRONT_RIGHT_SS - IN_STAND_DISTANCE);
                 break;
             case TRACTION:
-                servoFrontLeft.setPosition(FRONT_LEFT_OUT);
-                servoBackLeft.setPosition(BACK_LEFT_OUT);
-                servoBackRight.setPosition(BACK_RIGHT_OUT);
-                servoFrontRight.setPosition(FRONT_RIGHT_OUT);
+//                servoFrontLeft.setPosition(FRONT_LEFT_OUT);
+//                servoBackLeft.setPosition(BACK_LEFT_OUT);
+//                servoBackRight.setPosition(BACK_RIGHT_OUT);
+//                servoFrontRight.setPosition(FRONT_RIGHT_OUT);
+                servoFrontLeft.setPosition(FRONT_LEFT_SS - OUT_STAND_DISTANCE);
+                servoBackLeft.setPosition(BACK_LEFT_SS + OUT_STAND_DISTANCE);
+                servoBackRight.setPosition(BACK_RIGHT_SS - OUT_STAND_DISTANCE);
+                servoFrontRight.setPosition(FRONT_RIGHT_SS + OUT_STAND_DISTANCE);
                 break;
             case STANDSTILL:
                 servoFrontLeft.setPosition(FRONT_LEFT_SS);
@@ -218,12 +250,12 @@ public class Butterfly {
      * localization and such.
      */
     public static class SimpleMecanumDrive implements SimpleDrive {
-        private final double kV;
-        private final double kA;
-        private final double kStatic;
-        private final double trackWidth;
-        private final double wheelBase;
-        private final double lateralMultiplier;
+        public final double kV;
+        public final double kA;
+        public final double kStatic;
+        public final double trackWidth;
+        public final double wheelBase;
+        public final double lateralMultiplier;
 
         /**
          * @param kV velocity feedforward
@@ -286,10 +318,10 @@ public class Butterfly {
      * localization and such.
      */
     public static class SimpleTankDrive implements SimpleDrive {
-        private final double kV;
-        private final double kA;
-        private final double kStatic;
-        private final double trackWidth;
+        public final double kV;
+        public final double kA;
+        public final double kStatic;
+        public final double trackWidth;
 
         /**
          * @param kV velocity feedforward

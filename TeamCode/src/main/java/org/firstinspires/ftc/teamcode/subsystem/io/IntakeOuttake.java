@@ -5,11 +5,14 @@ import com.acmerobotics.roadrunner.util.Angle;
 import com.qualcomm.hardware.rev.RevColorSensorV3;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
+import org.apache.commons.math3.geometry.euclidean.twod.Vector2D;
+
 import java.util.function.Supplier;
 
-// todo This seems like a useless class?
 public class IntakeOuttake {
+    public static double VERTICAL_OFFSET = 0; // mm slides are above ground
 
+    // todo return a boolean on the functions: true for in range, and false for out of range. But should we still attempt to go to an out of range target?
     public HardwareMap hardwareMap;
     public Vertical vertical;
     public Horizontal horizontal;
@@ -19,6 +22,7 @@ public class IntakeOuttake {
 
     public Supplier<Pose2d> position;
 
+    // todo remove these local variables for targets and just use the object's getters? or keep as is?
     private double verticalTarget = 0;
     private double horizontalTarget = 0;
     private double turretTarget = 0;
@@ -33,17 +37,19 @@ public class IntakeOuttake {
         horizontal = new Horizontal(hardwareMap);
         turret = new Turret(hardwareMap);
         arm = new Arm(hardwareMap);
-        colorSensor = hardwareMap.get(RevColorSensorV3.class, "intakeSensor");
+//        colorSensor = hardwareMap.get(RevColorSensorV3.class, "intakeSensor");
     }
 
     // mm
     public void setVerticalTarget(double height) {
+        height = Math.max(height - VERTICAL_OFFSET, 0);
         verticalTarget = height;
         vertical.setTarget(height);
     }
     public void adjustVerticalTarget(double height) {
-        verticalTarget += height;
-        vertical.setTarget(vertical.getTarget() + height);
+//        verticalTarget += height;
+//        vertical.setTarget(vertical.getTarget() + height);
+        setVerticalTarget(verticalTarget + height);
     }
 
     // mm
@@ -52,8 +58,9 @@ public class IntakeOuttake {
         horizontal.setTarget(length);
     }
     public void adjustHorizontalTarget(double length) {
-        horizontalTarget += length;
-        horizontal.setTarget(horizontal.getTarget() + length);
+//        horizontalTarget += length;
+//        horizontal.setTarget(horizontal.getTarget() + length);
+        setHorizontalTarget(horizontalTarget + length);
     }
 
     // rad
@@ -62,8 +69,9 @@ public class IntakeOuttake {
         turret.setTarget(angle);
     }
     public void adjustTurretTarget(double angle) {
-        turretTarget += angle;
-        turret.setTarget(turret.getTarget() + angle);
+//        turretTarget += angle;
+//        turret.setTarget(turret.getTarget() + angle);
+        setTurretTarget(turretTarget + angle);
     }
 
     // rad
@@ -72,8 +80,9 @@ public class IntakeOuttake {
         arm.setTarget(angle);
     }
     public void adjustArmTarget(double angle) {
-        armTarget += angle;
-        arm.setTarget(arm.getTarget() + angle);
+//        armTarget += angle;
+//        arm.setTarget(arm.getTarget() + angle);
+        setArmTarget(armTarget + angle);
     }
     public void intake() {
         if (!intaked) {
@@ -87,7 +96,48 @@ public class IntakeOuttake {
             arm.outtake();
         }
     }
+    public void stoptake() {
+        arm.stoptake();
+    }
 
+    // WILL adjust vertical slides if we must go out of the arm's reach.
+    // adjust the arm head (cone)'s vertical position without moving slides or changing it's horizontal position
+    public void adjustVerticalNoSlides(double height) {  // do a setVerticalNoSlides? where it's absolute height instead of adjustment
+        Vector2D currentArmPosition = Arm.intakePosition(arm.getTarget());
+        double newHeight = currentArmPosition.getY() + height;
+        double newAngle;
+        if (newHeight < Arm.ARM_LENGTH) {
+            newAngle = Math.asin(newHeight / Arm.ARM_LENGTH);
+            newAngle = arm.getTarget() < Math.PI / 2 ? newAngle : Math.PI - newAngle;
+        } else {
+            newAngle = Math.PI / 2;
+            adjustVerticalTarget(newHeight - Arm.ARM_LENGTH);
+        } // but what if it goes BELOW the lowest arm point?
+        setArmTarget(newAngle);
+        adjustHorizontalTarget(currentArmPosition.getX() - Arm.intakePosition(newAngle).getX());
+    }
+
+    // idk how to name it
+    // so intake (arm head) position stays fixed, while the rest of the IO system moves (so perhaps vertical lifts and horizontal moves)
+    // but cone stays the same place
+    public void setArmStayStill(double angle) {
+        Vector2D currentArmPosition = Arm.intakePosition(arm.getTarget());
+        Vector2D newArmPosition = Arm.intakePosition(angle);
+
+        setArmTarget(angle);
+        adjustVerticalTarget(currentArmPosition.getY() - newArmPosition.getY());
+        adjustHorizontalTarget(currentArmPosition.getX() - newArmPosition.getX());
+    }
+    public void adjustArmStayStill(double angle) {
+        setArmStayStill(arm.getTarget() + angle);
+    }
+
+    // as of now, just moves vertical height to target
+    public void deploy(JunctionLevel junctionLevel) {
+        setVerticalTarget(junctionLevel.getHeight());
+    }
+
+    // 1, 1 is back left. 5, 5 is front right
     public void deploy(int row, int col) {
         double height;
 
@@ -96,11 +146,12 @@ public class IntakeOuttake {
         else if (Math.abs(row - 3) == 1 && Math.abs(col - 3) == 1) height = 3;
         else height = 1;
 
-
+        double tileDistance = 0;
+        setTargetAbsolute(col * tileDistance, row * tileDistance, height);
     }
 
     //relative, mm
-    public void setTarget(double x, double y, double z) {
+    public void setTargetRelative(double x, double y, double z) {
         double angle = Math.atan2(x, y);
         double angleOffset = Angle.normDelta(angle - turret.getPosition());
         double flatDistance = Math.sqrt(x*x + y*y);
@@ -115,10 +166,39 @@ public class IntakeOuttake {
         setHorizontalTarget((flatDistance - Math.cos(armAngle) * Arm.ARM_LENGTH) * (forward ? 1 : -1));
     }
 
+    public void setTargetAbsolute(double x, double y, double z) {
+        setTargetRelative(x - position.get().getX(), y - position.get().getY(), z);
+    }
+
+    public void collapse() {
+        setVerticalTarget(0);
+        setHorizontalTarget(0);
+//        setTurretTarget(0);
+        setArmTarget(Math.PI / 2);
+    }
+
     public void update() {
         vertical.update();
         horizontal.update();
         turret.update();
         arm.update();
+    }
+
+    public enum JunctionLevel {
+        NONE(VERTICAL_OFFSET),
+        GROUND(0), // todo
+        LOW(1),
+        MID(2),
+        HIGH(3);
+
+        private final double height;
+
+        JunctionLevel(double height) {
+            this.height = height;
+        }
+
+        public double getHeight() {
+            return height;
+        }
     }
 }

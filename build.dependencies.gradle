@@ -23,5 +23,5 @@ dependencies {
 
     implementation 'com.acmerobotics.dashboard:dashboard:0.4.7'
 
-    implementation 'com.github.Eeshwar-Krishnan:PhotonFTC:v2.0.1'
+    implementation 'com.github.Eeshwar-Krishnan:PhotonFTC:v2.0.3'
 }

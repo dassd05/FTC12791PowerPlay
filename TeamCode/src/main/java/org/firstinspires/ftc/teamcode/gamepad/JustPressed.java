@@ -23,10 +23,12 @@ public class JustPressed {
                 justPressed.add(button);
             }
         };
+        update();
     }
 
     public JustPressed(GamepadListenerEx gamepadListener) {
         this.listener = gamepadListener;
+        // todo doesnt work
     }
 
     public void update() {

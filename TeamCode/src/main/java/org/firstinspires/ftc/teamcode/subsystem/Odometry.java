@@ -27,7 +27,7 @@ import java.util.List;
  */
 @Config
 public class Odometry extends ThreeTrackingWheelLocalizer {
-    public static double TICKS_PER_REV = 0;
+    public static double TICKS_PER_REV = 8192;
     public static double WHEEL_RADIUS = 2; // in
     public static double GEAR_RATIO = 1; // output (wheel) speed / input (encoder) speed
 
@@ -38,14 +38,14 @@ public class Odometry extends ThreeTrackingWheelLocalizer {
 
     public Odometry(HardwareMap hardwareMap) {
         super(Arrays.asList(
-                new Pose2d(0, LATERAL_DISTANCE / 2, 0), // left
-                new Pose2d(0, -LATERAL_DISTANCE / 2, 0), // right
-                new Pose2d(FORWARD_OFFSET, 0, Math.toRadians(90)) // front
-        ));
+                new Pose2d(-7.9060880533, 164.6750575572 + 18.4999143903/2, 0), // left
+                new Pose2d(-7.9060880533, -164.6750575572 - 18.4999143903/2, 0), // right
+                new Pose2d(167.8, 67.0, Math.PI / 2) // front
+        ));  // todo calculate actual positions using mounting points plus trig? so we can continue calculating position accurately when we engage butterfly?
 
-        leftEncoder = new Encoder(hardwareMap.get(DcMotorEx.class, "leftEncoder"));
-        rightEncoder = new Encoder(hardwareMap.get(DcMotorEx.class, "rightEncoder"));
-        frontEncoder = new Encoder(hardwareMap.get(DcMotorEx.class, "frontEncoder"));
+        leftEncoder = new Encoder(hardwareMap.get(DcMotorEx.class, "fr"));
+        rightEncoder = new Encoder(hardwareMap.get(DcMotorEx.class, "br"));
+        frontEncoder = new Encoder(hardwareMap.get(DcMotorEx.class, "fl"));
 
         // TODO: reverse any encoders using Encoder.setDirection(Encoder.Direction.REVERSE)
     }
@@ -63,7 +63,7 @@ public class Odometry extends ThreeTrackingWheelLocalizer {
     @NonNull
     @Override
     public List<Double> getWheelVelocities() {
-        // TODO: If your encoder velocity can exceed 32767 counts / second (such as the REV Through Bore and other
+        // If your encoder velocity can exceed 32767 counts / second (such as the REV Through Bore and other
         //  competing magnetic encoders), change Encoder.getRawVelocity() to Encoder.getCorrectedVelocity() to enable a
         //  compensation method
 
@@ -72,6 +72,14 @@ public class Odometry extends ThreeTrackingWheelLocalizer {
                 encoderTicksToInches(rightEncoder.getCorrectedVelocity()),
                 encoderTicksToInches(frontEncoder.getCorrectedVelocity())
         );
+    }
+
+    @Override
+    public void update() {
+        leftEncoder.update();
+        rightEncoder.update();
+        frontEncoder.update();
+        super.update();
     }
 
     public static double encoderTicksToInches(double ticks) {

@@ -80,7 +80,7 @@ public interface ServoStuff {
         boolean directionIncreasingClockwise = true;
     }
 
-    interface GobildaSuperSpeecServo {
+    interface GobildaSuperSpeedServo {
         double noLoadSpeed48Volt = .055;  // sec/60deg
         double stallTorque48Volt = 4.0;  // kg-cm
         double noLoadCurrent48Volt = 190;  // mA

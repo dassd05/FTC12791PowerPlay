@@ -19,7 +19,7 @@ public class Turret {
         this.hardwareMap = hardwareMap;
 
         motor = hardwareMap.get(DcMotorEx.class, "turret");
-        encoder = hardwareMap.get(AnalogInput.class, "axon encoder");
+        encoder = hardwareMap.get(AnalogInput.class, "turret");
     }
 
     public int getSector() {
@@ -33,7 +33,8 @@ public class Turret {
         return target;
     }
     public void setTarget(double angle) {
-        target = Angle.norm(angle);
+        target = Angle.normDelta(angle);
+        // todo change back to Angle.norm and not normDelta
     }
 
     public void update() {
@@ -44,12 +45,15 @@ public class Turret {
             return;
         }
 
-        if (voltage > .9 && lastVoltage < .1) sector --;
-        if (voltage < .1 && lastVoltage > .9) sector ++;
+//        if (voltage > .9 && lastVoltage < .1) sector --;
+//        if (voltage < .1 && lastVoltage > .9) sector ++;
         position = Math.toRadians((sector + voltage) * 72);
         lastVoltage = voltage;
 
         double error = Angle.normDelta(target - position);
         // todo motor pid
+
+        // todo no accurate way to measure angle right now
+        motor.setPower(target);
     }
 }

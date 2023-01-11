@@ -19,19 +19,26 @@ import org.firstinspires.ftc.teamcode.subsystem.io.IntakeOuttake;
 import org.firstinspires.ftc.teamcode.util.LynxModuleUtil;
 import org.openftc.easyopencv.OpenCvPipeline;
 
+import java.util.List;
+
 public class Robot {
 
     public HardwareMap hardwareMap;
     public Telemetry telemetry;
-    public Butterfly butterfly;
+    public ButterflyRR butterfly;
     public IntakeOuttake intakeOuttake;
     public Odometry odometry;
     public BNO055IMU imu;
     public Webcam webcam;
+    public List<LynxModule> lynxModules;
     public FtcDashboard dashboard;
 
-    public Orientation orientation;
-    public Pose2d position;
+    private Orientation orientation;
+    private Pose2d position;  // origin is back left of the field?  x is forward, y is right, z is up
+    private Pose2d positionOffset = new Pose2d();
+    private Pose2d velocity;
+    private double updateRate = 0;
+    private long lastUpdateTime = System.nanoTime();
 
     public Robot(HardwareMap hardwareMap, Telemetry telemetry) {
         this.hardwareMap = hardwareMap;
@@ -39,21 +46,21 @@ public class Robot {
 
         LynxModuleUtil.ensureMinimumFirmwareVersion(hardwareMap);
 
-        butterfly = new Butterfly(hardwareMap, () -> position);
-        intakeOuttake = new IntakeOuttake(hardwareMap, () -> position);
-        odometry = new Odometry(hardwareMap);
+        butterfly = new ButterflyRR(hardwareMap, this::getPosition, this::getVelocity);
+        intakeOuttake = new IntakeOuttake(hardwareMap, this::getPosition);
+        odometry = new Odometry(hardwareMap);  // todo
 
         BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
         parameters.angleUnit = BNO055IMU.AngleUnit.RADIANS;
         parameters.accelUnit = BNO055IMU.AccelUnit.METERS_PERSEC_PERSEC;
         parameters.calibrationDataFile = "BNO055IMUCalibration.json";
-        parameters.loggingEnabled = true;
-        parameters.loggingTag = "IMU";
         parameters.accelerationIntegrationAlgorithm = new SimpleIMUIntegrator();
         imu = hardwareMap.get(BNO055IMU.class, "imu");
         imu.initialize(parameters);
 
-        for (LynxModule module : hardwareMap.getAll(LynxModule.class)) {
+        // locally store the LynxModules since a synchronized block occurs each time we call hardwareMap.get(), so maybe saves a bit of time when we clear cache?
+        lynxModules = hardwareMap.getAll(LynxModule.class);
+        for (LynxModule module : lynxModules) {
             module.setBulkCachingMode(LynxModule.BulkCachingMode.MANUAL);
         }
 
@@ -72,8 +79,11 @@ public class Robot {
         this.telemetry.clearAll();
 
         PhotonCore.enable();
+
+        update();
     }
 
+    // todo perhaps multiple cameras and multiple pipelines. also add our own ml?
     public void initWebcam(OpenCvPipeline pipeline) {
         webcam = new Webcam(hardwareMap, pipeline);
     }
@@ -115,19 +125,48 @@ public class Robot {
         return orientation.thirdAngle;
     }
 
+    public Pose2d getPosition() {
+        return position;
+    }
+
+    public void setPosition(Pose2d position) {
+        positionOffset = position.minus(this.position);
+    }
+
+    public Pose2d getVelocity() {
+        return velocity;
+    }
+
+    public double getUpdateRate() {
+        return updateRate;
+    }
+
 
     /**
      * Clear the bulk cache for each {@link LynxModule} in the robot.
      */
     public void clearCache() {
-        for (LynxModule module : hardwareMap.getAll(LynxModule.class)) {
+        for (LynxModule module : lynxModules) {
             module.clearBulkCache();
         }
     }
 
-    public void update() {
+    public void updateIMU() {
         orientation = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.RADIANS);
-        position = odometry.getPoseEstimate();
+    }
+
+    public void updatePosition() {
+        position = odometry.getPoseEstimate().plus(positionOffset);
+        velocity = odometry.getPoseVelocity();
+    }
+
+    public void update() {
+        long time = System.nanoTime();
+        updateRate = 1E9 / (time - lastUpdateTime);
+        lastUpdateTime = time;
+
+        updateIMU();
+        updatePosition();
         clearCache();
         butterfly.update();
         intakeOuttake.update();
