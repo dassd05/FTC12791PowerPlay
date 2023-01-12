@@ -72,11 +72,13 @@ public final class Constants {
     // todo should we have all constants centralized like these, or should each of these constants go into their respective class?
 
     public static final class PORTS {
+        // motors are all GoBILDA 5202/3/4 series
+        // except slides, which are Matrix 12v Motor
         public static final class CONTROL_HUB {
             public static final String[] MOTORS = new String[] {
+                    "frontLeft",
                     "frontRight", // reverse
                     "backLeft",
-                    "frontLeft",
                     "backRight" // reverse
             };
             public static final String[] SERVOS = new String[] {
@@ -90,16 +92,16 @@ public final class Constants {
         }
         public static final class EXPANSION_HUB {
             public static final String[] MOTORS = new String[] {
-                    "slides",
-                    "slides",
-                    "slides",
+                    "vertical",
+                    "vertical",
+                    "vertical",
                     "turret"
             };
             public static final String[] SERVOS = new String[] {
                     "intake",
+                    "arm",
                     "backwardLeft",
                     "backwardRight",
-                    "",
                     "forwardRight",
                     "forwardLeft"
             };
@@ -108,7 +110,7 @@ public final class Constants {
                 "backwardLeft",
                 "",
                 "forwardRight",
-                "",
+                "arm",
                 "forwardLeft",
                 ""
         };

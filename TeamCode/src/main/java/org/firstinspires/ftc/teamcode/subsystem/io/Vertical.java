@@ -20,7 +20,7 @@ public class Vertical {
     public Vertical(HardwareMap hardwareMap) {
         this.hardwareMap = hardwareMap;
 
-        motors = new MultiMotor(hardwareMap, "vertical1", "vertical2", "vertical3");
+        motors = new MultiMotor(hardwareMap, "v1", "v2", "v3");
         motors.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         motors.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         motors.setTargetPosition(0);

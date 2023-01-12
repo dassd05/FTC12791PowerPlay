@@ -31,7 +31,7 @@ public class Arm {
         this.hardwareMap = hardwareMap;
 
         arm = hardwareMap.get(ServoImplEx.class, "arm");
-        intake = hardwareMap.get(CRServoImplEx.class, "intake");
+        intake = hardwareMap.get(CRServoImplEx.class, "in");
 
         arm.setPwmRange(ServoStuff.AxonMaxServo.servoModePwmRange);
         intake.setPwmRange(ServoStuff.GobildaSpeedServo.continuousModePwmRange);

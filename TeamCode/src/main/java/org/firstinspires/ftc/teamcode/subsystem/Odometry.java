@@ -38,14 +38,14 @@ public class Odometry extends ThreeTrackingWheelLocalizer {
 
     public Odometry(HardwareMap hardwareMap) {
         super(Arrays.asList(
-                new Pose2d(-7.9060880533, 164.6750575572 + 18.4999143903/2, 0), // left
-                new Pose2d(-7.9060880533, -164.6750575572 - 18.4999143903/2, 0), // right
-                new Pose2d(167.8, 67.0, Math.PI / 2) // front
+                new Pose2d(-7.9060880533, 164.6750575572 + 18.4999143903/2, 0), // left port 0
+                new Pose2d(-7.9060880533, -164.6750575572 - 18.4999143903/2, 0), // right port 3
+                new Pose2d(167.8, 67.0, Math.PI / 2) // front port 2
         ));  // todo calculate actual positions using mounting points plus trig? so we can continue calculating position accurately when we engage butterfly?
 
-        leftEncoder = new Encoder(hardwareMap.get(DcMotorEx.class, "fr"));
+        leftEncoder = new Encoder(hardwareMap.get(DcMotorEx.class, "fl"));
         rightEncoder = new Encoder(hardwareMap.get(DcMotorEx.class, "br"));
-        frontEncoder = new Encoder(hardwareMap.get(DcMotorEx.class, "fl"));
+        frontEncoder = new Encoder(hardwareMap.get(DcMotorEx.class, "bl"));
 
         // TODO: reverse any encoders using Encoder.setDirection(Encoder.Direction.REVERSE)
     }

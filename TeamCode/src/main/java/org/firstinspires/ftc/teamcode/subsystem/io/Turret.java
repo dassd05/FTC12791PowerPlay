@@ -18,8 +18,8 @@ public class Turret {
     public Turret(HardwareMap hardwareMap) {
         this.hardwareMap = hardwareMap;
 
-        motor = hardwareMap.get(DcMotorEx.class, "turret");
-        encoder = hardwareMap.get(AnalogInput.class, "turret");
+        motor = hardwareMap.get(DcMotorEx.class, "tur");
+        encoder = hardwareMap.get(AnalogInput.class, "tur");
     }
 
     public int getSector() {
