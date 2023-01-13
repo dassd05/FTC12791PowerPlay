@@ -24,7 +24,7 @@ public class Arm {
     public CRServoImplEx intake;
 
     private double position = 0;
-    private double target = 0;
+    private double target = .5 * (ARM_BACKWARD + ARM_FORWARD);
     private double intakePower = 0;
 
     public Arm(HardwareMap hardwareMap) {

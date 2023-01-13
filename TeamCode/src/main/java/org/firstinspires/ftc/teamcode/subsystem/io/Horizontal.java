@@ -81,6 +81,10 @@ public class Horizontal {
         double forwardTarget = target > 0 ? Math.PI - forward.positionInv(target + forward.rod - forward.crank).get(0) : 0; // if there are multiple values of the inverse, then we grab the lowest one
         double backwardTarget = target < 0 ? Math.PI - backward.positionInv(-target + backward.rod - backward.crank).get(0) : 0; // thus it'll most likely be in the range [0, pi] todo
 
+        // limit range so no hitting or weird behavior
+        forwardTarget = Range.clip(forwardTarget, .13, 3);
+        backwardTarget = Range.clip(backwardTarget, .13, 3);
+
 //        forward1.setPosition(angleToAxonServo(forwardTarget) + FORWARD1_OFFSET);
 //        forward2.setPosition(angleToAxonServo(forwardTarget) + FORWARD2_OFFSET);
 //        backward1.setPosition(angleToAxonServo(backwardTarget) + BACKWARD1_OFFSET);

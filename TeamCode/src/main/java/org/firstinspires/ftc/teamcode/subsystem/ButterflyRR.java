@@ -147,12 +147,13 @@ public class ButterflyRR extends Butterfly {
 
     @Override
     public void update() {
-        DriveSignal signal = getTrajectoryRunner().update(position.get(), velocity.get());
-        if (signal != null) {
-            if (getState() == State.MECANUM) setMotorPowers(mecanum.setDriveSignal(signal));
-            else if (getState() == State.TRACTION) setMotorPowers(tank.setDriveSignal(signal));
-        }
-        if (getState() == State.STANDSTILL) brake();
+        // todo later
+//        DriveSignal signal = getTrajectoryRunner().update(position.get(), velocity.get());
+//        if (signal != null) {
+//            if (getState() == State.MECANUM) setMotorPowers(mecanum.setDriveSignal(signal));
+//            else if (getState() == State.TRACTION) setMotorPowers(tank.setDriveSignal(signal));
+//        }
+//        if (getState() == State.STANDSTILL) brake();
         super.update();
     }
 

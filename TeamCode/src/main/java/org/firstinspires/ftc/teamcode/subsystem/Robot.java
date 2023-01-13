@@ -1,5 +1,9 @@
 package org.firstinspires.ftc.teamcode.subsystem;
 
+import static org.firstinspires.ftc.teamcode.opmode.test.HardwareTest.servoCurrent;
+
+import androidx.annotation.Nullable;
+
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
@@ -8,12 +12,14 @@ import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.hardware.lynx.LynxModule;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
+import com.qualcomm.robotcore.hardware.configuration.LynxConstants;
 import com.qualcomm.robotcore.hardware.configuration.typecontainers.MotorConfigurationType;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
+import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 import org.firstinspires.ftc.teamcode.subsystem.io.IntakeOuttake;
 import org.firstinspires.ftc.teamcode.util.LynxModuleUtil;
@@ -33,10 +39,10 @@ public class Robot {
     public List<LynxModule> lynxModules;
     public FtcDashboard dashboard;
 
-    private Orientation orientation;
-    private Pose2d position;  // origin is back left of the field?  x is forward, y is right, z is up
+    private Orientation orientation = new Orientation();
+    private Pose2d position = new Pose2d();  // origin is back left of the field?  x is forward, y is right, z is up
     private Pose2d positionOffset = new Pose2d();
-    private Pose2d velocity;
+    private Pose2d velocity = new Pose2d();
     private double updateRate = 0;
     private long lastUpdateTime = System.nanoTime();
 
@@ -80,7 +86,7 @@ public class Robot {
 
         PhotonCore.enable();
 
-        update();
+//        update();
     }
 
     // todo perhaps multiple cameras and multiple pipelines. also add our own ml?
@@ -172,5 +178,30 @@ public class Robot {
         intakeOuttake.update();
         odometry.update();
         telemetry.update();
+    }
+
+    public void telemetryCurrent() throws InterruptedException {
+        double butterflyCurrent = butterfly.frontLeft.getCurrent(CurrentUnit.AMPS) + butterfly.backLeft.getCurrent(CurrentUnit.AMPS)
+                + butterfly.backRight.getCurrent(CurrentUnit.AMPS) + butterfly.frontRight.getCurrent(CurrentUnit.AMPS);
+        telemetry.addData("Butterfly Motors Current (amps)", butterflyCurrent);
+        for (LynxModule lynxModule : lynxModules) {
+            telemetry.addData(String.format("<code>%s</code> \"%s\" Servo Current (amps)", lynxModule.getDeviceName(), hardwareMap.getNamesOf(lynxModule).iterator().next()), servoCurrent(lynxModule));
+        }
+        telemetry.addData("Vertical Motors Current (amps)", intakeOuttake.vertical.motors.getCurrent(CurrentUnit.AMPS));
+        telemetry.addData("Turret Motor Current (amps)", intakeOuttake.turret.motor.getCurrent(CurrentUnit.AMPS));
+    }
+
+    public void telemetryTime() {
+        telemetry.addData("Update Rate", updateRate);
+    }
+
+    @Nullable
+    private static LynxModule getControlHub(List<LynxModule> lynxModules) {
+        for (LynxModule lynxModule : lynxModules) {
+            if (LynxConstants.isEmbeddedSerialNumber(lynxModule.getSerialNumber())) {
+                return lynxModule;
+            }
+        }
+        return null;
     }
 }

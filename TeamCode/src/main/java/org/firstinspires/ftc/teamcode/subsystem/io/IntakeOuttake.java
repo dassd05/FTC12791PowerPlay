@@ -178,8 +178,8 @@ public class IntakeOuttake {
     }
 
     public void update() {
-        vertical.update();
-        horizontal.update();
+//        vertical.update();
+//        horizontal.update();
         turret.update();
         arm.update();
     }

@@ -12,6 +12,7 @@ import com.acmerobotics.roadrunner.kinematics.TankKinematics;
 import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.ServoImplEx;
@@ -72,6 +73,9 @@ public class Butterfly {
         backRight = hardwareMap.get(DcMotorEx.class, "br");
         frontRight = hardwareMap.get(DcMotorEx.class, "fr");
 
+        frontLeft.setDirection(DcMotorSimple.Direction.REVERSE);
+        backLeft.setDirection(DcMotorSimple.Direction.REVERSE);
+
         frontLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         backLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         backRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
@@ -105,6 +109,22 @@ public class Butterfly {
 
     public void setState(State state) {
         this.state = state;
+
+        switch (state) {
+            case MECANUM:
+            case STANDSTILL:
+                frontLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+                backLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+                backRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+                frontRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+                break;
+            case TRACTION:
+                frontLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+                backLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+                backRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+                frontRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+                break;
+        }
     }
 
     public void setMotorPowers(List<Double> powers) {
@@ -126,7 +146,8 @@ public class Butterfly {
         else if (getState() == State.MECANUM) drive(forward, 0, turn);
         else setMotorPowers(tank.setDrivePower(new Pose2d(forward, 0, turn)));
 
-//        // scales motor power proportionally so it doesn't exceed 1
+        // non rr
+        // scales motor power proportionally so it doesn't exceed 1
 //        double limiter = Math.max(Math.abs(forward) + Math.abs(turn), 1);
 //
 //        frontLeftPower = (forward + turn) / limiter;
@@ -137,17 +158,20 @@ public class Butterfly {
 
     public void drive(double forward, double strafe, double turn) {
         if (getState() != State.MECANUM) drive(forward, turn);
-        else setMotorPowers(mecanum.setDrivePower(new Pose2d(forward, strafe, turn)));
+        else {
+            setMotorPowers(mecanum.setDrivePower(new Pose2d(forward, strafe, turn)));
 
+            // non rr
 //        strafe *= 1.1; // Counteract imperfect strafing maybe~~
-//
-//        // scales motor power proportionally so it doesn't exceed 1
-//        double limiter = Math.max(Math.abs(forward) + Math.abs(strafe) + Math.abs(turn), 1);
-//
-//        frontLeftPower = (forward + strafe + turn) / limiter;
-//        backLeftPower = (forward - strafe + turn) / limiter;
-//        backRightPower = (forward + strafe - turn) / limiter;
-//        frontRightPower = (forward - strafe - turn) / limiter;
+
+            // scales motor power proportionally so it doesn't exceed 1
+            double limiter = Math.max(Math.abs(forward) + Math.abs(strafe) + Math.abs(turn), 1);
+
+            frontLeftPower = (forward + strafe + turn) / limiter;
+            backLeftPower = (forward - strafe + turn) / limiter;
+            backRightPower = (forward + strafe - turn) / limiter;
+            frontRightPower = (forward - strafe - turn) / limiter;
+        }
     }
 
     public void driveFieldCentric(double forward, double strafe, double turn) {
@@ -161,6 +185,7 @@ public class Butterfly {
     }
 
     public void brake() {
+        // todo pid against movement?
         frontLeftPower = 0;
         backLeftPower = 0;
         backRightPower = 0;

@@ -36,35 +36,44 @@ public class TestTeleop extends LinearOpMode {
             }
             else robot.butterfly.brake();
 
-            if (justPressed.dpad_down()) {
-                deploying = false;
-                robot.intakeOuttake.deploy(IntakeOuttake.JunctionLevel.NONE);
-            }
-            if (justPressed.dpad_left()) {
-                deploying = true;
-                robot.intakeOuttake.deploy(IntakeOuttake.JunctionLevel.LOW);
-            }
-            if (justPressed.dpad_right()) {
-                deploying = true;
-                robot.intakeOuttake.deploy(IntakeOuttake.JunctionLevel.MID);
-            }
-            if (justPressed.dpad_up()) {
-                deploying = true;
-                robot.intakeOuttake.deploy(IntakeOuttake.JunctionLevel.HIGH);
-            }
+            // todo bring back later, io
+//            if (justPressed.dpad_down()) {
+//                deploying = false;
+//                robot.intakeOuttake.deploy(IntakeOuttake.JunctionLevel.NONE);
+//            }
+//            if (justPressed.dpad_left()) {
+//                deploying = true;
+//                robot.intakeOuttake.deploy(IntakeOuttake.JunctionLevel.LOW);
+//            }
+//            if (justPressed.dpad_right()) {
+//                deploying = true;
+//                robot.intakeOuttake.deploy(IntakeOuttake.JunctionLevel.MID);
+//            }
+//            if (justPressed.dpad_up()) {
+//                deploying = true;
+//                robot.intakeOuttake.deploy(IntakeOuttake.JunctionLevel.HIGH);
+//            }
+//
+//            if (deploying) {
+//                robot.intakeOuttake.adjustVerticalNoSlides(-gamepad1.left_stick_y);
+//                robot.intakeOuttake.adjustHorizontalTarget(gamepad1.left_stick_x);
+////                robot.intakeOuttake.adjustTurretTarget(-.01 * gamepad1.right_stick_x);
+//                robot.intakeOuttake.adjustArmStayStill(.01 * gamepad1.right_stick_y);
+//                if (gamepad1.a && !gamepad1.start) robot.intakeOuttake.outtake();
+//            } else {
+//                if (gamepad1.a && !gamepad1.start) robot.intakeOuttake.intake();
+//            }
+//            if (!gamepad1.a) robot.intakeOuttake.stoptake();
+//
+//            robot.intakeOuttake.adjustTurretTarget(.01 * (gamepad1.left_trigger - gamepad1.right_trigger));
+
+            if (justPressed.a() && !gamepad1.start) deploying = !deploying;
 
             if (deploying) {
-                robot.intakeOuttake.adjustVerticalNoSlides(-gamepad1.left_stick_y);
-                robot.intakeOuttake.adjustHorizontalTarget(gamepad1.left_stick_x);
-//                robot.intakeOuttake.adjustTurretTarget(-.01 * gamepad1.right_stick_x);
-                robot.intakeOuttake.adjustArmStayStill(.01 * gamepad1.right_stick_y);
-                if (gamepad1.a && !gamepad1.start) robot.intakeOuttake.outtake();
-            } else {
-                if (gamepad1.a && !gamepad1.start) robot.intakeOuttake.intake();
+//                robot.intakeOuttake.adjustVerticalNoSlides(-4 * gamepad1.left_stick_y);
+//                robot.intakeOuttake.adjustHorizontalTarget(3 * gamepad1.left_stick_x);
+//                robot.intakeOuttake.adjustArmTarget(.01 * gamepad1.right_stick_y);
             }
-            if (!gamepad1.a) robot.intakeOuttake.stoptake();
-
-            robot.intakeOuttake.adjustTurretTarget(.01 * (gamepad1.left_trigger - gamepad1.right_trigger));
 
             telemetry.addData("Drivetrain State", robot.butterfly.getState().name());
             telemetry.addData("Position", robot.getPosition().toString());
