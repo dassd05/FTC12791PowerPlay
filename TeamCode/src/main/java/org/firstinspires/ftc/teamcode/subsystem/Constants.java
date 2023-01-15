@@ -42,6 +42,7 @@ public final class Constants {
         public static double BACK_RIGHT_IN = .49;
         public static double BACK_RIGHT_OUT = .18;
 
+
         public static double OUT_STAND_DISTANCE = .31; // distance between traction mode and all 8 wheels together
         public static double IN_STAND_DISTANCE = .2; // (arbitrary) distance between mecanum mode and all 8 wheels together
     }
@@ -51,22 +52,53 @@ public final class Constants {
     }
 
     public static final class DEPLOYMENT {
-        public static double FORWARD_LEFT_IN = .772; // diff = .667
-        public static double FORWARD_LEFT_OUT = .105;
-        public static double FORWARD_RIGHT_IN = .085; // diff = .665
-        public static double FORWARD_RIGHT_OUT = .75;
-        public static double BACKWARD_LEFT_IN = .23; // diff = .555
-        public static double BACKWARD_LEFT_OUT = .785;
-        public static double BACKWARD_RIGHT_IN = .99; // diff = .565
-        public static double BACKWARD_RIGHT_OUT = .425;
-        public static double ARM_BACKWARD = .994; // diff = .266
-        public static double ARM_FORWARD = .462; // diff = .266
-        public static double ARM_UP = .728;
+//        public static double FORWARD_LEFT_IN = .772; // diff = .667
+//        public static double FORWARD_LEFT_OUT = .105;
+//        public static double FORWARD_RIGHT_IN = .085; // diff = .665
+//        public static double FORWARD_RIGHT_OUT = .75;
+//        public static double BACKWARD_LEFT_IN = .23; // diff = .555
+//        public static double BACKWARD_LEFT_OUT = .785;
+//        public static double BACKWARD_RIGHT_IN = .99; // diff = .565
+//        public static double BACKWARD_RIGHT_OUT = .425;
+//        public static double ARM_BACKWARD = .994; // diff = .266
+//        public static double ARM_FORWARD = .462; // diff = .266
+//        public static double ARM_UP = .728;
+//
+//        // theoretically, axon has 355 degrees of freedom, so .507 difference should be 180 degrees
+//        public static double FORWARD_180 = .666;
+//        public static double BACKWARD_180 = .560;
+//        public static double ARM_180 = .532;
 
-        // theoretically, axon has 355 degrees of freedom, so .507 difference should be 180 degrees
-        public static double FORWARD_180 = .666;
-        public static double BACKWARD_180 = .560;
-        public static double ARM_180 = .532;
+
+        public static double v4bIntakePrep = .68;
+        public static double v4bIntake = .78;
+        public static double v4bNeutral = .4;
+        public static double v4bOuttake = .25;
+
+        public static double intakeLinkage1In = .25;
+        public static double intakeLinkage2In = .96;
+        public static double intakeLinkage1Out = .74;
+        public static double intakeLinkage2Out = .47;
+
+        public static double outtakeLinkage1In = .09;
+        public static double outtakeLinkage2In = .76;
+
+        public static double outtakeLinkage1Out = .55;
+        public static double outtakeLinkage2Out = .3;
+
+        public static double outtakeLinkage2SafeIntake = .6;
+        public static double outtakeLinkage1SafeIntake = .25;
+
+
+        public static double intakeLinkage1IntakePosTemp = .65;
+        public static double intakeLinkage2IntakePosTenp = .56;
+
+        public static double outtakeLinkage1IntakePosTemp = .4;
+        public static double outakeLinkage2IntakePosTenp = .45;
+
+
+
+        public static int slidesUp = 1000;
     }
 
     // todo should we have all constants centralized like these, or should each of these constants go into their respective class?

@@ -48,8 +48,8 @@ public class Arm {
         return target;
     }
     public void setTarget(double angle) {
-        target = Range.clip(angle, -.5, Math.PI + .5);
-        // todo find acceptable arm positions, and also make it accessible
+//        target = Range.clip(angle, -.5, Math.PI + .5);
+//        // todo find acceptable arm positions, and also make it accessible
     }
 
     public void intake() {
@@ -63,8 +63,8 @@ public class Arm {
     }
 
     public void update() {
-        arm.setPosition(Range.scale(target, 0, Math.PI, ARM_FORWARD, ARM_BACKWARD));
-        intake.setPower(intakePower);
+//        arm.setPosition(Range.scale(target, 0, Math.PI, ARM_FORWARD, ARM_BACKWARD));
+//        intake.setPower(intakePower);
     }
 
     //rad

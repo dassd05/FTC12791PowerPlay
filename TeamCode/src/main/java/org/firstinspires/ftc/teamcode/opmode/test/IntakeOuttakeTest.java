@@ -28,7 +28,7 @@ public class IntakeOuttakeTest extends LinearOpMode {
             intakeOuttake.setArmTarget(ARM_TARGET);
             intakeOuttake.setTurretTarget(TURRET_TARGET);
             intakeOuttake.setHorizontalTarget(HORIZONTAL_TARGET);
-            intakeOuttake.setVerticalTarget(VERTICAL_TARGET);
+            intakeOuttake.setVerticalTarget((int) VERTICAL_TARGET);
             if (INTAKING > 0) intakeOuttake.intake();
             else if (INTAKING < 0) intakeOuttake.outtake();
             else intakeOuttake.stoptake();

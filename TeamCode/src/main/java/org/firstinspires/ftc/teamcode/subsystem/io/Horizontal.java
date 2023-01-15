@@ -57,10 +57,10 @@ public class Horizontal {
 //        forward1.setDirection(Servo.Direction.REVERSE);  // no use for this since we use Range.scale from angle to position
 //        backward1.setDirection(Servo.Direction.REVERSE);
 
-        forward = new SliderCrankLinkage(360, 383.228);
-        backward = new SliderCrankLinkage(240, 277.684);
-        forward.calculateInverses(.001);  // ~6000 (.001 in 2pi) * 4 (p, v, a, t) * 2 (f + b) = 48000 (hard - p, v, a, t) calculations
-        backward.calculateInverses(.001);  // 4800 * 8 (bytes per double) * 2 (x + y) = 384000 bytes
+//        forward = new SliderCrankLinkage(360, 383.228);
+//        backward = new SliderCrankLinkage(240, 277.684);
+//        forward.calculateInverses(.001);  // ~6000 (.001 in 2pi) * 4 (p, v, a, t) * 2 (f + b) = 48000 (hard - p, v, a, t) calculations
+//        backward.calculateInverses(.001);  // 4800 * 8 (bytes per double) * 2 (x + y) = 384000 bytes
 
         // should we constrain the velocity of the linkage with a ServoEx class?
     }
@@ -77,23 +77,23 @@ public class Horizontal {
     }
 
     public void update() {
-        // we just say that only one side is nonzero at any moment
-        double forwardTarget = target > 0 ? Math.PI - forward.positionInv(target + forward.rod - forward.crank).get(0) : 0; // if there are multiple values of the inverse, then we grab the lowest one
-        double backwardTarget = target < 0 ? Math.PI - backward.positionInv(-target + backward.rod - backward.crank).get(0) : 0; // thus it'll most likely be in the range [0, pi] todo
-
-        // limit range so no hitting or weird behavior
-        forwardTarget = Range.clip(forwardTarget, .13, 3);
-        backwardTarget = Range.clip(backwardTarget, .13, 3);
-
-//        forward1.setPosition(angleToAxonServo(forwardTarget) + FORWARD1_OFFSET);
-//        forward2.setPosition(angleToAxonServo(forwardTarget) + FORWARD2_OFFSET);
-//        backward1.setPosition(angleToAxonServo(backwardTarget) + BACKWARD1_OFFSET);
-//        backward2.setPosition(angleToAxonServo(backwardTarget) + BACKWARD2_OFFSET);
-        // ensure that we *NEVER* go past [0, pi]
-        forwardLeft.setPosition(clipScale(forwardTarget, 0, Math.PI, FORWARD_LEFT_IN, FORWARD_LEFT_OUT));
-        forwardRight.setPosition(clipScale(forwardTarget, 0, Math.PI, FORWARD_RIGHT_IN, FORWARD_RIGHT_OUT));
-        backwardLeft.setPosition(clipScale(backwardTarget, 0, Math.PI, BACKWARD_LEFT_IN, BACKWARD_LEFT_OUT));
-        backwardRight.setPosition(clipScale(backwardTarget, 0, Math.PI, BACKWARD_RIGHT_IN, BACKWARD_RIGHT_OUT));
+//        // we just say that only one side is nonzero at any moment
+//        double forwardTarget = target > 0 ? Math.PI - forward.positionInv(target + forward.rod - forward.crank).get(0) : 0; // if there are multiple values of the inverse, then we grab the lowest one
+//        double backwardTarget = target < 0 ? Math.PI - backward.positionInv(-target + backward.rod - backward.crank).get(0) : 0; // thus it'll most likely be in the range [0, pi] todo
+//
+//        // limit range so no hitting or weird behavior
+//        forwardTarget = Range.clip(forwardTarget, .13, 3);
+//        backwardTarget = Range.clip(backwardTarget, .13, 3);
+//
+////        forward1.setPosition(angleToAxonServo(forwardTarget) + FORWARD1_OFFSET);
+////        forward2.setPosition(angleToAxonServo(forwardTarget) + FORWARD2_OFFSET);
+////        backward1.setPosition(angleToAxonServo(backwardTarget) + BACKWARD1_OFFSET);
+////        backward2.setPosition(angleToAxonServo(backwardTarget) + BACKWARD2_OFFSET);
+//        // ensure that we *NEVER* go past [0, pi]
+//        forwardLeft.setPosition(clipScale(forwardTarget, 0, Math.PI, FORWARD_LEFT_IN, FORWARD_LEFT_OUT));
+//        forwardRight.setPosition(clipScale(forwardTarget, 0, Math.PI, FORWARD_RIGHT_IN, FORWARD_RIGHT_OUT));
+//        backwardLeft.setPosition(clipScale(backwardTarget, 0, Math.PI, BACKWARD_LEFT_IN, BACKWARD_LEFT_OUT));
+//        backwardRight.setPosition(clipScale(backwardTarget, 0, Math.PI, BACKWARD_RIGHT_IN, BACKWARD_RIGHT_OUT));
     }
 
     // cannot rely on angle to position conversions, since the servos apparently don't have the range they report they do

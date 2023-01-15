@@ -21,7 +21,10 @@ import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
+import org.firstinspires.ftc.teamcode.opmode.test.TurretTest;
 import org.firstinspires.ftc.teamcode.subsystem.io.IntakeOuttake;
+import org.firstinspires.ftc.teamcode.subsystem.io.Turret;
+import org.firstinspires.ftc.teamcode.subsystem.io.Vertical;
 import org.firstinspires.ftc.teamcode.util.LynxModuleUtil;
 import org.openftc.easyopencv.OpenCvPipeline;
 
@@ -33,6 +36,9 @@ public class Robot {
     public Telemetry telemetry;
     public ButterflyRR butterfly;
     public IntakeOuttake intakeOuttake;
+    public Turret turret;
+
+    public Vertical vertical;
     public Odometry odometry;
     public BNO055IMU imu;
     public Webcam webcam;
@@ -54,6 +60,8 @@ public class Robot {
 
         butterfly = new ButterflyRR(hardwareMap, this::getPosition, this::getVelocity);
         intakeOuttake = new IntakeOuttake(hardwareMap, this::getPosition);
+        turret = new Turret(hardwareMap);
+        vertical = new Vertical(hardwareMap);
         odometry = new Odometry(hardwareMap);  // todo
 
         BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
@@ -71,7 +79,7 @@ public class Robot {
         }
 
         for (DcMotor motor : new DcMotor[] { butterfly.frontLeft, butterfly.frontRight, butterfly.backLeft, butterfly.backRight,
-                intakeOuttake.vertical.motors, intakeOuttake.turret.motor }) {
+                intakeOuttake.vertical.v1, intakeOuttake.vertical.v2, intakeOuttake.vertical.v2, intakeOuttake.turret.motor }) {
             MotorConfigurationType configuration = motor.getMotorType().clone();
             configuration.setAchieveableMaxRPMFraction(1.0);
             motor.setMotorType(configuration);
@@ -176,6 +184,7 @@ public class Robot {
         clearCache();
         butterfly.update();
         intakeOuttake.update();
+        turret.update();
         odometry.update();
         telemetry.update();
     }
@@ -187,7 +196,7 @@ public class Robot {
         for (LynxModule lynxModule : lynxModules) {
             telemetry.addData(String.format("<code>%s</code> \"%s\" Servo Current (amps)", lynxModule.getDeviceName(), hardwareMap.getNamesOf(lynxModule).iterator().next()), servoCurrent(lynxModule));
         }
-        telemetry.addData("Vertical Motors Current (amps)", intakeOuttake.vertical.motors.getCurrent(CurrentUnit.AMPS));
+        //telemetry.addData("Vertical Motors Current (amps)", intakeOuttake.vertical.motors.getCurrent(CurrentUnit.AMPS));
         telemetry.addData("Turret Motor Current (amps)", intakeOuttake.turret.motor.getCurrent(CurrentUnit.AMPS));
     }
 

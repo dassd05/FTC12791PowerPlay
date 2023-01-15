@@ -26,15 +26,15 @@ public class VerticalTest extends LinearOpMode {
             timer.reset();
 
             target = Math.max(0, target - 2 * gamepad1.right_stick_y);  // max 200 mm/s
-            vertical.setTarget(target);
+            vertical.setTarget((int) target);
 
             telemetry.addData("Vertical Target", "%f mm", vertical.getTarget());
             telemetry.addData("Vertical Position", "%f mm", vertical.getPosition());
-            telemetry.addData("Motors velocity", vertical.motors.getVelocity());
-            for (DcMotorEx motor : vertical.motors.motors)
-                telemetry.addData("Motor " + motor.getPortNumber() + " Current", motor.getCurrent(CurrentUnit.AMPS) + " A");
+            //telemetry.addData("Motors velocity", vertical.motors.getVelocity());
+            //for (DcMotorEx motor : vertical.motors.motors)
+               // telemetry.addData("Motor " + motor.getPortNumber() + " Current", motor.getCurrent(CurrentUnit.AMPS) + " A");
             telemetry.update();
-            vertical.update();
+            //vertical.update();
         }
     }
 }

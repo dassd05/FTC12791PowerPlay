@@ -23,7 +23,7 @@ public class IntakeOuttake {
     public Supplier<Pose2d> position;
 
     // todo remove these local variables for targets and just use the object's getters? or keep as is?
-    private double verticalTarget = 0;
+    private int verticalTarget = 0;
     private double horizontalTarget = 0;
     private double turretTarget = 0;
     private double armTarget = 0;
@@ -41,12 +41,12 @@ public class IntakeOuttake {
     }
 
     // mm
-    public void setVerticalTarget(double height) {
-        height = Math.max(height - VERTICAL_OFFSET, 0);
+    public void setVerticalTarget(int height) {
+        height = (int) Math.max(height - VERTICAL_OFFSET, 0);
         verticalTarget = height;
         vertical.setTarget(height);
     }
-    public void adjustVerticalTarget(double height) {
+    public void adjustVerticalTarget(int height) {
 //        verticalTarget += height;
 //        vertical.setTarget(vertical.getTarget() + height);
         setVerticalTarget(verticalTarget + height);
@@ -111,7 +111,7 @@ public class IntakeOuttake {
             newAngle = arm.getTarget() < Math.PI / 2 ? newAngle : Math.PI - newAngle;
         } else {
             newAngle = Math.PI / 2;
-            adjustVerticalTarget(newHeight - Arm.ARM_LENGTH);
+            adjustVerticalTarget((int) (newHeight - Arm.ARM_LENGTH));
         } // but what if it goes BELOW the lowest arm point?
         setArmTarget(newAngle);
         adjustHorizontalTarget(currentArmPosition.getX() - Arm.intakePosition(newAngle).getX());
@@ -125,7 +125,7 @@ public class IntakeOuttake {
         Vector2D newArmPosition = Arm.intakePosition(angle);
 
         setArmTarget(angle);
-        adjustVerticalTarget(currentArmPosition.getY() - newArmPosition.getY());
+        adjustVerticalTarget((int) (currentArmPosition.getY() - newArmPosition.getY()));
         adjustHorizontalTarget(currentArmPosition.getX() - newArmPosition.getX());
     }
     public void adjustArmStayStill(double angle) {
@@ -134,7 +134,7 @@ public class IntakeOuttake {
 
     // as of now, just moves vertical height to target
     public void deploy(JunctionLevel junctionLevel) {
-        setVerticalTarget(junctionLevel.getHeight());
+        setVerticalTarget((int) junctionLevel.getHeight());
     }
 
     // 1, 1 is back left. 5, 5 is front right
@@ -162,7 +162,7 @@ public class IntakeOuttake {
         double armAngle = Math.atan2(z, flatDistance);
         setArmTarget(Angle.norm(armAngle + (forward ? 0 : Math.PI)));
 
-        setVerticalTarget(z - Math.sin(armAngle) * Arm.ARM_LENGTH);
+        setVerticalTarget((int) (z - Math.sin(armAngle) * Arm.ARM_LENGTH));
         setHorizontalTarget((flatDistance - Math.cos(armAngle) * Arm.ARM_LENGTH) * (forward ? 1 : -1));
     }
 

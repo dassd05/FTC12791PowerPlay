@@ -33,7 +33,7 @@ import java.util.function.Predicate;
 @Config
 @TeleOp(group = "test")
 public class HardwareTest extends LinearOpMode {
-    public static boolean CONTROL_HUB_SELECTED = true;
+    public static boolean CONTROL_HUB_SELECTED = false;
     public static double MOTOR0_POWER = 0;
     public static double MOTOR1_POWER = 0;
     public static double MOTOR2_POWER = 0;
@@ -63,7 +63,7 @@ public class HardwareTest extends LinearOpMode {
     @SuppressLint("DefaultLocale")
     @Override
     public void runOpMode() throws InterruptedException {
-        CONTROL_HUB_SELECTED = true;
+        //CONTROL_HUB_SELECTED = true;
 
         List<LynxModule> lynxModules = hardwareMap.getAll(LynxModule.class);
         List<LynxDcMotorController> motorControllers = hardwareMap.getAll(LynxDcMotorController.class);
