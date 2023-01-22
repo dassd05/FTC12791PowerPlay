@@ -101,7 +101,7 @@ public class Turret {
         long time = System.nanoTime();
         double error = ABSOLUTE_FORWARD - voltage;
         if (error < 0 != lastError < 0) totalError = 0;
-        else totalError += (error - lastError) * (time - lastTime);
+        else totalError += (error) * (time - lastTime);
         double d = (error - lastError) / (time - lastTime);
 
         double pError = PID.p * error;

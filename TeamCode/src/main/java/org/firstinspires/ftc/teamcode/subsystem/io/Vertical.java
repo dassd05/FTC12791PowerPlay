@@ -27,18 +27,20 @@ public class Vertical {
         v2 = hardwareMap.get(DcMotorEx.class, "v3");
         v3 = hardwareMap.get(DcMotor.class, "v2");
 
-        //v1.setDirection(DcMotorEx.Direction.REVERSE);
+        v1.setDirection(DcMotorEx.Direction.REVERSE);
         v1.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
-        //v2.setDirection(DcMotorSimple.Direction.REVERSE);
+        v2.setDirection(DcMotorSimple.Direction.REVERSE);
         v2.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         v2.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
-        v2.setTargetPosition(0);
-        v2.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-
-        //v3.setDirection(DcMotorSimple.Direction.REVERSE);
+        v3.setDirection(DcMotorSimple.Direction.REVERSE);
         v3.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+
+        v2.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        v1.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        v3.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+
 //        motors.setPIDFCoefficients(DcMotor.RunMode.RUN_TO_POSITION, new PIDFCoefficients()); // todo is this fine, or do we need our own pidf controller?
     }
 

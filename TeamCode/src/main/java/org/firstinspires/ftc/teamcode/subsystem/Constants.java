@@ -98,7 +98,7 @@ public final class Constants {
 
 
 
-        public static int slidesUp = 1000;
+        public static int slidesUp = 1650;
     }
 
     // todo should we have all constants centralized like these, or should each of these constants go into their respective class?

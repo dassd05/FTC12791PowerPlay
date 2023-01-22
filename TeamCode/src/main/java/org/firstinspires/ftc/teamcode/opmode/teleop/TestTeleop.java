@@ -24,6 +24,8 @@ public class TestTeleop extends LinearOpMode {
 
     double intakeSpeed = 0.0;
 
+    public static double P = .0027, I = .0000000000003, D = 35;
+
     public ElapsedTime ioTimer = new ElapsedTime(ElapsedTime.Resolution.MILLISECONDS);
     @Override
     public void runOpMode() throws InterruptedException {
@@ -31,10 +33,15 @@ public class TestTeleop extends LinearOpMode {
         JustPressed justPressed = new JustPressed(gamepad1);
         boolean deploying = false;
 
+        double totalError = 0.0;
+        double lastError = 0.0;
+
         io = IO.REST;
         IOUpdate();
 
         waitForStart();
+
+        long lastTime = System.nanoTime();
 
         while (opModeIsActive()) {
             if (justPressed.x()) robot.butterfly.setState(Butterfly.State.MECANUM);
@@ -56,7 +63,7 @@ public class TestTeleop extends LinearOpMode {
 
 
             if (io == IO.OUTTAKE) {
-                if (robot.vertical.getPosition() - targetPos > -10)
+                if (Math.abs(robot.vertical.v2.getCurrentPosition() - targetPos) < 25 || ioTimer.time() > 2000)
                     slidesReached = true;
                 else
                     slidesReached = false;
@@ -84,23 +91,40 @@ public class TestTeleop extends LinearOpMode {
             if (gamepad1.dpad_left || gamepad1.dpad_right)
                 rest();
 
+            long time = System.nanoTime();
+            double error = targetPos - robot.vertical.v2.getCurrentPosition();
+            if (error < 0 != lastError < 0) totalError = 0;
+            else totalError += (error) * (time - lastTime);
+            double d = (error - lastError) / (time - lastTime);
+
+            double pError = P * error;
+            double i = totalError * I;
+            double iError = (Math.abs(i) < .4 ? i : Math.signum(i) * .4);
+            double dError = D * d;
+
+            double power = (pError + iError + dError);
+            lastTime = time;
+            lastError = error;
+
             IOUpdate();
 
             robot.intakeOuttake.arm.arm.setPosition(arm);
             robot.intakeOuttake.arm.intake.setPower(intakeSpeed);
 
-            robot.vertical.v2.setTargetPosition(targetPos);
-            robot.vertical.v2.setPower(.9);
-
-            robot.vertical.v1.setPower(robot.vertical.v2.getPower());
-            robot.vertical.v3.setPower(robot.vertical.v2.getPower());
+            robot.vertical.v1.setPower(power + .01);
+            robot.vertical.v2.setPower(power + .01);
+            robot.vertical.v3.setPower(power +.01);
 
             //robot.vertical.update(targetPos);
 
             telemetry.addData("slides power 1", robot.vertical.v2.getPower());
-            telemetry.addData("encoder", robot.vertical.v2.getCurrentPosition());
             telemetry.addData("slides power 2", robot.vertical.v1.getPower());
             telemetry.addData("slides power 3", robot.vertical.v3.getPower());
+            telemetry.addData("slides encoder", robot.vertical.v2.getCurrentPosition());
+            telemetry.addData("arm pos", arm);
+            telemetry.addData("p", pError);
+            telemetry.addData("i", iError);
+            telemetry.addData("d", dError);
             robot.update();
             justPressed.update();
         }
@@ -127,10 +151,14 @@ public class TestTeleop extends LinearOpMode {
     public void IOUpdate() {
         switch(io) {
             case OUTTAKE:
-                intake = false;
-                targetPos = slidesUp;
                 setIntakeLinkage(0);
                 setOuttakeLinkage(.31);
+                intake = false;
+
+                if (ioTimer.time() < 750)
+                    intakeSpeed = 1.0;
+
+                targetPos = slidesUp;
 
                 if (slidesReached)
                     arm = v4bOuttake;
