@@ -115,6 +115,7 @@ public final class Constants {
             };
             public static final String[] SERVOS = new String[] {
                     "",
+                    "rotation",
                     "backLeft",
                     "frontLeft",
                     "backRight",
@@ -130,12 +131,12 @@ public final class Constants {
                     "turret"
             };
             public static final String[] SERVOS = new String[] {
-                    "intake",
+                    "claw",
                     "arm",
-                    "backwardLeft",
-                    "backwardRight",
-                    "forwardRight",
-                    "forwardLeft"
+                    "intakeRight",
+                    "intakeLeft",
+                    "outtakeLeft",
+                    "outtakeRight"
             };
         }
         public static final String[] SERVO_POWER_MODULE = new String[] {

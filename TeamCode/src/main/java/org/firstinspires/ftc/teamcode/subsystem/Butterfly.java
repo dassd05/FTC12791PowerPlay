@@ -16,6 +16,7 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.ServoImplEx;
+import com.qualcomm.robotcore.util.Range;
 
 import java.util.List;
 import java.util.function.Supplier;
@@ -199,6 +200,66 @@ public class Butterfly {
         servoBackRight.setPosition(positions.get(2));
         servoFrontRight.setPosition(positions.get(3));
     }
+
+
+    public static double AngleWrap(double angle) {
+        while (angle < -Math.PI) {
+            angle += 2 * Math.PI;
+        }
+        while (angle > Math.PI) {
+            angle -= 2 * Math.PI;
+        }
+        return angle;
+    }
+
+    public boolean positionReached = false;
+
+    public void runToPosition(double target_x, double target_y, double target_theta, double movementSpeed, double turnSpeed, double x, double y, double theta) {
+        double movement_x;
+        double movement_y;
+        double movement_turn;
+
+        double distanceToTarget = Math.hypot(target_x - x, target_y - y);
+
+        double absoluteAngleToTarget = Math.atan2(target_y - y, target_x - x);
+
+        double relativeAngleToPoint = AngleWrap(absoluteAngleToTarget - (theta + Math.toRadians(0)));
+        double relativeXToPoint = Math.cos(relativeAngleToPoint) * distanceToTarget;
+        double relativeYToPoint = Math.sin(relativeAngleToPoint) * distanceToTarget;
+
+
+        double movementXPower = relativeXToPoint / (Math.abs(relativeXToPoint) + Math.abs(relativeYToPoint));
+        double movementYPower = relativeYToPoint / (Math.abs(relativeXToPoint) + Math.abs(relativeYToPoint));
+
+        movement_x = movementXPower * movementSpeed;
+        movement_y = movementYPower * movementSpeed;
+
+        //double relativeTurnAngle = relativeAngleToPoint - Math.toRadians(180.0);
+        double angleError = AngleWrap(-Math.toRadians(target_theta) + theta + Math.toRadians(90));
+        movement_turn = Range.clip(angleError / Math.toRadians(50), -1.0, 1.0) * turnSpeed;
+
+        if (distanceToTarget < 5.0) {
+            movement_turn /= 5;
+            movement_x /= 7;
+            movement_y /= 7;
+        }
+        if (distanceToTarget < .5) {
+            movement_turn /=3;
+            movement_x = 0;
+            movement_y = 0;
+        }
+        if (Math.abs(Math.toDegrees(angleError)) < 1) {
+            movement_turn = 0;
+        }
+
+        positionReached = distanceToTarget < .5 && Math.abs(Math.toDegrees(angleError)) < 1;
+
+        double[] fields = { Math.cbrt(movement_y), Math.cbrt(movement_x), Math.cbrt(movement_turn) };
+        drive(fields[0], fields[1], fields[2]);
+
+        //telemetry.addData("angle error", angleError);
+    }
+
 
     public void update() {
         // todo make it always brake when state is STANDSTILL?
