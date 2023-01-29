@@ -34,7 +34,7 @@ public class Robot {
 
     public HardwareMap hardwareMap;
     public Telemetry telemetry;
-    public ButterflyRR butterfly;
+    public Butterfly butterfly;
     public IntakeOuttake intakeOuttake;
     public Turret turret;
 
@@ -58,7 +58,7 @@ public class Robot {
 
         LynxModuleUtil.ensureMinimumFirmwareVersion(hardwareMap);
 
-        butterfly = new ButterflyRR(hardwareMap, this::getPosition, this::getVelocity);
+        butterfly = new Butterfly(hardwareMap, this::getPosition, this::getVelocity);
         intakeOuttake = new IntakeOuttake(hardwareMap, this::getPosition);
         turret = new Turret(hardwareMap);
         vertical = new Vertical(hardwareMap);

@@ -26,7 +26,7 @@ public class Encoder {
         FORWARD(1),
         REVERSE(-1);
 
-        private final int multiplier;
+        private int multiplier;
 
         Direction(int multiplier) {
             this.multiplier = multiplier;
@@ -38,22 +38,30 @@ public class Encoder {
     }
 
     private DcMotorEx motor;
+    private NanoClock clock;
+
     private Direction direction;
 
-    private int lastPosition = 0;
-    private double rawVelocity = 0;
+    private int lastPosition;
+    private int velocityEstimateIdx;
+    private double[] velocityEstimates;
     private int velocityEstimateIndex = 0;
-    private final double[] velocityEstimates = new double[3];
+    private final double[] velocityEstimate = new double[3];
     private double lastUpdateTime;
 
-    public Encoder(DcMotorEx motor, Direction direction) {
+    public Encoder(DcMotorEx motor, NanoClock clock) {
         this.motor = motor;
-        this.direction = direction;
-        this.lastUpdateTime = System.nanoTime();
+        this.clock = clock;
+
+        this.direction = Direction.FORWARD;
+
+        this.lastPosition = 0;
+        this.velocityEstimates = new double[3];
+        this.lastUpdateTime = clock.seconds();
     }
 
     public Encoder(DcMotorEx motor) {
-        this(motor, Direction.FORWARD);
+        this(motor, NanoClock.system());
     }
 
     public Direction getDirection() {
@@ -66,6 +74,7 @@ public class Encoder {
 
     /**
      * Allows you to set the direction of the counts and velocity without modifying the motor's direction state
+     *
      * @param direction either reverse or forward depending on if encoder counts should be negated
      */
     public void setDirection(Direction direction) {
@@ -79,7 +88,17 @@ public class Encoder {
      * @return encoder position
      */
     public int getCurrentPosition() {
-        return lastPosition;
+        int multiplier = getMultiplier();
+        int currentPosition = motor.getCurrentPosition() * multiplier;
+        if (currentPosition != lastPosition) {
+            double currentTime = clock.seconds();
+            double dt = currentTime - lastUpdateTime;
+            velocityEstimates[velocityEstimateIdx] = (currentPosition - lastPosition) / dt;
+            velocityEstimateIdx = (velocityEstimateIdx + 1) % 3;
+            lastPosition = currentPosition;
+            lastUpdateTime = currentTime;
+        }
+        return currentPosition;
     }
 
     /**
@@ -89,7 +108,8 @@ public class Encoder {
      * @return raw velocity
      */
     public double getRawVelocity() {
-        return rawVelocity;
+        int multiplier = getMultiplier();
+        return motor.getVelocity() * multiplier;
     }
 
     /**
@@ -107,10 +127,9 @@ public class Encoder {
     }
 
     public void update() {
-        rawVelocity = motor.getVelocity() * getMultiplier();
         int position = motor.getCurrentPosition() * getMultiplier();
         double time = System.nanoTime() / 1e9;
-        velocityEstimates[velocityEstimateIndex] = (position - lastPosition) / (time - lastUpdateTime);
+        velocityEstimate[velocityEstimateIndex] = (position - lastPosition) / (time - lastUpdateTime);
         velocityEstimateIndex = (velocityEstimateIndex + 1) % 3;
         lastPosition = position;
         lastUpdateTime = time;
