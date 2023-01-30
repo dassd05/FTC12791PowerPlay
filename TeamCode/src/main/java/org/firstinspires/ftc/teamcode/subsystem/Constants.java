@@ -52,19 +52,20 @@ public final class Constants {
     }
 
     public static final class DEPLOYMENT {
-//        public static double FORWARD_LEFT_IN = .772; // diff = .667
-//        public static double FORWARD_LEFT_OUT = .105;
-//        public static double FORWARD_RIGHT_IN = .085; // diff = .665
-//        public static double FORWARD_RIGHT_OUT = .75;
-//        public static double BACKWARD_LEFT_IN = .23; // diff = .555
-//        public static double BACKWARD_LEFT_OUT = .785;
-//        public static double BACKWARD_RIGHT_IN = .99; // diff = .565
-//        public static double BACKWARD_RIGHT_OUT = .425;
-//        public static double ARM_BACKWARD = .994; // diff = .266
-//        public static double ARM_FORWARD = .462; // diff = .266
-//        public static double ARM_UP = .728;
-//
-//        // theoretically, axon has 355 degrees of freedom, so .507 difference should be 180 degrees
+        // long is forward is outtake, short is backward is intake
+        public static double FORWARD_LEFT_IN = .765; // diff = .67
+        public static double FORWARD_LEFT_OUT = .095;
+        public static double FORWARD_RIGHT_IN = .085; // diff = .665
+        public static double FORWARD_RIGHT_OUT = .75;
+        public static double BACKWARD_LEFT_IN = .23; // diff = .555
+        public static double BACKWARD_LEFT_OUT = .785;
+        public static double BACKWARD_RIGHT_IN = .975; // diff = .565
+        public static double BACKWARD_RIGHT_OUT = .425;
+        public static double ARM_BACKWARD = .994; // diff = .266
+        public static double ARM_FORWARD = .462; // diff = .266
+        public static double ARM_UP = .728;
+
+        // theoretically, axon has 355 degrees of freedom, so .507 difference should be 180 degrees
 //        public static double FORWARD_180 = .666;
 //        public static double BACKWARD_180 = .560;
 //        public static double ARM_180 = .532;
@@ -75,13 +76,14 @@ public final class Constants {
         public static double v4bNeutral = .4;
         public static double v4bOuttake = .25;
 
-        public static double intakeLinkage1In = .25;
-        public static double intakeLinkage2In = .96;
-        public static double intakeLinkage1Out = .74;
-        public static double intakeLinkage2Out = .47;
-
-        public static double outtakeLinkage1In = .09;
-        public static double outtakeLinkage2In = .76;
+//        public static double intakeLinkage1In = .23;
+//        public static double intakeLinkage2In = .975;
+//        public static double intakeLinkage1Out = -1;
+//        public static double getIntakeLinkage1Up = .51;
+//        public static double intakeLinkage2Out = .43;
+//
+//        public static double outtakeLinkage1In = .09;
+//        public static double outtakeLinkage2In = .76;
 
         public static double outtakeLinkage1Out = .55;
         public static double outtakeLinkage2Out = .3;
@@ -133,10 +135,10 @@ public final class Constants {
             public static final String[] SERVOS = new String[] {
                     "claw",
                     "arm",
-                    "intakeRight",
-                    "intakeLeft",
-                    "outtakeLeft",
-                    "outtakeRight"
+                    "backwardLeft",
+                    "backwardRight",
+                    "forwardRight",
+                    "forwardLeft"
             };
         }
         public static final String[] SERVO_POWER_MODULE = new String[] {
