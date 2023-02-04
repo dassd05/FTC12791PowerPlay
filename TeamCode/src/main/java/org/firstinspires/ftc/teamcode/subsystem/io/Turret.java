@@ -14,9 +14,13 @@ import org.firstinspires.ftc.teamcode.util.Encoder;
 
 @Config
 public class Turret {
-    public static double ABSOLUTE_FORWARD = .89; // volts. ccw is decreasing
-    public static PIDCoefficients PID = new PIDCoefficients(1.3, 2e-9, 0);
+    public static double ABSOLUTE_FORWARD = 1.26; // volts. ccw is decreasing
+    //public static double ABSOLUTE_FORWARD = .89; // volts. ccw is decreasing
+    public static PIDCoefficients PID = new PIDCoefficients(1.3, 1e-8, 0);
     public static double INTEGRAL_CAP = .55;
+
+
+    public static PIDCoefficients PIDZeroed = new PIDCoefficients(.07, 0, 160000);
 
     public HardwareMap hardwareMap;
     public DcMotorEx motor;
@@ -31,6 +35,7 @@ public class Turret {
     private long lastTime = System.nanoTime();
     private double lastError = 0;
     private double totalError = 0;
+    private long totalTime = 0;
 
     private int targetPosition = 0;
 
@@ -61,10 +66,33 @@ public class Turret {
         // todo change back to Angle.norm and not normDelta
     }
 
+    public int turretTargetPosition = 0;
+
+    public double getTurretTargetPosition() {
+        return turretTargetPosition;
+    }
+    public void setTurretTargetPosition(int target) {
+        turretTargetPosition = target;
+    }
+
+
+    int offset = 0;
+
+    boolean zeroed = false;
+
+    public void setZero(boolean yes) {
+        zeroed = yes;
+    }
+    public boolean zeroed () {
+        return zeroed;
+    }
+
+    double power = 0;
     public void update() {
-        double voltage = absoluteEncoder.getVoltage();// / absoluteEncoder.getMaxVoltage();
-        quadratureEncoder.update();
-        int pos = quadratureEncoder.getCurrentPosition();
+        if (!zeroed) {
+            double voltage = absoluteEncoder.getVoltage();// / absoluteEncoder.getMaxVoltage();
+            quadratureEncoder.update();
+            //int pos = quadratureEncoder.getCurrentPosition();
 
 //        if (lastVoltage == -1) {
 //            lastVoltage = voltage;
@@ -77,44 +105,117 @@ public class Turret {
 //        lastVoltage = voltage;
 //
 //        double error = Angle.normDelta(target - position);
-        // todo motor pid
+            // todo motor pid
 
-        // todo no accurate way to measure angle right now
+            // todo no accurate way to measure angle right now
 //        motor.setPower(target);
 
-        // todo temp
-        long time = System.nanoTime();
-        double error = ABSOLUTE_FORWARD - voltage;
-        if (error < 0 != lastError < 0) totalError = 0;
-        else totalError += (error - lastError) * (time - lastTime);
-        double d = (error - lastError) / (time - lastTime);
-        double i = totalError * PID.i;
+            // todo temp
+            long time = System.nanoTime();
+            double error = ABSOLUTE_FORWARD - voltage;
+            if (error < 0 != lastError < 0) totalError = 0;
+            else totalError += (error - lastError) * (time - lastTime);
+            double d = (error - lastError) / (time - lastTime);
+            double i = totalError * PID.i;
 
-        double power = PID.p * error + (Math.abs(i) < INTEGRAL_CAP ? i : Math.signum(i) * INTEGRAL_CAP) + PID.d * d;
-        motor.setPower(power);
-        lastTime = time;
-        lastError = error;
+            double power = PID.p * error + (Math.abs(i) < INTEGRAL_CAP ? i : Math.signum(i) * INTEGRAL_CAP) + PID.d * d;
+            motor.setPower(power);
+
+            if (/*Math.abs(error) <= .04 ||*/ (totalTime) > 3e9) {
+                offset = quadratureEncoder.getCurrentPosition();
+                //motor.setPower(0);
+                motor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+                motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+                zeroed = true;
+            }
+            totalTime += time - lastTime;
+            lastTime = time;
+            lastError = error;
+        } else {
+            quadratureEncoder.update();
+            long time = System.nanoTime();
+            int pos = -quadratureEncoder.getCurrentPosition() + offset;
+
+            double error = turretTargetPosition - pos;
+            if (error < 0 != lastError < 0) totalError = 0;
+            else totalError += (error - lastError) * (time - lastTime);
+            double d = (error - lastError) / (time - lastTime);
+            double i = totalError * PIDZeroed.i;
+
+            if (Math.abs(error) > 4)
+                power = PIDZeroed.p * error + (Math.abs(i) < INTEGRAL_CAP ? i : Math.signum(i) * INTEGRAL_CAP) + PIDZeroed.d * d;
+            else
+                power = 0;
+
+            //double power = PIDZeroed.p * error + (Math.abs(i) < INTEGRAL_CAP ? i : Math.signum(i) * INTEGRAL_CAP) + PIDZeroed.d * d;
+            motor.setPower(power);
+            lastTime = time;
+            lastError = error;
+        }
     }
 
     public void update(Telemetry telemetry) {
-        double voltage = absoluteEncoder.getVoltage();// / absoluteEncoder.getMaxVoltage();
-        long time = System.nanoTime();
-        double error = ABSOLUTE_FORWARD - voltage;
-        if (error < 0 != lastError < 0) totalError = 0;
-        else totalError += (error) * (time - lastTime);
-        double d = (error - lastError) / (time - lastTime);
+        if (!zeroed) {
+            double voltage = absoluteEncoder.getVoltage();// / absoluteEncoder.getMaxVoltage();
+            quadratureEncoder.update();
+            //int pos = quadratureEncoder.getCurrentPosition();
 
-        double pError = PID.p * error;
-        double i = totalError * PID.i;
-        double iError = (Math.abs(i) < INTEGRAL_CAP ? i : Math.signum(i) * INTEGRAL_CAP);
-        double dError = PID.d * d;
-        motor.setPower(pError + iError + dError);
-        lastTime = time;
-        lastError = error;
+//        if (lastVoltage == -1) {
+//            lastVoltage = voltage;
+//            return;
+//        }
 
-        telemetry.addData("Analog input", voltage);
-        telemetry.addData("Error", error);
-        telemetry.addData("P Error", pError);
-        telemetry.addData("I Error", iError);
+//        if (voltage > .9 && lastVoltage < .1) sector --;
+//        if (voltage < .1 && lastVoltage > .9) sector ++;
+//        position = Math.toRadians((sector + voltage) * 72);
+//        lastVoltage = voltage;
+//
+//        double error = Angle.normDelta(target - position);
+            // todo motor pid
+
+            // todo no accurate way to measure angle right now
+//        motor.setPower(target);
+
+            // todo temp
+            long time = System.nanoTime();
+            double error = ABSOLUTE_FORWARD - voltage;
+            if (error < 0 != lastError < 0) totalError = 0;
+            else totalError += (error - lastError) * (time - lastTime);
+            double d = (error - lastError) / (time - lastTime);
+            double i = totalError * PID.i;
+
+            double power = PID.p * error + (Math.abs(i) < INTEGRAL_CAP ? i : Math.signum(i) * INTEGRAL_CAP) + PID.d * d;
+            motor.setPower(power);
+
+            if (/*Math.abs(error) <= .04 ||*/ (totalTime) > 3e9) {
+                offset = quadratureEncoder.getCurrentPosition();
+                //motor.setPower(0);
+                motor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+                motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+                zeroed = true;
+            }
+            totalTime += time - lastTime;
+            lastTime = time;
+            lastError = error;
+        } else {
+            quadratureEncoder.update();
+            long time = System.nanoTime();
+            int pos = -quadratureEncoder.getCurrentPosition() + offset;
+
+            double error = turretTargetPosition - pos;
+            if (error < 0 != lastError < 0) totalError = 0;
+            else totalError += (error - lastError) * (time - lastTime);
+            double d = (error - lastError) / (time - lastTime);
+            double i = totalError * PIDZeroed.i;
+
+            double power = PIDZeroed.p * error + (Math.abs(i) < INTEGRAL_CAP ? i : Math.signum(i) * INTEGRAL_CAP) + PIDZeroed.d * d;
+            motor.setPower(power);
+            lastTime = time;
+            lastError = error;
+
+            telemetry.addData("Error", error);
+            telemetry.addData("P Error", .012 * error);
+            telemetry.addData("I Error", (Math.abs(i) < INTEGRAL_CAP ? i : Math.signum(i) * INTEGRAL_CAP));
+        }
     }
 }

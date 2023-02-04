@@ -29,6 +29,7 @@ public final class Constants {
     private Constants() {}
 
     public static final class BUTTERFLY {
+
         // maybe make a constant DISTANCE, and just do IN + DISTANCE for OUT.
 
         // here IN is when all 8 wheels are together (misleading ikr)
@@ -52,6 +53,17 @@ public final class Constants {
     }
 
     public static final class DEPLOYMENT {
+
+        // long is forward is outtake, short is backward is intake
+        public static double FORWARD_LEFT_IN = .765; // diff = .67
+        public static double FORWARD_LEFT_OUT = .095;
+        public static double FORWARD_RIGHT_IN = .085; // diff = .665
+        public static double FORWARD_RIGHT_OUT = .75;
+        public static double BACKWARD_LEFT_IN = .23; // diff = .555
+        public static double BACKWARD_LEFT_OUT = .785;
+        public static double BACKWARD_RIGHT_IN = .975; // diff = .565
+        public static double BACKWARD_RIGHT_OUT = .425;
+
 //        public static double FORWARD_LEFT_IN = .772; // diff = .667
 //        public static double FORWARD_LEFT_OUT = .105;
 //        public static double FORWARD_RIGHT_IN = .085; // diff = .665

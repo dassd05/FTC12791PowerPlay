@@ -4,11 +4,13 @@ import android.content.Context;
 import android.os.CpuUsageInfo;
 import android.os.HardwarePropertiesManager;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.robotcore.internal.system.AppUtil;
 
+@Disabled
 @TeleOp(group = "test")
 public class HardwareTest2 extends LinearOpMode {
     @Override

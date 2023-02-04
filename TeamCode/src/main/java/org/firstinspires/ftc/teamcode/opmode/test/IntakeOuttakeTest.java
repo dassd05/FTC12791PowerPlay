@@ -2,12 +2,14 @@ package org.firstinspires.ftc.teamcode.opmode.test;
 
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.teamcode.subsystem.io.IntakeOuttake;
 import org.firstinspires.ftc.teamcode.util.TelemetryUtil;
 
+@Disabled
 @Config
 @TeleOp(group = "test")
 public class IntakeOuttakeTest extends LinearOpMode {
@@ -29,9 +31,9 @@ public class IntakeOuttakeTest extends LinearOpMode {
             intakeOuttake.setTurretTarget(TURRET_TARGET);
             intakeOuttake.setHorizontalTarget(HORIZONTAL_TARGET);
             intakeOuttake.setVerticalTarget((int) VERTICAL_TARGET);
-            if (INTAKING > 0) intakeOuttake.intake();
-            else if (INTAKING < 0) intakeOuttake.outtake();
-            else intakeOuttake.stoptake();
+//            if (INTAKING > 0) intakeOuttake.intake();
+//            else if (INTAKING < 0) intakeOuttake.outtake();
+//            else intakeOuttake.stoptake();
             telemetry.update();
             intakeOuttake.update();
         }

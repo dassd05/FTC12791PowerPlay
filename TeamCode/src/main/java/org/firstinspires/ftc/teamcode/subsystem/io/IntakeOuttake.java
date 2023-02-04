@@ -75,62 +75,50 @@ public class IntakeOuttake {
     }
 
     // rad
-    public void setArmTarget(double angle) {
-        armTarget = angle;
-        arm.setTarget(angle);
+    public void setArmTarget(double position) {
+        armTarget = position;
     }
     public void adjustArmTarget(double angle) {
 //        armTarget += angle;
 //        arm.setTarget(arm.getTarget() + angle);
         setArmTarget(armTarget + angle);
     }
-    public void intake() {
-        if (!intaked) {
-            intaked = true;
-            arm.intake();
-        }
-    }
-    public void outtake() {
-        if (intaked) {
-            intaked = false;
-            arm.outtake();
-        }
-    }
-    public void stoptake() {
-        arm.stoptake();
-    }
 
-    // WILL adjust vertical slides if we must go out of the arm's reach.
-    // adjust the arm head (cone)'s vertical position without moving slides or changing it's horizontal position
-    public void adjustVerticalNoSlides(double height) {  // do a setVerticalNoSlides? where it's absolute height instead of adjustment
-        Vector2D currentArmPosition = Arm.intakePosition(arm.getTarget());
-        double newHeight = currentArmPosition.getY() + height;
-        double newAngle;
-        if (newHeight < Arm.ARM_LENGTH) {
-            newAngle = Math.asin(newHeight / Arm.ARM_LENGTH);
-            newAngle = arm.getTarget() < Math.PI / 2 ? newAngle : Math.PI - newAngle;
-        } else {
-            newAngle = Math.PI / 2;
-            adjustVerticalTarget((int) (newHeight - Arm.ARM_LENGTH));
-        } // but what if it goes BELOW the lowest arm point?
-        setArmTarget(newAngle);
-        adjustHorizontalTarget(currentArmPosition.getX() - Arm.intakePosition(newAngle).getX());
-    }
+//    public void stoptake() {
+//        arm.stoptake();
+//    }
+
+//    // WILL adjust vertical slides if we must go out of the arm's reach.
+//    // adjust the arm head (cone)'s vertical position without moving slides or changing it's horizontal position
+//    public void adjustVerticalNoSlides(double height) {  // do a setVerticalNoSlides? where it's absolute height instead of adjustment
+//        Vector2D currentArmPosition = Arm.intakePosition(arm.getTarget());
+//        double newHeight = currentArmPosition.getY() + height;
+//        double newAngle;
+//        if (newHeight < Arm.ARM_LENGTH) {
+//            newAngle = Math.asin(newHeight / Arm.ARM_LENGTH);
+//            newAngle = arm.getTarget() < Math.PI / 2 ? newAngle : Math.PI - newAngle;
+//        } else {
+//            newAngle = Math.PI / 2;
+//            adjustVerticalTarget((int) (newHeight - Arm.ARM_LENGTH));
+//        } // but what if it goes BELOW the lowest arm point?
+//        setArmTarget(newAngle);
+//        adjustHorizontalTarget(currentArmPosition.getX() - Arm.intakePosition(newAngle).getX());
+//    }
 
     // idk how to name it
     // so intake (arm head) position stays fixed, while the rest of the IO system moves (so perhaps vertical lifts and horizontal moves)
     // but cone stays the same place
-    public void setArmStayStill(double angle) {
-        Vector2D currentArmPosition = Arm.intakePosition(arm.getTarget());
-        Vector2D newArmPosition = Arm.intakePosition(angle);
-
-        setArmTarget(angle);
-        adjustVerticalTarget((int) (currentArmPosition.getY() - newArmPosition.getY()));
-        adjustHorizontalTarget(currentArmPosition.getX() - newArmPosition.getX());
-    }
-    public void adjustArmStayStill(double angle) {
-        setArmStayStill(arm.getTarget() + angle);
-    }
+//    public void setArmStayStill(double angle) {
+//        Vector2D currentArmPosition = Arm.intakePosition(arm.getTarget());
+//        Vector2D newArmPosition = Arm.intakePosition(angle);
+//
+//        setArmTarget(angle);
+//        adjustVerticalTarget((int) (currentArmPosition.getY() - newArmPosition.getY()));
+//        adjustHorizontalTarget(currentArmPosition.getX() - newArmPosition.getX());
+//    }
+//    public void adjustArmStayStill(double angle) {
+//        setArmStayStill(arm.getTarget() + angle);
+//    }
 
     // as of now, just moves vertical height to target
     public void deploy(JunctionLevel junctionLevel) {
@@ -181,7 +169,7 @@ public class IntakeOuttake {
 //        vertical.update();
 //        horizontal.update();
         turret.update();
-        arm.update();
+        //arm.update();
     }
 
     public enum JunctionLevel {

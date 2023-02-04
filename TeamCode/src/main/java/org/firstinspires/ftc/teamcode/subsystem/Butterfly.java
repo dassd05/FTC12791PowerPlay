@@ -235,8 +235,8 @@ public class Butterfly {
         movement_y = movementYPower * movementSpeed;
 
         //double relativeTurnAngle = relativeAngleToPoint - Math.toRadians(180.0);
-        double angleError = AngleWrap(-Math.toRadians(target_theta) + theta + Math.toRadians(90));
-        movement_turn = Range.clip(angleError / Math.toRadians(50), -1.0, 1.0) * turnSpeed;
+        double angleError = AngleWrap(Math.toRadians(target_theta) - theta + Math.toRadians(0));
+        movement_turn = Range.clip(-angleError / Math.toRadians(50), -1.0, 1.0) * turnSpeed;
 
         if (distanceToTarget < 5.0) {
             movement_turn /= 5;
@@ -244,7 +244,7 @@ public class Butterfly {
             movement_y /= 7;
         }
         if (distanceToTarget < .5) {
-            movement_turn /=3;
+            movement_turn /=5;
             movement_x = 0;
             movement_y = 0;
         }
@@ -253,6 +253,61 @@ public class Butterfly {
         }
 
         positionReached = distanceToTarget < .5 && Math.abs(Math.toDegrees(angleError)) < 1;
+
+        double[] fields = { Math.cbrt(movement_y), Math.cbrt(movement_x), Math.cbrt(movement_turn) };
+        drive(fields[0], fields[1], fields[2]);
+
+        //telemetry.addData("angle error", angleError);
+    }
+
+    public void runToPosition(double target_x, double target_y, double target_theta, double movementSpeed, double turnSpeed, double x, double y, double theta, boolean extra) {
+        double movement_x;
+        double movement_y;
+        double movement_turn;
+
+        double distanceToTarget = Math.hypot(target_x - x, target_y - y);
+
+        double absoluteAngleToTarget = Math.atan2(target_y - y, target_x - x);
+
+        double relativeAngleToPoint = AngleWrap(absoluteAngleToTarget - (theta + Math.toRadians(0)));
+        double relativeXToPoint = Math.cos(relativeAngleToPoint) * distanceToTarget;
+        double relativeYToPoint = Math.sin(relativeAngleToPoint) * distanceToTarget;
+
+
+        double movementXPower = relativeXToPoint / (Math.abs(relativeXToPoint) + Math.abs(relativeYToPoint));
+        double movementYPower = relativeYToPoint / (Math.abs(relativeXToPoint) + Math.abs(relativeYToPoint));
+
+        movement_x = movementXPower * movementSpeed;
+        movement_y = movementYPower * movementSpeed;
+
+        //double relativeTurnAngle = relativeAngleToPoint - Math.toRadians(180.0);
+        double angleError = AngleWrap(Math.toRadians(target_theta) - theta + Math.toRadians(0));
+        movement_turn = Range.clip(-angleError / Math.toRadians(50), -1.0, 1.0) * turnSpeed;
+
+        if (distanceToTarget < 5.0) {
+            movement_turn /= 5;
+            movement_x /= 7;
+            movement_y /= 7;
+        }
+        if (distanceToTarget < .3) {
+            movement_turn /=5;
+            movement_x = 0;
+            movement_y = 0;
+        }
+        if (extra) {
+            if (Math.abs(Math.toDegrees(angleError)) < .5) {
+                movement_turn = 0;
+            }
+        } else {
+            if (Math.abs(Math.toDegrees(angleError)) < 1) {
+                movement_turn = 0;
+            }
+        }
+
+        if (extra)
+            positionReached = distanceToTarget < .3 && Math.abs(Math.toDegrees(angleError)) < .5;
+        else
+            positionReached = distanceToTarget < .5 && Math.abs(Math.toDegrees(angleError)) < 1;
 
         double[] fields = { Math.cbrt(movement_y), Math.cbrt(movement_x), Math.cbrt(movement_turn) };
         drive(fields[0], fields[1], fields[2]);

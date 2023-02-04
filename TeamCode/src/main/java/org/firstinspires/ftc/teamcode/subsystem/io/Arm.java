@@ -14,66 +14,90 @@ import org.firstinspires.ftc.teamcode.subsystem.ServoStuff;
 @Config
 public class Arm {
 //    public static double ARM_OFFSET = 0;
-    public static double ARM_BACKWARD = .994;
-    public static double ARM_FORWARD = .462;
-    public static double INTAKE_SPEED = .8;
+    public static double ARM_INTAKE = .9;
+    public static double ARM_REST = .53;
+    public static double ARM_OUTTAKE = .38;
+
     public static double ARM_LENGTH = 250;
+
+    boolean open = true;
+
+    public static double CLAW_OPEN = 1.0;
+    public static double CLAW_CLOSE = .55;
+
+    boolean intakeWrist = true;
+
+    public static double WRIST_INTAKE = .28;
+    public static double WRIST_OUTTAKE = .96;
+    public static double WRIST_SAFE = 0;
 
     public HardwareMap hardwareMap;
     public ServoImplEx arm;
-    public CRServoImplEx intake;
+    public ServoImplEx claw;
+    public ServoImplEx wrist;
 
     private double position = 0;
-    private double target = .5 * (ARM_BACKWARD + ARM_FORWARD);
-    private double intakePower = 0;
+    private double target = 0;
+
 
     public Arm(HardwareMap hardwareMap) {
         this.hardwareMap = hardwareMap;
 
         arm = hardwareMap.get(ServoImplEx.class, "arm");
-        intake = hardwareMap.get(CRServoImplEx.class, "in");
+        claw = hardwareMap.get(ServoImplEx.class, "claw");
+        wrist = hardwareMap.get(ServoImplEx.class, "wrist");
 
-        arm.setPwmRange(ServoStuff.AxonMaxServo.servoModePwmRange);
-        intake.setPwmRange(ServoStuff.GobildaSpeedServo.continuousModePwmRange);
+        //arm.setPwmRange(ServoStuff.AxonMaxServo.servoModePwmRange);
+        //claw.setPwmRange(ServoStuff.GobildaSpeedServo.servoModePwmRange);
+        //wrist.setPwmRange(ServoStuff.GobildaSpeedServo.servoModePwmRange);
 
         // no use for this since we use Range.scale from angle to position
 //        intake.setDirection(DcMotorSimple.Direction.REVERSE);  // change so positive is ccw/forward
     }
 
-    //rad ccw
-    public double getPosition() {
+    public double getArmPosition() {
         return position;
     }
-    public double getTarget() {
+    public double getArmTarget() {
         return target;
     }
-    public void setTarget(double angle) {
-//        target = Range.clip(angle, -.5, Math.PI + .5);
-//        // todo find acceptable arm positions, and also make it accessible
+    public double adjust = 0.0;
+    public void setArmTarget(double position) {
+        target = Range.scale(Range.clip(position + adjust, 0, 1), 0,1, ARM_INTAKE, ARM_OUTTAKE);
+        // todo find acceptable arm positions, and also make it accessible
+    }
+    public void adjustArm (double adjustment) {
+        adjust = adjustment;
+    }
+    public void resetAdjustArm() {
+        adjust = 0.0;
     }
 
-    public void intake() {
-        intakePower = INTAKE_SPEED;
+
+    public void changeClaw() {
+        open = !open;
     }
-    public void outtake() {
-        intakePower = -INTAKE_SPEED;
+    public void openClaw(boolean yes) {
+        if (yes)
+            claw.setPosition(CLAW_OPEN);
+        else
+            claw.setPosition(CLAW_CLOSE);
     }
-    public void stoptake() {
-        intakePower = 0;
+
+    public void flipWrist() {
+        intakeWrist = !intakeWrist;
     }
+    public void intakeWrist(boolean yes) {
+        if (yes)
+            wrist.setPosition(WRIST_INTAKE);
+        else
+            wrist.setPosition(WRIST_OUTTAKE);
+    }
+
 
     public void update() {
-//        arm.setPosition(Range.scale(target, 0, Math.PI, ARM_FORWARD, ARM_BACKWARD));
-//        intake.setPower(intakePower);
-    }
-
-    //rad
-    public static double angleToServo(double angle) {
-        return Math.toDegrees(angle) / 300.;
-    }
-
-    //rad
-    public static Vector2D intakePosition(double angle) {
-        return new Vector2D(ARM_LENGTH * Math.cos(angle), ARM_LENGTH * Math.sin(angle));
+        arm.setPosition(target);
+        openClaw(open);
+        intakeWrist(intakeWrist);
     }
 }

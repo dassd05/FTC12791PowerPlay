@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.opmode.test;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
@@ -14,6 +15,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
+@Disabled
 @TeleOp(group = "test")
 public class SpeedTest extends LinearOpMode {
     public static boolean ENABLE_CAMERA = true;
@@ -67,7 +69,7 @@ public class SpeedTest extends LinearOpMode {
             telemetry.addData("Total Update Time", logTime("Total Update Time", () -> {
                 robot.updatePosition();
                 telemetry.addLine("General Robot Stats")
-                        .addData("IMU Time", logTime("IMU Time", robot::updateIMU))
+                        //.addData("IMU Time", logTime("IMU Time", robot::updateIMU))
                         .addData("Bulk Cache Time", logTime("Bulk Cache Time", robot::clearCache))
                         .addData("Butterfly Time", logTime("Butterfly Time", robot.butterfly::update))
                         .addData("IntakeOuttake Time", logTime("IntakeOuttake Time", robot.intakeOuttake::update))

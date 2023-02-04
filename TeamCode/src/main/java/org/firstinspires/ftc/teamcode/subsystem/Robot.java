@@ -65,13 +65,13 @@ public class Robot {
         vertical = new Vertical(hardwareMap);
         odometry = new Odometry(hardwareMap);  // todo
 
-        BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
-        parameters.angleUnit = BNO055IMU.AngleUnit.RADIANS;
-        parameters.accelUnit = BNO055IMU.AccelUnit.METERS_PERSEC_PERSEC;
-        parameters.calibrationDataFile = "BNO055IMUCalibration.json";
-        parameters.accelerationIntegrationAlgorithm = new SimpleIMUIntegrator();
-        imu = hardwareMap.get(BNO055IMU.class, "imu");
-        imu.initialize(parameters);
+//        BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
+//        parameters.angleUnit = BNO055IMU.AngleUnit.RADIANS;
+//        parameters.accelUnit = BNO055IMU.AccelUnit.METERS_PERSEC_PERSEC;
+//        parameters.calibrationDataFile = "BNO055IMUCalibration.json";
+//        parameters.accelerationIntegrationAlgorithm = new SimpleIMUIntegrator();
+//        imu = hardwareMap.get(BNO055IMU.class, "imu");
+//        imu.initialize(parameters);
 
         // locally store the LynxModules since a synchronized block occurs each time we call hardwareMap.get(), so maybe saves a bit of time when we clear cache?
         lynxModules = hardwareMap.getAll(LynxModule.class);
@@ -166,9 +166,9 @@ public class Robot {
         }
     }
 
-    public void updateIMU() {
-        orientation = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.RADIANS);
-    }
+//    public void updateIMU() {
+//        orientation = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.RADIANS);
+//    }
 
     public void updatePosition() {
         position = odometry.getPoseEstimate().plus(positionOffset);
@@ -180,14 +180,14 @@ public class Robot {
         updateRate = 1E9 / (time - lastUpdateTime);
         lastUpdateTime = time;
 
-        updateIMU();
-        updatePosition();
+        //updateIMU();
+        //updatePosition();
         clearCache();
         butterfly.update();
-        intakeOuttake.update();
+        //intakeOuttake.update();
         turret.update();
-        odometry.update();
-        telemetry.update();
+        //odometry.update();
+        //telemetry.update();
     }
 
     public void telemetryCurrent() throws InterruptedException {

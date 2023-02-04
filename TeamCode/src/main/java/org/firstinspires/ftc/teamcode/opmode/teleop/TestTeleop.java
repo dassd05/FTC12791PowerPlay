@@ -109,7 +109,7 @@ public class TestTeleop extends LinearOpMode {
             IOUpdate();
 
             robot.intakeOuttake.arm.arm.setPosition(arm);
-            robot.intakeOuttake.arm.intake.setPower(intakeSpeed);
+            //robot.intakeOuttake.arm.intake.setPower(intakeSpeed);
 
             robot.vertical.v1.setPower(power + .01);
             robot.vertical.v2.setPower(power + .01);
