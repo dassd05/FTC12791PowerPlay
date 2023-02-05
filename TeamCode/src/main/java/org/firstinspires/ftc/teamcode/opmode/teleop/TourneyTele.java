@@ -6,6 +6,7 @@ import static org.firstinspires.ftc.teamcode.subsystem.io.Arm.*;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.util.ElapsedTime;
+import com.qualcomm.robotcore.util.Range;
 
 import org.firstinspires.ftc.teamcode.gamepad.JustPressed;
 import org.firstinspires.ftc.teamcode.subsystem.Butterfly;
@@ -14,7 +15,8 @@ import org.firstinspires.ftc.teamcode.subsystem.Robot;
 @TeleOp(name = "TourneyTele", group = "0")
 public class TourneyTele extends LinearOpMode {
 
-    public static double P = .0027, I = .0000000000003, D = 35;
+//    public static double P = .0027, I = .0000000000003, D = 35;
+    public static double P = .0035, I = .0000000000007, D = 25;
 
     int targetPos = 0;
 
@@ -32,6 +34,9 @@ public class TourneyTele extends LinearOpMode {
         int slidesTop = 1440;
         int slidesMiddle = 900;
         int safe = 25;
+
+        double backLeftIntaking = Range.scale(.75, 0, 1, BACKWARD_LEFT_IN, BACKWARD_LEFT_OUT);
+        double backRightIntaking = Range.scale(.75, 0, 1, BACKWARD_RIGHT_IN, BACKWARD_RIGHT_OUT);
 
         boolean deployed = false;
 
@@ -57,7 +62,7 @@ public class TourneyTele extends LinearOpMode {
             // slowdown
             if (gamepad1.right_bumper)
                 fields = new double[]{fields[0] * .35, fields[1] * .35, fields[2] * .5};
-            else robot.butterfly.drive(fields[0], fields[1], fields[2]);
+            robot.butterfly.drive(fields[0], fields[1], fields[2]);
 
 
             if (justPressed.dpad_up()) {
@@ -72,18 +77,18 @@ public class TourneyTele extends LinearOpMode {
                 deployed = false;
                 myTimer.reset();
             }
-            if (justPressed.dpad_right()) {
-                firstTime = false;
-                myState = State.MIDDLE;
-                deployed = false;
-                myTimer.reset();
-            }
-            if (justPressed.dpad_left()) {
-                firstTime = false;
-                myState = State.LOW;
-                deployed = false;
-                myTimer.reset();
-            }
+//            if (justPressed.dpad_right()) {
+//                firstTime = false;
+//                myState = State.MIDDLE;
+//                deployed = false;
+//                myTimer.reset();
+//            }
+//            if (justPressed.dpad_left()) {
+//                firstTime = false;
+//                myState = State.LOW;
+//                deployed = false;
+//                myTimer.reset();
+//            }
 
             switch (myState) {
                 case DOWN:
@@ -119,34 +124,63 @@ public class TourneyTele extends LinearOpMode {
                     robot.intakeOuttake.horizontal.backwardRight.setPosition((BACKWARD_RIGHT_IN + BACKWARD_RIGHT_OUT) / 2);
 
                     if (justPressed.a()) {
+                        robot.intakeOuttake.arm.claw.setPosition(CLAW_OPEN);
+                        myTimer.reset();
+                        myState = State.INTAKING;
+                    }
+                    break;
+                case INTAKING:
+                    if (myTimer.time() < 700) {
+                        robot.intakeOuttake.horizontal.backwardLeft.setPosition(linearProfile(700, myTimer.time(), 700, (BACKWARD_LEFT_IN + BACKWARD_LEFT_OUT) / 2, backLeftIntaking));
+                        robot.intakeOuttake.horizontal.backwardRight.setPosition(linearProfile(700, myTimer.time(), 700, (BACKWARD_RIGHT_IN + BACKWARD_RIGHT_OUT) / 2, backRightIntaking));
+                    } else {
+                        robot.intakeOuttake.horizontal.backwardLeft.setPosition(backLeftIntaking);
+                        robot.intakeOuttake.horizontal.backwardRight.setPosition(backRightIntaking);
+                    }
+                    robot.intakeOuttake.arm.arm.setPosition(ARM_INTAKE);
+                    if (myTimer.time() > 400)
+                        robot.intakeOuttake.arm.claw.setPosition(CLAW_OPEN);
+
+                    if (justPressed.a()) {
                         robot.intakeOuttake.arm.claw.setPosition(CLAW_CLOSE);
+                        sleep(300);
                         myTimer.reset();
                         myState = State.INTAKE;
                     }
                     break;
                 case INTAKE:
-                    robot.intakeOuttake.horizontal.backwardLeft.setPosition(BACKWARD_LEFT_IN);
-                    robot.intakeOuttake.horizontal.backwardRight.setPosition(BACKWARD_RIGHT_IN);
+                    if (myTimer.time() < 700) {
+                        robot.intakeOuttake.horizontal.backwardLeft.setPosition(linearProfile(700, myTimer.time(), 700, backLeftIntaking, BACKWARD_LEFT_IN));
+                        robot.intakeOuttake.horizontal.backwardRight.setPosition(linearProfile(700, myTimer.time(), 700, backRightIntaking, BACKWARD_RIGHT_IN));
+                    }
+                    robot.intakeOuttake.arm.claw.setPosition(CLAW_CLOSE);
+//                    if (gamepad1.)
 
-                    if (myTimer.time() > 175)
-                        robot.intakeOuttake.arm.arm.setPosition(linearProfile(500, myTimer.time(), 675, ARM_INTAKE, (ARM_REST + ARM_OUTTAKE) / 2));
-
-                    robot.intakeOuttake.horizontal.backwardRight.setPosition(BACKWARD_RIGHT_IN);
-                    robot.intakeOuttake.horizontal.backwardLeft.setPosition(BACKWARD_LEFT_IN);
+                    if (myTimer.time() > 175 && myTimer.time() < 675)
+                        robot.intakeOuttake.arm.arm.setPosition(linearProfile(500, myTimer.time(), 675, ARM_INTAKE, (ARM_REST)));
+                    if (myTimer.time() > 675)
+                        robot.intakeOuttake.arm.arm.setPosition(ARM_REST);
 
                     if (myTimer.time() > 500) {
                         robot.intakeOuttake.arm.wrist.setPosition(WRIST_OUTTAKE);
                     }
 
+                    if (justPressed.a()) {
+                        robot.intakeOuttake.arm.claw.setPosition(CLAW_CLOSE);
+                        myTimer.reset();
+                        myState = State.INTAKING;
+                    }
                     break;
                 case MIDDLE:
                     robot.intakeOuttake.horizontal.backwardLeft.setPosition(BACKWARD_LEFT_IN);
                     robot.intakeOuttake.horizontal.backwardRight.setPosition(BACKWARD_RIGHT_IN);
                     if (deployed)
-                        targetPos -= 500;
+                        targetPos = slidesMiddle - 500;
                     else
                         targetPos = slidesMiddle;
-                    robot.intakeOuttake.arm.arm.setPosition(linearProfile(500, myTimer.time(), 500, (ARM_REST + ARM_OUTTAKE) / 2, ARM_OUTTAKE));
+
+                    if (myTimer.time() < 500)
+                        robot.intakeOuttake.arm.arm.setPosition(linearProfile(500, myTimer.time(), 500, ARM_REST, ARM_OUTTAKE));
 
                     if (justPressed.left_bumper()) {
                         deployed = true;
@@ -156,11 +190,15 @@ public class TourneyTele extends LinearOpMode {
                 case HIGH:
                     robot.intakeOuttake.horizontal.backwardLeft.setPosition(BACKWARD_LEFT_IN);
                     robot.intakeOuttake.horizontal.backwardRight.setPosition(BACKWARD_RIGHT_IN);
+                    robot.intakeOuttake.horizontal.forwardLeft.setPosition(FORWARD_LEFT_IN);
+                    robot.intakeOuttake.horizontal.forwardRight.setPosition(FORWARD_RIGHT_IN);
                     if (deployed)
-                        targetPos -= 500;
+                        targetPos = slidesTop - 500;
                     else
                         targetPos = slidesTop;
-                    robot.intakeOuttake.arm.arm.setPosition(linearProfile(800, myTimer.time(), 800, (ARM_REST + ARM_OUTTAKE) / 2, ARM_OUTTAKE));
+
+                    if (myTimer.time() < 800)
+                        robot.intakeOuttake.arm.arm.setPosition(linearProfile(800, myTimer.time(), 800, ARM_REST , ARM_OUTTAKE));
 
                     if (justPressed.left_bumper()) {
                         deployed = true;
@@ -182,7 +220,7 @@ public class TourneyTele extends LinearOpMode {
 
 
             long time = System.nanoTime();
-            double error = targetPos - robot.vertical.v2.getCurrentPosition();
+            double error = Math.max(0, targetPos) - robot.vertical.v2.getCurrentPosition();
             if (error < 0 != lastError < 0) totalError = 0;
             else totalError += (error) * (time - lastTime);
             double d = (error - lastError) / (time - lastTime);
@@ -214,7 +252,8 @@ public class TourneyTele extends LinearOpMode {
         MIDDLE,
         HIGH,
         DOWN,
-        INTAKE
+        INTAKE,
+        INTAKING,
     }
     public State myState;
 
