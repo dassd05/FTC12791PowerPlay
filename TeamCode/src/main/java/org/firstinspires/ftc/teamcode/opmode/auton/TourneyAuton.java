@@ -9,12 +9,20 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
+import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
 import org.firstinspires.ftc.teamcode.opmode.teleop.TestTeleop;
 import org.firstinspires.ftc.teamcode.subsystem.Butterfly;
 import org.firstinspires.ftc.teamcode.subsystem.Robot;
 import org.firstinspires.ftc.teamcode.subsystem.Webcam;
+import org.firstinspires.ftc.teamcode.subsystem.vision.AprilTagDetectionPipeline;
 import org.firstinspires.ftc.teamcode.subsystem.vision.SignalDetectionPipeline;
+import org.openftc.apriltag.AprilTagDetection;
+import org.openftc.easyopencv.OpenCvCamera;
+import org.openftc.easyopencv.OpenCvCameraFactory;
+import org.openftc.easyopencv.OpenCvCameraRotation;
+
+import java.util.ArrayList;
 
 @Autonomous (name = "TourneyAuton", group = "0", preselectTeleOp = "TourneyTele")
 
@@ -42,10 +50,45 @@ public class TourneyAuton extends LinearOpMode {
         drive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         drive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
-        SignalDetectionPipeline pipeline = new SignalDetectionPipeline();
-        Webcam webcam = new Webcam(hardwareMap, pipeline);
+//        SignalDetectionPipeline pipeline = new SignalDetectionPipeline();
+//        Webcam webcam = new Webcam(hardwareMap, pipeline);
+        OpenCvCamera camera;
+        AprilTagDetectionPipeline aprilTagDetectionPipeline;
 
-        SignalDetectionPipeline.ParkPosition parkPosition = SignalDetectionPipeline.ParkPosition.MIDDLE;
+        final double FEET_PER_METER = 3.28084;
+
+        double fx = 578.272;
+        double fy = 578.272;
+        double cx = 402.145;
+        double cy = 221.506;
+
+        double tagsize = 0.166;
+
+        int LEFT = 1;
+        int MIDDLE = 2;
+        int RIGHT = 3;
+
+        AprilTagDetection tagOfInterest = null;
+
+        int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
+        camera = OpenCvCameraFactory.getInstance().createWebcam(hardwareMap.get(WebcamName.class, "Webcam 1"), cameraMonitorViewId);
+        aprilTagDetectionPipeline = new AprilTagDetectionPipeline(tagsize, fx, fy, cx, cy);
+
+        camera.setPipeline(aprilTagDetectionPipeline);
+        camera.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener()
+        {
+            @Override
+            public void onOpened() {
+                camera.startStreaming(800,448, OpenCvCameraRotation.UPRIGHT);
+            }
+
+            @Override
+            public void onError(int errorCode) {
+
+            }
+        });
+
+        //SignalDetectionPipeline.ParkPosition parkPosition = SignalDetectionPipeline.ParkPosition.MIDDLE;
 
         Pose2d pose1 = new Pose2d(0,60,0);
         Pose2d pose1_2 = new Pose2d(0,50,45);
@@ -60,10 +103,33 @@ public class TourneyAuton extends LinearOpMode {
         ElapsedTime myTimer = new ElapsedTime(ElapsedTime.Resolution.MILLISECONDS);
 
         while (opModeInInit()) {
+
+            ArrayList<AprilTagDetection> currentDetections = aprilTagDetectionPipeline.getLatestDetections();
+
+            if(currentDetections.size() != 0) {
+                boolean tagFound = false;
+
+                for(AprilTagDetection tag : currentDetections) {
+                    if(tag.id == LEFT || tag.id == MIDDLE || tag.id == RIGHT) {
+                        if (tag.id == LEFT)
+                            telemetry.addLine("detected position: left");
+                        if (tag.id == MIDDLE)
+                            telemetry.addLine("detected position: middle");
+                        if (tag.id == RIGHT)
+                            telemetry.addLine("detected position: right");
+                        tagOfInterest = tag;
+                        tagFound = true;
+                        break;
+                    }
+                    else {
+                        telemetry.addLine("no april tag detected...");
+                    }
+                }
+            }
             //sleep(250);
-            parkPosition = pipeline.position;
-            telemetry.addData("position", parkPosition);
-            if (pipeline.average != null) telemetry.addData("color", pipeline.average.toString());
+//            parkPosition = pipeline.position;
+//            telemetry.addData("position", parkPosition);
+//            if (pipeline.average != null) telemetry.addData("color", pipeline.average.toString());
             telemetry.update();
 
             robot.intakeOuttake.arm.claw.setPosition(CLAW_OPEN);
@@ -318,20 +384,20 @@ public class TourneyAuton extends LinearOpMode {
                     robot.intakeOuttake.horizontal.forwardRight.setPosition(FORWARD_RIGHT_IN);
                     robot.intakeOuttake.horizontal.forwardLeft.setPosition(FORWARD_LEFT_IN);
 
-                    switch (parkPosition) {
-                        case LEFT:
+                    switch (tagOfInterest.id) {
+                        case 1:
                             robot.butterfly.runToPosition(left.getX(), left.getY(), left.getHeading(),
                                     .85, .85, -poseEstimate.getY(), poseEstimate.getX(),
                                     poseEstimate.getHeading());
                             break;
 
-                        case RIGHT:
+                        case 3:
                             robot.butterfly.runToPosition(right.getX(), right.getY(), right.getHeading(),
                                     .85, .85, -poseEstimate.getY(), poseEstimate.getX(),
                                     poseEstimate.getHeading());
                             break;
 
-                        case MIDDLE:
+                        case 2:
                             robot.butterfly.runToPosition(middle.getX(), middle.getY(), middle.getHeading(),
                                     .85, .85, -poseEstimate.getY(), poseEstimate.getX(),
                                     poseEstimate.getHeading());
