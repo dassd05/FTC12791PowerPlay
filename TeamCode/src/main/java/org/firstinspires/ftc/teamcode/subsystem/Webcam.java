@@ -17,14 +17,14 @@ public class Webcam {
     public Camera camera;
     public OpenCvPipeline pipeline;
 
-    public Webcam(HardwareMap hardwareMap, OpenCvPipeline pipeline) {
+    public Webcam(HardwareMap hardwareMap, String name, OpenCvPipeline pipeline) {
         this.hardwareMap = hardwareMap;
         this.pipeline = pipeline;
 
         int cameraMonitorViewId = hardwareMap.appContext.getResources().
                 getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
 
-        webcamName = hardwareMap.get(WebcamName.class, "Webcam 1");
+        webcamName = hardwareMap.get(WebcamName.class, name);
         cvCamera = OpenCvCameraFactory.getInstance().createWebcam(webcamName, cameraMonitorViewId);
         cvCamera.setPipeline(pipeline);
         cvCamera.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener() {
@@ -37,5 +37,9 @@ public class Webcam {
             public void onError(int errorCode) {
             }
         });
+    }
+
+    public Webcam(HardwareMap hardwareMap, OpenCvPipeline pipeline) {
+        this(hardwareMap, "Webcam 1", pipeline);
     }
 }

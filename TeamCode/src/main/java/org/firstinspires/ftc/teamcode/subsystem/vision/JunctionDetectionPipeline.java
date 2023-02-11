@@ -33,18 +33,6 @@ public class JunctionDetectionPipeline extends OpenCvPipeline {
 
     private List<Target> junctions;
 
-    public static class Target {
-        public final MatOfPoint contour;
-        public final Rect rect;
-        public final double offset;
-
-        public Target(MatOfPoint contour, Rect rect, double offset) {
-            this.contour = contour;
-            this.rect = rect;
-            this.offset = offset;
-        }
-    }
-
     public List<Target> getJunctions() {
         synchronized (junctionLock) {
             return new ArrayList<>(junctions);
@@ -147,9 +135,9 @@ public class JunctionDetectionPipeline extends OpenCvPipeline {
                     String.format(Locale.getDefault(), "%.2f°", o),
                     new Point(rect.x, rect.y + rect.height + 24),
                     Imgproc.FONT_HERSHEY_SIMPLEX,
-                    16,
+                    1,
                     new Scalar(0, 255, 0),
-                    65
+                    4
             );
         }
         return offsets;

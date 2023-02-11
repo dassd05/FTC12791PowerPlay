@@ -8,6 +8,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import org.firstinspires.ftc.teamcode.subsystem.Webcam;
 import org.firstinspires.ftc.teamcode.subsystem.io.Turret;
 import org.firstinspires.ftc.teamcode.subsystem.vision.JunctionDetectionPipeline;
+import org.firstinspires.ftc.teamcode.subsystem.vision.Target;
 import org.firstinspires.ftc.teamcode.util.TelemetryUtil;
 
 @Config
@@ -19,7 +20,7 @@ public class JunctionDetectionTest extends LinearOpMode {
     public void runOpMode() throws InterruptedException {
         telemetry = TelemetryUtil.initTelemetry(telemetry);
         JunctionDetectionPipeline pipeline = new JunctionDetectionPipeline();
-        Webcam webcam = new Webcam(hardwareMap, pipeline);
+        Webcam webcam = new Webcam(hardwareMap, "Webcam 2", pipeline);
         FtcDashboard dashboard = FtcDashboard.getInstance();
         dashboard.startCameraStream(webcam.cvCamera, 60);
         Turret turret = null;
@@ -30,7 +31,7 @@ public class JunctionDetectionTest extends LinearOpMode {
         }
 
         // provide a new object rather than a null value so our stream refresh checker doesn't get tripped up if the first frame has no junctions
-        JunctionDetectionPipeline.Target lastJunction = new JunctionDetectionPipeline.Target(null, null, 0);
+        Target lastJunction = new Target(null, null, 0);
 
         sleep(500);
 
@@ -39,13 +40,13 @@ public class JunctionDetectionTest extends LinearOpMode {
         while (opModeIsActive()) {
             sleep(10);
             int numJunctions = pipeline.getJunctions().size();
-            JunctionDetectionPipeline.Target junction = pipeline.getClosestJunction();
+            Target junction = pipeline.getClosestJunction();
 
             // has the stream updated yet, or is it still the same thing?
             if (junction == lastJunction) continue;
 
-            if (turretLocking && turret != null && numJunctions > 0 && junction != null) {
-                turret.setTarget(turret.getPosition() + Math.toRadians(junction.offset));
+            if (turretLocking && turret != null && numJunctions > 0 && junction != null && turret.zeroed()) {
+                turret.setTurretTargetPosition(-turret.quadratureEncoder.getCurrentPosition() + Turret.radiansToTicks(Math.toRadians(junction.offset)));
             }
 
             telemetry.addData("Number of Junctions", numJunctions);
@@ -55,8 +56,11 @@ public class JunctionDetectionTest extends LinearOpMode {
             }
             telemetry.addData("Turret Status", !turretLocking ? "disabled" : turret != null ? "enabled" : "Error: Not configured properly!");
             if (turret != null && turretLocking) {
-                telemetry.addData("Turret Target", Math.toDegrees(turret.getTarget()) + "°");
-                telemetry.addData("Turret Position", Math.toDegrees(turret.getPosition()) + "°");
+                telemetry.addData("Turret Zeroed", turret.zeroed());
+//                telemetry.addData("Turret Target (deg)", Math.toDegrees(turret.getTurretTargetPosition()));
+//                telemetry.addData("Turret Position (deg)", Math.toDegrees(turret.quadratureEncoder.getCurrentPosition()));
+                telemetry.addData("Turret Target", turret.getTurretTargetPosition());
+                telemetry.addData("Turret Position", -turret.quadratureEncoder.getCurrentPosition());
                 turret.update();
             }
             telemetry.addData("Camera", webcam.webcamName.toString());

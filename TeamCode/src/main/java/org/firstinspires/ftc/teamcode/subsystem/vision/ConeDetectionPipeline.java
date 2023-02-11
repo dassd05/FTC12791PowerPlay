@@ -45,18 +45,6 @@ public class ConeDetectionPipeline extends OpenCvPipeline {
         RED,
     }
 
-    public static class Target {
-        public final MatOfPoint contour;
-        public final Rect rect;
-        public final double offset;
-
-        public Target(MatOfPoint contour, Rect rect, double offset) {
-            this.contour = contour;
-            this.rect = rect;
-            this.offset = offset;
-        }
-    }
-
     public ConeDetectionPipeline(Color color) {
         this.color = color;
     }
@@ -161,9 +149,9 @@ public class ConeDetectionPipeline extends OpenCvPipeline {
                     String.format(Locale.getDefault(), "%.2f°", o),
                     new Point(rect.x, rect.y - 6),
                     Imgproc.FONT_HERSHEY_SIMPLEX,
-                    16,
+                    1,
                     new Scalar(0, 255, 0),
-                    65
+                    4
             );
         }
         return offsets;

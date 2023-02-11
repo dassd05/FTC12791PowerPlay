@@ -20,7 +20,7 @@ public class Turret {
     public static double INTEGRAL_CAP = .55;
 
 
-    public static PIDCoefficients PIDZeroed = new PIDCoefficients(.07, 0, 160000);
+    public static PIDCoefficients PIDZeroed = new PIDCoefficients(.07, 1e-9, 700000);
 
     public HardwareMap hardwareMap;
     public DcMotorEx motor;
@@ -31,6 +31,7 @@ public class Turret {
 //    private int sector = 0;
     private double position = 0;
     private double target = 0;
+    public int pos = 0;
 
     private long lastTime = System.nanoTime();
     private double lastError = 0;
@@ -49,6 +50,10 @@ public class Turret {
 
         // todo temp
         motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+    }
+    public Turret(HardwareMap hardwareMap, boolean zeroed) {
+        this(hardwareMap);
+        this.zeroed = zeroed;
     }
 
 //    public int getSector() {
@@ -122,10 +127,11 @@ public class Turret {
             motor.setPower(power);
 
             if (/*Math.abs(error) <= .04 ||*/ (totalTime) > 3e9) {
-                offset = quadratureEncoder.getCurrentPosition();
                 //motor.setPower(0);
+                motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
                 motor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
                 motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+                offset = quadratureEncoder.getCurrentPosition();
                 zeroed = true;
             }
             totalTime += time - lastTime;
@@ -134,7 +140,7 @@ public class Turret {
         } else {
             quadratureEncoder.update();
             long time = System.nanoTime();
-            int pos = -quadratureEncoder.getCurrentPosition() + offset;
+            pos = -quadratureEncoder.getCurrentPosition() + offset;
 
             double error = turretTargetPosition - pos;
             if (error < 0 != lastError < 0) totalError = 0;
@@ -142,7 +148,7 @@ public class Turret {
             double d = (error - lastError) / (time - lastTime);
             double i = totalError * PIDZeroed.i;
 
-            if (Math.abs(error) > 4)
+            if (Math.abs(error) > 2)
                 power = PIDZeroed.p * error + (Math.abs(i) < INTEGRAL_CAP ? i : Math.signum(i) * INTEGRAL_CAP) + PIDZeroed.d * d;
             else
                 power = 0;
@@ -217,5 +223,12 @@ public class Turret {
             telemetry.addData("P Error", .012 * error);
             telemetry.addData("I Error", (Math.abs(i) < INTEGRAL_CAP ? i : Math.signum(i) * INTEGRAL_CAP));
         }
+    }
+
+    public static double ticksToRadians(int ticks) {
+        return ticks / 751.8 * 24 / 125 * Math.PI * 2;
+    }
+    public static int radiansToTicks(double radians) {
+        return (int) Math.round(radians / Math.PI / 2 * 125 / 24 * 751.8);
     }
 }

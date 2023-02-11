@@ -43,6 +43,7 @@ public class TurretTest extends LinearOpMode {
 //            telemetry.addData("Turret Power", turret.getTarget());
 
             telemetry.addData("turret position", turret.quadratureEncoder.getCurrentPosition());
+            telemetry.addData("turret pos", turret.pos);
             telemetry.addData("zeroed", turret.zeroed());
             //telemetry.addData("turret error", )
             telemetry.addData("PID", turret.motor.getPower());

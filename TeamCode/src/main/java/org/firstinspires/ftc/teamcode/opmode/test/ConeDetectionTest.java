@@ -8,6 +8,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import org.firstinspires.ftc.teamcode.subsystem.Webcam;
 import org.firstinspires.ftc.teamcode.subsystem.io.Turret;
 import org.firstinspires.ftc.teamcode.subsystem.vision.ConeDetectionPipeline;
+import org.firstinspires.ftc.teamcode.subsystem.vision.Target;
 import org.firstinspires.ftc.teamcode.util.TelemetryUtil;
 
 @Config
@@ -30,7 +31,7 @@ public class ConeDetectionTest extends LinearOpMode {
         }
 
         // provide a new object rather than a null value so our stream refresh checker doesn't get tripped up if the first frame has no cones
-        ConeDetectionPipeline.Target lastCone = new ConeDetectionPipeline.Target(null, null, 0);
+        Target lastCone = new Target(null, null, 0);
 
         sleep(500);
 
@@ -44,13 +45,13 @@ public class ConeDetectionTest extends LinearOpMode {
             }
 
             int numCones = pipeline.getCones().size();
-            ConeDetectionPipeline.Target cone = pipeline.getClosestCone();
+            Target cone = pipeline.getClosestCone();
 
             // has the stream updated yet, or is it still the same thing?
             if (cone == lastCone) continue;
 
-            if (turretLocking && turret != null && numCones > 0 && cone != null) {
-                turret.setTarget(turret.getPosition() + Math.toRadians(cone.offset));
+            if (turretLocking && turret != null && numCones > 0 && cone != null && turret.zeroed()) {
+                turret.setTurretTargetPosition(-turret.quadratureEncoder.getCurrentPosition() + Turret.radiansToTicks(Math.toRadians(cone.offset)));
             }
 
             telemetry.addData("Number of Cones", numCones);
@@ -60,8 +61,8 @@ public class ConeDetectionTest extends LinearOpMode {
             }
             telemetry.addData("Turret Status", !turretLocking ? "disabled" : turret != null ? "enabled" : "Error: Not configured properly!");
             if (turret != null && turretLocking) {
-                telemetry.addData("Turret Target", Math.toDegrees(turret.getTarget()) + "°");
-                telemetry.addData("Turret Position", Math.toDegrees(turret.getPosition()) + "°");
+                telemetry.addData("Turret Target (deg)", Math.toDegrees(turret.getTurretTargetPosition()));
+                telemetry.addData("Turret Position (deg)", Math.toDegrees(turret.quadratureEncoder.getCurrentPosition()));
                 turret.update();
             }
             telemetry.addData("Camera", webcam.webcamName.toString());
