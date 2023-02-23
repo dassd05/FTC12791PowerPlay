@@ -126,8 +126,8 @@ public final class Constants {
                     "frontRight" // reverse
             };
             public static final String[] ENCODERS = new String[] {
-                    "turret",
                     "left",
+                    "turret",
                     "front",
                     "right"
             };
