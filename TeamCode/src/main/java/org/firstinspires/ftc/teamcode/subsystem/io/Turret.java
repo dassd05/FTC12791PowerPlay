@@ -46,7 +46,7 @@ public class Turret {
         motor = hardwareMap.get(DcMotorEx.class, "tur"); // positive power ccw
         motor.setDirection(DcMotorSimple.Direction.REVERSE);
         absoluteEncoder = hardwareMap.get(AnalogInput.class, "tur");
-        quadratureEncoder = new Encoder(hardwareMap.get(DcMotorEx.class, "fr")); // port 1
+        quadratureEncoder = new Encoder(hardwareMap.get(DcMotorEx.class, "bl")); // port 1
 
         // todo temp
         motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
