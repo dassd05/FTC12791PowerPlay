@@ -29,9 +29,9 @@ import org.openftc.easyopencv.OpenCvSwitchableWebcam;
 
 import java.util.ArrayList;
 
-@Autonomous (name = "TourneyAuton", group = "0", preselectTeleOp = "OldTourneyTele")
+@Autonomous (name = "PARK", group = "0", preselectTeleOp = "OldTourneyTele")
 
-public class TourneyAuton extends LinearOpMode {
+public class PARK extends LinearOpMode {
 
     public static double P = .0035, I = .0000000000007, D = 25;
 
@@ -211,7 +211,7 @@ public class TourneyAuton extends LinearOpMode {
                             poseEstimate.getHeading(), true);
                     if (robot.butterfly.positionReached || myTimer.time() > 2000) {
                         myTimer.reset();
-                        state = State.SCORE;
+                        state = State.PARK;
                     }
                     break;
 
@@ -229,8 +229,8 @@ public class TourneyAuton extends LinearOpMode {
                             }
 
                             //if (myTimer.time() > 200) {
-                                robot.intakeOuttake.horizontal.forwardRight.setPosition((((FORWARD_RIGHT_IN + FORWARD_RIGHT_OUT) / 2) + (FORWARD_RIGHT_IN)) / 2);
-                                robot.intakeOuttake.horizontal.forwardLeft.setPosition((((FORWARD_LEFT_IN + FORWARD_LEFT_OUT) / 2) + (FORWARD_LEFT_IN)) / 2);
+                            robot.intakeOuttake.horizontal.forwardRight.setPosition((((FORWARD_RIGHT_IN + FORWARD_RIGHT_OUT) / 2) + (FORWARD_RIGHT_IN)) / 2);
+                            robot.intakeOuttake.horizontal.forwardLeft.setPosition((((FORWARD_LEFT_IN + FORWARD_LEFT_OUT) / 2) + (FORWARD_LEFT_IN)) / 2);
 //                            }
 //                            else {
 //                                robot.intakeOuttake.horizontal.forwardRight.setPosition((FORWARD_RIGHT_IN + FORWARD_RIGHT_OUT) / 2);
@@ -238,7 +238,7 @@ public class TourneyAuton extends LinearOpMode {
 //                            }
 
 
-                            if (myTimer.time() > 100)
+                            if (myTimer.time() > 200)
                                 robot.intakeOuttake.arm.arm.setPosition(ARM_INTAKE);
 
                             robot.intakeOuttake.arm.wrist.setPosition(WRIST_INTAKE);
@@ -247,8 +247,8 @@ public class TourneyAuton extends LinearOpMode {
                                 robot.intakeOuttake.arm.claw.setPosition(CLAW_OPEN);
 
                             if (myTimer.time() > 975) {
-                                robot.intakeOuttake.horizontal.backwardLeft.setPosition(BACKWARD_LEFT_OUT + .007);
-                                robot.intakeOuttake.horizontal.backwardRight.setPosition(BACKWARD_RIGHT_OUT - .007);
+                                robot.intakeOuttake.horizontal.backwardLeft.setPosition(BACKWARD_LEFT_OUT + .012);
+                                robot.intakeOuttake.horizontal.backwardRight.setPosition(BACKWARD_RIGHT_OUT - .012);
                                 myTimer.reset();
                                 reached = true;
                                 score = Score.GRAB;

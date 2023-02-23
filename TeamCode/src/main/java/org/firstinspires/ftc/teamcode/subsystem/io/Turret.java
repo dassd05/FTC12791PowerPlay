@@ -148,7 +148,7 @@ public class Turret {
             double d = (error - lastError) / (time - lastTime);
             double i = totalError * PIDZeroed.i;
 
-            if (Math.abs(error) > 2)
+            if (Math.abs(error) > 20)
                 power = PIDZeroed.p * error + (Math.abs(i) < INTEGRAL_CAP ? i : Math.signum(i) * INTEGRAL_CAP) + PIDZeroed.d * d;
             else
                 power = 0;

@@ -48,10 +48,10 @@ public class Horizontal {
         backwardLeft = hardwareMap.get(ServoImplEx.class, "hbl");
         backwardRight = hardwareMap.get(ServoImplEx.class, "hbr");
 
-        forwardLeft.setPwmRange(ServoStuff.AxonMiniServo.servoModePwmRange);
-        forwardRight.setPwmRange(ServoStuff.AxonMiniServo.servoModePwmRange);
-        backwardLeft.setPwmRange(ServoStuff.AxonMaxServo.servoModePwmRange);
-        backwardRight.setPwmRange(ServoStuff.AxonMaxServo.servoModePwmRange);
+//        forwardLeft.setPwmRange(ServoStuff.AxonMiniServo.servoModePwmRange);
+//        forwardRight.setPwmRange(ServoStuff.AxonMiniServo.servoModePwmRange);
+//        backwardLeft.setPwmRange(ServoStuff.AxonMaxServo.servoModePwmRange);
+//        backwardRight.setPwmRange(ServoStuff.AxonMaxServo.servoModePwmRange);
 
         // positive position = outwards
 //        forward1.setDirection(Servo.Direction.REVERSE);  // no use for this since we use Range.scale from angle to position

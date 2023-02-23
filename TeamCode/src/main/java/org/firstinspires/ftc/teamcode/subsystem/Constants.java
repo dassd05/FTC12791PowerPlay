@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.subsystem;
 
 import com.acmerobotics.dashboard.config.Config;
+import com.acmerobotics.roadrunner.geometry.Pose2d;
 
 @Config
 public final class Constants {
@@ -27,6 +28,10 @@ public final class Constants {
      */
 
     private Constants() {}
+
+    public static final class SavedData {
+        public static Pose2d endOfAutonPose = null;
+    }
 
     public static final class BUTTERFLY {
 

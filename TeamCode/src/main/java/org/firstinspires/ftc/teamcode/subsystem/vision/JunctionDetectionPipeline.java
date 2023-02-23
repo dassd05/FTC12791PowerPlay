@@ -29,6 +29,8 @@ public class JunctionDetectionPipeline extends OpenCvPipeline {
     public static int yellowHighS = 255;
     public static int yellowHighV = 255;
 
+    private Mat copy;
+
     private final Object junctionLock = new Object();
 
     private List<Target> junctions;
@@ -62,7 +64,8 @@ public class JunctionDetectionPipeline extends OpenCvPipeline {
 
     @Override
     public Mat processFrame(Mat input) {
-        Mat copy = new Mat(input.size(), CvType.CV_8UC1);
+        if (copy != null) copy.release();
+        copy = new Mat(input.size(), CvType.CV_8UC1);
         inRange(input, copy);
         List<MatOfPoint> contours = findObj(copy);
         List<Rect> rects = drawBoxes(input, contours);
