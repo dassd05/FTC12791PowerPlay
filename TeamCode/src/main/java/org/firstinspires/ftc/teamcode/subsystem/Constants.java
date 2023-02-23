@@ -125,35 +125,41 @@ public final class Constants {
         // except slides, which are Matrix 12v Motor
         public static final class CONTROL_HUB {
             public static final String[] MOTORS = new String[] {
-                    "frontLeft",
-                    "frontRight", // reverse
                     "backLeft",
-                    "backRight" // reverse
+                    "backRight", // reverse
+                    "frontLeft",
+                    "frontRight" // reverse
+            };
+            public static final String[] ENCODERS = new String[] {
+                    "left",
+                    "turret",
+                    "front",
+                    "right"
             };
             public static final String[] SERVOS = new String[] {
-                    "",
-                    "rotation",
-                    "backLeft",
+                    "wrist",
                     "frontLeft",
-                    "backRight",
-                    "frontRight",
-                    ""
+                    "backLeft",
+                    "backwardRight",
+                    "forwardRight",
+                    "claw"
             };
+            // port 2/3 is axon analog
         }
         public static final class EXPANSION_HUB {
             public static final String[] MOTORS = new String[] {
-                    "vertical",
-                    "vertical",
-                    "vertical",
-                    "turret"
+                    "turret",
+                    "vertical", // encoder = vertical
+                    "vertical", // encoder = vertical
+                    "vertical" // encoder = vertical
             };
             public static final String[] SERVOS = new String[] {
-                    "claw",
                     "arm",
-                    "intakeRight",
-                    "intakeLeft",
-                    "outtakeLeft",
-                    "outtakeRight"
+                    "forwardLeft",
+                    "",
+                    "frontRight",
+                    "backwardLeft",
+                    "backRight"
             };
         }
         public static final String[] SERVO_POWER_MODULE = new String[] {
