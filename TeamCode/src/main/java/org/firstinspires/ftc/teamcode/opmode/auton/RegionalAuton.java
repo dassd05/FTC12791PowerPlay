@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.opmode.auton;
 import static org.firstinspires.ftc.teamcode.subsystem.Constants.DEPLOYMENT.*;
 import static org.firstinspires.ftc.teamcode.subsystem.io.Arm.*;
 
+import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
@@ -29,19 +30,19 @@ import org.openftc.easyopencv.OpenCvSwitchableWebcam;
 
 import java.util.ArrayList;
 
-@Autonomous (name = "TourneyAuton", group = "0", preselectTeleOp = "OldTourneyTele")
+@Autonomous (name = "RegionalAuton", group = "0", preselectTeleOp = "RegionalTele")
 
-public class TourneyAuton extends LinearOpMode {
+public class RegionalAuton extends LinearOpMode {
 
     public static double P = .0035, I = .0000000000007, D = 25;
 
     public double targetPos = 0.0;
 
-    public double coneOffset = 77;
+    public double coneOffset = 72;
     public double webcamOffset = 15;
     public double safeClear = 440;
     //public double slidesUp = 1440;
-    public double slidesUp = 1065;
+    public double slidesUp = 1015;
 
 
     public int turret = 0;
@@ -97,6 +98,7 @@ public class TourneyAuton extends LinearOpMode {
 
             }
         });
+        FtcDashboard.getInstance().startCameraStream(camera, 60);
 
         //SignalDetectionPipeline.ParkPosition parkPosition = SignalDetectionPipeline.ParkPosition.MIDDLE;
 
@@ -206,6 +208,9 @@ public class TourneyAuton extends LinearOpMode {
                     break;
 
                 case POSITION:
+                    robot.intakeOuttake.horizontal.backwardLeft.setPosition((BACKWARD_LEFT_IN + BACKWARD_LEFT_OUT) / 2);
+                    robot.intakeOuttake.horizontal.backwardRight.setPosition((BACKWARD_RIGHT_IN + BACKWARD_RIGHT_OUT) / 2);
+
                     robot.butterfly.runToPosition(pose2.getX(), pose2.getY(), pose2.getHeading(),
                             .45, 1, -poseEstimate.getY(), poseEstimate.getX(),
                             poseEstimate.getHeading(), true);
@@ -221,11 +226,11 @@ public class TourneyAuton extends LinearOpMode {
                             targetPos = (5 - cycles) * coneOffset + webcamOffset;
 
                             if (cycles < 6) {
-                                robot.intakeOuttake.horizontal.backwardLeft.setPosition(linearProfile(875, myTimer.time(), 875, ((BACKWARD_LEFT_IN + BACKWARD_LEFT_OUT) / 2), (BACKWARD_LEFT_OUT + .012)));
-                                robot.intakeOuttake.horizontal.backwardRight.setPosition(linearProfile(875, myTimer.time(), 875, ((BACKWARD_RIGHT_IN + BACKWARD_RIGHT_OUT) / 2), BACKWARD_RIGHT_OUT - .012));
+                                robot.intakeOuttake.horizontal.backwardLeft.setPosition(linearProfile(875, myTimer.time(), 875, ((BACKWARD_LEFT_IN + BACKWARD_LEFT_OUT) / 2), (BACKWARD_LEFT_OUT - .127)));
+                                robot.intakeOuttake.horizontal.backwardRight.setPosition(linearProfile(875, myTimer.time(), 875, ((BACKWARD_RIGHT_IN + BACKWARD_RIGHT_OUT) / 2), BACKWARD_RIGHT_OUT + .127));
                             } else {
-                                robot.intakeOuttake.horizontal.backwardLeft.setPosition(linearProfile(875, myTimer.time(), 875, BACKWARD_LEFT_IN, (BACKWARD_LEFT_OUT + .012)));
-                                robot.intakeOuttake.horizontal.backwardRight.setPosition(linearProfile(875, myTimer.time(), 875, BACKWARD_RIGHT_IN, BACKWARD_RIGHT_OUT - .012));
+                                robot.intakeOuttake.horizontal.backwardLeft.setPosition(linearProfile(875, myTimer.time(), 875, BACKWARD_LEFT_IN, (BACKWARD_LEFT_OUT - .127)));
+                                robot.intakeOuttake.horizontal.backwardRight.setPosition(linearProfile(875, myTimer.time(), 875, BACKWARD_RIGHT_IN, BACKWARD_RIGHT_OUT + .127));
                             }
 
                             //if (myTimer.time() > 200) {
@@ -243,12 +248,12 @@ public class TourneyAuton extends LinearOpMode {
 
                             robot.intakeOuttake.arm.wrist.setPosition(WRIST_INTAKE);
 
-                            if (myTimer.time() > 200)
+                            if (myTimer.time() > 50)
                                 robot.intakeOuttake.arm.claw.setPosition(CLAW_OPEN);
 
                             if (myTimer.time() > 975) {
-                                robot.intakeOuttake.horizontal.backwardLeft.setPosition(BACKWARD_LEFT_OUT + .007);
-                                robot.intakeOuttake.horizontal.backwardRight.setPosition(BACKWARD_RIGHT_OUT - .007);
+                                robot.intakeOuttake.horizontal.backwardLeft.setPosition(BACKWARD_LEFT_OUT - .127);
+                                robot.intakeOuttake.horizontal.backwardRight.setPosition(BACKWARD_RIGHT_OUT + .127);
                                 myTimer.reset();
                                 reached = true;
                                 score = Score.GRAB;
@@ -279,7 +284,7 @@ public class TourneyAuton extends LinearOpMode {
                                 robot.intakeOuttake.horizontal.backwardLeft.setPosition(BACKWARD_LEFT_IN);
                                 robot.intakeOuttake.horizontal.backwardRight.setPosition(BACKWARD_RIGHT_IN);
 
-                                turret = 365;
+                                turret = -360;
                                 robot.intakeOuttake.arm.arm.setPosition((ARM_REST + ARM_OUTTAKE) / 2);
                                 myTimer.reset();
                                 score = Score.UP;
@@ -314,8 +319,8 @@ public class TourneyAuton extends LinearOpMode {
                             if (myTimer.time() <= 650) {
 //                                robot.intakeOuttake.horizontal.forwardLeft.setPosition(((FORWARD_LEFT_OUT + FORWARD_LEFT_IN) / 2 - .03));
 //                                robot.intakeOuttake.horizontal.forwardRight.setPosition(((FORWARD_RIGHT_OUT + FORWARD_RIGHT_IN) / 2 + .03));
-                                robot.intakeOuttake.horizontal.forwardLeft.setPosition(((FORWARD_LEFT_OUT + FORWARD_LEFT_IN) / 2 - .069));
-                                robot.intakeOuttake.horizontal.forwardRight.setPosition(((FORWARD_RIGHT_OUT + FORWARD_RIGHT_IN) / 2 + .069));
+                                robot.intakeOuttake.horizontal.forwardLeft.setPosition(((FORWARD_LEFT_OUT + FORWARD_LEFT_IN) / 2 - .06));
+                                robot.intakeOuttake.horizontal.forwardRight.setPosition(((FORWARD_RIGHT_OUT + FORWARD_RIGHT_IN) / 2 + .06));
 
 //                                //robot.intakeOuttake.horizontal.forwardLeft.setPosition(linearProfile(650, myTimer.time(), 650,((((FORWARD_LEFT_IN + FORWARD_LEFT_OUT) / 2) + (FORWARD_LEFT_IN)) / 2), ((FORWARD_LEFT_OUT + FORWARD_LEFT_IN) / 2 - .025)));
                                 //robot.intakeOuttake.horizontal.forwardRight.setPosition(linearProfile(650, myTimer.time(), 650, ((((FORWARD_RIGHT_IN + FORWARD_RIGHT_OUT) / 2) + (FORWARD_RIGHT_IN)) / 2), ((FORWARD_RIGHT_OUT + FORWARD_RIGHT_IN) / 2 + .025)));
@@ -332,8 +337,8 @@ public class TourneyAuton extends LinearOpMode {
                             if (myTimer.time() > 700) {
 //                                robot.intakeOuttake.horizontal.forwardLeft.setPosition((FORWARD_LEFT_OUT + FORWARD_LEFT_IN) / 2 - .03);
 //                                robot.intakeOuttake.horizontal.forwardRight.setPosition((FORWARD_RIGHT_OUT + FORWARD_RIGHT_IN) / 2 + .03);
-                                robot.intakeOuttake.horizontal.forwardLeft.setPosition(((FORWARD_LEFT_OUT + FORWARD_LEFT_IN) / 2 - .069));
-                                robot.intakeOuttake.horizontal.forwardRight.setPosition(((FORWARD_RIGHT_OUT + FORWARD_RIGHT_IN) / 2 + .069));
+                                robot.intakeOuttake.horizontal.forwardLeft.setPosition(((FORWARD_LEFT_OUT + FORWARD_LEFT_IN) / 2 - .06));
+                                robot.intakeOuttake.horizontal.forwardRight.setPosition(((FORWARD_RIGHT_OUT + FORWARD_RIGHT_IN) / 2 + .06));
 
                                 robot.intakeOuttake.arm.arm.setPosition(ARM_OUTTAKE - .1);
 
@@ -382,7 +387,7 @@ public class TourneyAuton extends LinearOpMode {
 //                                robot.intakeOuttake.horizontal.forwardRight.setPosition((FORWARD_RIGHT_IN + FORWARD_RIGHT_OUT) / 2);
 //                                robot.intakeOuttake.horizontal.forwardLeft.setPosition((FORWARD_LEFT_IN + FORWARD_LEFT_OUT) / 2);
 
-                                robot.intakeOuttake.arm.arm.setPosition(ARM_REST);
+                                robot.intakeOuttake.arm.arm.setPosition((ARM_REST + ARM_INTAKE) / 2);
                                 cycles += 1;
                                 myTimer.reset();
                                 score = Score.EXTEND;

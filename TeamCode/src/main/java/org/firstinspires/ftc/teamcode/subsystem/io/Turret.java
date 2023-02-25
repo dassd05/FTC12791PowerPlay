@@ -14,9 +14,9 @@ import org.firstinspires.ftc.teamcode.util.Encoder;
 
 @Config
 public class Turret {
-    public static double ABSOLUTE_FORWARD = 1.26; // volts. ccw is decreasing
+    public static double ABSOLUTE_FORWARD = .79; // volts. ccw is decreasing
     //public static double ABSOLUTE_FORWARD = .89; // volts. ccw is decreasing
-    public static PIDCoefficients PID = new PIDCoefficients(1.3, 1e-8, 0);
+    public static PIDCoefficients PID = new PIDCoefficients(13.0, 1e-8, 0);
     public static double INTEGRAL_CAP = .55;
 
 
@@ -35,7 +35,7 @@ public class Turret {
 
     private long lastTime = System.nanoTime();
     private double lastError = 0;
-    private double totalError = 0;
+    public static double totalError = 0;
     private long totalTime = 0;
 
     private int targetPosition = 0;
@@ -118,7 +118,7 @@ public class Turret {
             // todo temp
             long time = System.nanoTime();
             double error = ABSOLUTE_FORWARD - voltage;
-            if (error < 0 != lastError < 0) totalError = 0;
+            if (error * lastError <= 0) totalError = 0;
             else totalError += (error - lastError) * (time - lastTime);
             double d = (error - lastError) / (time - lastTime);
             double i = totalError * PID.i;
@@ -127,7 +127,7 @@ public class Turret {
             motor.setPower(power);
 
             if (/*Math.abs(error) <= .04 ||*/ (totalTime) > 3e9) {
-                //motor.setPower(0);
+                motor.setPower(0);
                 motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
                 motor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
                 motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
@@ -143,7 +143,7 @@ public class Turret {
             pos = -quadratureEncoder.getCurrentPosition() + offset;
 
             double error = turretTargetPosition - pos;
-            if (error < 0 != lastError < 0) totalError = 0;
+            if (error * lastError <= 0) totalError = 0;
             else totalError += (error - lastError) * (time - lastTime);
             double d = (error - lastError) / (time - lastTime);
             double i = totalError * PIDZeroed.i;
@@ -160,6 +160,7 @@ public class Turret {
         }
     }
 
+    //public static double power1;
     public void update(Telemetry telemetry) {
         if (!zeroed) {
             double voltage = absoluteEncoder.getVoltage();// / absoluteEncoder.getMaxVoltage();
@@ -185,7 +186,7 @@ public class Turret {
             // todo temp
             long time = System.nanoTime();
             double error = ABSOLUTE_FORWARD - voltage;
-            if (error < 0 != lastError < 0) totalError = 0;
+            if (error * lastError <= 0) totalError = 0;
             else totalError += (error - lastError) * (time - lastTime);
             double d = (error - lastError) / (time - lastTime);
             double i = totalError * PID.i;
@@ -195,7 +196,7 @@ public class Turret {
 
             if (/*Math.abs(error) <= .04 ||*/ (totalTime) > 3e9) {
                 offset = quadratureEncoder.getCurrentPosition();
-                //motor.setPower(0);
+                motor.setPower(0);
                 motor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
                 motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
                 zeroed = true;
@@ -209,7 +210,7 @@ public class Turret {
             int pos = -quadratureEncoder.getCurrentPosition() + offset;
 
             double error = turretTargetPosition - pos;
-            if (error < 0 != lastError < 0) totalError = 0;
+            if (error * lastError <= 0) totalError = 0;
             else totalError += (error - lastError) * (time - lastTime);
             double d = (error - lastError) / (time - lastTime);
             double i = totalError * PIDZeroed.i;

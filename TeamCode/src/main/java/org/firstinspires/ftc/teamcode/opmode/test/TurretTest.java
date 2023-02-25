@@ -1,7 +1,8 @@
 package org.firstinspires.ftc.teamcode.opmode.test;
 
+import static org.firstinspires.ftc.teamcode.subsystem.io.Turret.*;
+
 import com.acmerobotics.dashboard.config.Config;
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.util.ElapsedTime;
@@ -27,6 +28,7 @@ public class TurretTest extends LinearOpMode {
         while (opModeInInit()) {
             turret.update(telemetry);
             telemetry.addData("PID", turret.motor.getPower());
+            telemetry.addData("voltage", turret.absoluteEncoder.getVoltage());
             telemetry.addData("zeroed", turret.zeroed());
             telemetry.update();
         }
@@ -45,8 +47,9 @@ public class TurretTest extends LinearOpMode {
             telemetry.addData("turret position", turret.quadratureEncoder.getCurrentPosition());
             telemetry.addData("turret pos", turret.pos);
             telemetry.addData("zeroed", turret.zeroed());
+            telemetry.addData("i", totalError * PIDZeroed.i);
             //telemetry.addData("turret error", )
-            telemetry.addData("PID", turret.motor.getPower());
+            //telemetry.addData("PID", power1);
             telemetry.update();
         }
     }
