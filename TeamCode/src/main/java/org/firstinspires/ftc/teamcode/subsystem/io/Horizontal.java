@@ -1,6 +1,9 @@
 package org.firstinspires.ftc.teamcode.subsystem.io;
 
+import static org.firstinspires.ftc.teamcode.opmode.test.HardwareTest.servoCurrent;
+
 import com.acmerobotics.dashboard.config.Config;
+import com.qualcomm.hardware.lynx.LynxModule;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.HardwareMap;
@@ -86,8 +89,8 @@ public class Horizontal {
         backwardTarget = target < 0 ? Math.PI - backward.positionInv(-target + backward.rod - backward.crank).get(0) : 0; // thus it'll most likely be in the range [0, pi] todo
 
         // limit range so no hitting or weird behavior
-        forwardTarget = Range.clip(forwardTarget, .13, 3);
-        backwardTarget = Range.clip(backwardTarget, .13, 3);
+        forwardTarget = Range.clip(forwardTarget, .39, 2.75);
+        backwardTarget = Range.clip(backwardTarget, .39, 2.75);
 
 //        forward1.setPosition(angleToAxonServo(forwardTarget) + FORWARD1_OFFSET);
 //        forward2.setPosition(angleToAxonServo(forwardTarget) + FORWARD2_OFFSET);
@@ -113,7 +116,7 @@ public class Horizontal {
 
     private static double clipScale(double n, double a1, double a2, double b1, double b2) {
         // scale then clip in the SLIGHTEST chance of a floating point error and it extends outside the given range
-        return clip(Range.scale(n, a1, a2, b1, b2), b1, b2);
+        return Range.clip(Range.scale(n, a1, a2, b1, b2), b1, b2);
     }
     private static double clip(double n, double a, double b) {
         if (a < b) return Math.min(Math.max(n, a), b);
@@ -142,10 +145,19 @@ public class Horizontal {
                 target += 2 * gamepad1.right_stick_x;  // max 200 mm/s
                 horizontal.setTarget(target);
 
+                double current = 0;
+                for (LynxModule lynxModule : hardwareMap.getAll(LynxModule.class))
+                    current += servoCurrent(lynxModule);
+
                 telemetry.addData("Horizontal Target", "%f mm", horizontal.getTarget());
                 telemetry.addData("Horizontal Position", "%f mm", horizontal.getPosition());
                 telemetry.addData("Forward Target", "%f°", Math.toDegrees(horizontal.forwardTarget));
                 telemetry.addData("Backward Target", "%f°", Math.toDegrees(horizontal.backwardTarget));
+                telemetry.addData("Forward Left Position", horizontal.forwardLeft.getPosition());
+                telemetry.addData("Forward Right Position", horizontal.forwardRight.getPosition());
+                telemetry.addData("Backward Left Position", horizontal.backwardLeft.getPosition());
+                telemetry.addData("Backward Right Position", horizontal.backwardRight.getPosition());
+                telemetry.addData("Servo current", current);
                 telemetry.update();
                 horizontal.update();
             }
