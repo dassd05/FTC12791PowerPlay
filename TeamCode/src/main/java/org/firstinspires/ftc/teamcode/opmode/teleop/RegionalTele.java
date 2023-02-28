@@ -59,7 +59,6 @@ public class RegionalTele extends LinearOpMode {
 
         boolean armNeutral = true;
         boolean linkageAuto = false;
-        boolean manualClaw = false;
 
         robot.intakeOuttake.horizontal.forwardRight.setPosition(FORWARD_RIGHT_IN);
         robot.intakeOuttake.horizontal.forwardLeft.setPosition(FORWARD_LEFT_IN);
@@ -90,8 +89,6 @@ public class RegionalTele extends LinearOpMode {
                 armNeutral = !armNeutral;
             if (justPressed2.a())
                 linkageAuto = !linkageAuto;
-            if (justPressed2.b())
-                manualClaw = !manualClaw;
 
             switch (myState) {
                 case REST:
@@ -224,14 +221,8 @@ public class RegionalTele extends LinearOpMode {
                         case LOW:
                             if (FSMTimer.time() < 400)
                                 robot.intakeOuttake.arm.arm.setPosition(linearProfile(400, FSMTimer.time(), 400, ARM_REST, ARM_OUTTAKE));
-                            else {
-                                robot.intakeOuttake.arm.arm.setPosition(ARM_OUTTAKE + driverArm);
-                            }
-
-                            if (manualClaw)
-                                robot.intakeOuttake.arm.claw.setPosition(CLAW_OPEN);
                             else
-                                robot.intakeOuttake.arm.claw.setPosition(CLAW_CLOSE);
+                                robot.intakeOuttake.arm.arm.setPosition(ARM_OUTTAKE + driverArm);
                             break;
                         case MIDDLE:
                             slidesTargetPos = slidesMiddle;
@@ -269,10 +260,12 @@ public class RegionalTele extends LinearOpMode {
                     }
 
                     if (gamepad1.left_bumper) {
-                        manualClaw = false;
-                        FSMTimer.reset();
                         firstTime = true;
-                        myState = State.SCORE;
+                        FSMTimer.reset();
+                        if (mySlides != Slides.LOW)
+                            myState = State.SCORE;
+                        else
+                            myState = State.DEEXTEND;
                     }
                     break;
                 case SCORE:

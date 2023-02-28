@@ -15,15 +15,6 @@ import org.firstinspires.ftc.teamcode.util.TelemetryUtil;
 
 @Config
 public class Horizontal {
-    // long is forward is outtake, short is backward is intake
-    public static double FORWARD_LEFT_IN = .765; // diff = .67
-    public static double FORWARD_LEFT_OUT = .095;
-    public static double FORWARD_RIGHT_IN = .085; // diff = .665
-    public static double FORWARD_RIGHT_OUT = .75;
-    public static double BACKWARD_LEFT_IN = .23; // diff = .555
-    public static double BACKWARD_LEFT_OUT = .785;
-    public static double BACKWARD_RIGHT_IN = .975; // diff = .565
-    public static double BACKWARD_RIGHT_OUT = .425;
 
     public static final double MAX_FORWARD = 2 * 360;
     public static final double MAX_BACKWARD = 2 * 240;
