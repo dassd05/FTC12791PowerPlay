@@ -19,6 +19,7 @@ public class Arm {
     public static double ARM_OUTTAKE = .38;
 
     public static double ARM_LENGTH = 250;
+    public static double ARM_HORIZONTAL_LENGTH = 346.17;
 
     boolean open = true;
 
@@ -50,9 +51,6 @@ public class Arm {
         //arm.setPwmRange(ServoStuff.AxonMaxServo.servoModePwmRange);
         //claw.setPwmRange(ServoStuff.GobildaSpeedServo.servoModePwmRange);
         //wrist.setPwmRange(ServoStuff.GobildaSpeedServo.servoModePwmRange);
-
-        // no use for this since we use Range.scale from angle to position
-//        intake.setDirection(DcMotorSimple.Direction.REVERSE);  // change so positive is ccw/forward
     }
 
     public double getArmPosition() {

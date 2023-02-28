@@ -1,32 +1,34 @@
 package org.firstinspires.ftc.teamcode.subsystem.io;
 
 import com.acmerobotics.dashboard.config.Config;
+import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.ServoImplEx;
+import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 
+import org.firstinspires.ftc.teamcode.subsystem.Constants;
 import org.firstinspires.ftc.teamcode.subsystem.ServoStuff;
 import org.firstinspires.ftc.teamcode.subsystem.SliderCrankLinkage;
+import org.firstinspires.ftc.teamcode.util.TelemetryUtil;
 
 @Config
 public class Horizontal {
-    // position at which horizontal is completely in (ie target = 0)
-//    public static double FORWARD1_OFFSET = 0;
-//    public static double FORWARD2_OFFSET = 0;
-//    public static double BACKWARD1_OFFSET = 0;
-//    public static double BACKWARD2_OFFSET = 0;
-
-    public static double FORWARD_LEFT_IN = .772; // diff = .667
-    public static double FORWARD_LEFT_OUT = .105;
+    // long is forward is outtake, short is backward is intake
+    public static double FORWARD_LEFT_IN = .765; // diff = .67
+    public static double FORWARD_LEFT_OUT = .095;
     public static double FORWARD_RIGHT_IN = .085; // diff = .665
     public static double FORWARD_RIGHT_OUT = .75;
     public static double BACKWARD_LEFT_IN = .23; // diff = .555
     public static double BACKWARD_LEFT_OUT = .785;
-    public static double BACKWARD_RIGHT_IN = .99; // diff = .565
+    public static double BACKWARD_RIGHT_IN = .975; // diff = .565
     public static double BACKWARD_RIGHT_OUT = .425;
 
     public static final double MAX_FORWARD = 2 * 360;
     public static final double MAX_BACKWARD = 2 * 240;
+
+    public static boolean debugging = false;
 
     public HardwareMap hardwareMap;
     public ServoImplEx forwardLeft;
@@ -39,6 +41,8 @@ public class Horizontal {
 
     private double position = 0;
     private double target = 0;
+    private double forwardTarget = 0;
+    private double backwardTarget= 0;
 
     public Horizontal(HardwareMap hardwareMap) {
         this.hardwareMap = hardwareMap;
@@ -48,19 +52,19 @@ public class Horizontal {
         backwardLeft = hardwareMap.get(ServoImplEx.class, "hbl");
         backwardRight = hardwareMap.get(ServoImplEx.class, "hbr");
 
-//        forwardLeft.setPwmRange(ServoStuff.AxonMiniServo.servoModePwmRange);
-//        forwardRight.setPwmRange(ServoStuff.AxonMiniServo.servoModePwmRange);
-//        backwardLeft.setPwmRange(ServoStuff.AxonMaxServo.servoModePwmRange);
-//        backwardRight.setPwmRange(ServoStuff.AxonMaxServo.servoModePwmRange);
+        forwardLeft.setPwmRange(ServoStuff.AxonMiniServo.servoModePwmRange);
+        forwardRight.setPwmRange(ServoStuff.AxonMiniServo.servoModePwmRange);
+        backwardLeft.setPwmRange(ServoStuff.AxonMaxServo.servoModePwmRange);
+        backwardRight.setPwmRange(ServoStuff.AxonMaxServo.servoModePwmRange);
 
         // positive position = outwards
 //        forward1.setDirection(Servo.Direction.REVERSE);  // no use for this since we use Range.scale from angle to position
 //        backward1.setDirection(Servo.Direction.REVERSE);
 
-//        forward = new SliderCrankLinkage(360, 383.228);
-//        backward = new SliderCrankLinkage(240, 277.684);
-//        forward.calculateInverses(.001);  // ~6000 (.001 in 2pi) * 4 (p, v, a, t) * 2 (f + b) = 48000 (hard - p, v, a, t) calculations
-//        backward.calculateInverses(.001);  // 4800 * 8 (bytes per double) * 2 (x + y) = 384000 bytes
+        forward = new SliderCrankLinkage(360, 383.228);
+        backward = new SliderCrankLinkage(240, 277.684);
+        forward.calculateInverses(.001);  // ~6000 (.001 in 2pi) * 4 (p, v, a, t) * 2 (f + b) = 48000 (hard - p, v, a, t) calculations
+        backward.calculateInverses(.001);  // 4800 * 8 (bytes per double) * 2 (x + y) = 384000 bytes
 
         // should we constrain the velocity of the linkage with a ServoEx class?
     }
@@ -77,23 +81,25 @@ public class Horizontal {
     }
 
     public void update() {
-//        // we just say that only one side is nonzero at any moment
-//        double forwardTarget = target > 0 ? Math.PI - forward.positionInv(target + forward.rod - forward.crank).get(0) : 0; // if there are multiple values of the inverse, then we grab the lowest one
-//        double backwardTarget = target < 0 ? Math.PI - backward.positionInv(-target + backward.rod - backward.crank).get(0) : 0; // thus it'll most likely be in the range [0, pi] todo
-//
-//        // limit range so no hitting or weird behavior
-//        forwardTarget = Range.clip(forwardTarget, .13, 3);
-//        backwardTarget = Range.clip(backwardTarget, .13, 3);
-//
-////        forward1.setPosition(angleToAxonServo(forwardTarget) + FORWARD1_OFFSET);
-////        forward2.setPosition(angleToAxonServo(forwardTarget) + FORWARD2_OFFSET);
-////        backward1.setPosition(angleToAxonServo(backwardTarget) + BACKWARD1_OFFSET);
-////        backward2.setPosition(angleToAxonServo(backwardTarget) + BACKWARD2_OFFSET);
-//        // ensure that we *NEVER* go past [0, pi]
-//        forwardLeft.setPosition(clipScale(forwardTarget, 0, Math.PI, FORWARD_LEFT_IN, FORWARD_LEFT_OUT));
-//        forwardRight.setPosition(clipScale(forwardTarget, 0, Math.PI, FORWARD_RIGHT_IN, FORWARD_RIGHT_OUT));
-//        backwardLeft.setPosition(clipScale(backwardTarget, 0, Math.PI, BACKWARD_LEFT_IN, BACKWARD_LEFT_OUT));
-//        backwardRight.setPosition(clipScale(backwardTarget, 0, Math.PI, BACKWARD_RIGHT_IN, BACKWARD_RIGHT_OUT));
+        // we just say that only one side is nonzero at any moment
+        forwardTarget = target > 0 ? Math.PI - forward.positionInv(target + forward.rod - forward.crank).get(0) : 0; // if there are multiple values of the inverse, then we grab the lowest one
+        backwardTarget = target < 0 ? Math.PI - backward.positionInv(-target + backward.rod - backward.crank).get(0) : 0; // thus it'll most likely be in the range [0, pi] todo
+
+        // limit range so no hitting or weird behavior
+        forwardTarget = Range.clip(forwardTarget, .13, 3);
+        backwardTarget = Range.clip(backwardTarget, .13, 3);
+
+//        forward1.setPosition(angleToAxonServo(forwardTarget) + FORWARD1_OFFSET);
+//        forward2.setPosition(angleToAxonServo(forwardTarget) + FORWARD2_OFFSET);
+//        backward1.setPosition(angleToAxonServo(backwardTarget) + BACKWARD1_OFFSET);
+//        backward2.setPosition(angleToAxonServo(backwardTarget) + BACKWARD2_OFFSET);
+        // ensure that we *NEVER* go past [0, pi]
+        if (!debugging) {
+            forwardLeft.setPosition(clipScale(forwardTarget, 0, Math.PI, Constants.DEPLOYMENT.FORWARD_LEFT_IN, Constants.DEPLOYMENT.FORWARD_LEFT_OUT));
+            forwardRight.setPosition(clipScale(forwardTarget, 0, Math.PI, Constants.DEPLOYMENT.FORWARD_RIGHT_IN, Constants.DEPLOYMENT.FORWARD_RIGHT_OUT));
+            backwardLeft.setPosition(clipScale(backwardTarget, 0, Math.PI, Constants.DEPLOYMENT.BACKWARD_LEFT_IN, Constants.DEPLOYMENT.BACKWARD_LEFT_OUT));
+            backwardRight.setPosition(clipScale(backwardTarget, 0, Math.PI, Constants.DEPLOYMENT.BACKWARD_RIGHT_IN, Constants.DEPLOYMENT.BACKWARD_RIGHT_OUT));
+        }
     }
 
     // cannot rely on angle to position conversions, since the servos apparently don't have the range they report they do
@@ -112,5 +118,37 @@ public class Horizontal {
     private static double clip(double n, double a, double b) {
         if (a < b) return Math.min(Math.max(n, a), b);
         else return Math.min(Math.max(n, b), a);
+    }
+
+
+    @Config
+    @TeleOp(group = "test")
+    public static class HorizontalTest extends LinearOpMode {
+        public static double target = 0;
+
+        @Override
+        public void runOpMode() throws InterruptedException {
+            Horizontal horizontal = new Horizontal(hardwareMap);
+            debugging = true;
+            telemetry = TelemetryUtil.initTelemetry(telemetry);
+
+            ElapsedTime timer = new ElapsedTime(ElapsedTime.Resolution.MILLISECONDS);
+            waitForStart();
+
+            while (opModeIsActive()) {
+                sleep((long) Math.max(0, 10 - timer.time()));
+                timer.reset();
+
+                target += 2 * gamepad1.right_stick_x;  // max 200 mm/s
+                horizontal.setTarget(target);
+
+                telemetry.addData("Horizontal Target", "%f mm", horizontal.getTarget());
+                telemetry.addData("Horizontal Position", "%f mm", horizontal.getPosition());
+                telemetry.addData("Forward Target", "%f°", Math.toDegrees(horizontal.forwardTarget));
+                telemetry.addData("Backward Target", "%f°", Math.toDegrees(horizontal.backwardTarget));
+                telemetry.update();
+                horizontal.update();
+            }
+        }
     }
 }

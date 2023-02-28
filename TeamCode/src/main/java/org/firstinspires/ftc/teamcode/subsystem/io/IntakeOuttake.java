@@ -134,7 +134,7 @@ public class IntakeOuttake {
         else if (Math.abs(row - 3) == 1 && Math.abs(col - 3) == 1) height = 3;
         else height = 1;
 
-        double tileDistance = 0;
+        double tileDistance = 24 * 25.4;
         setTargetAbsolute(col * tileDistance, row * tileDistance, height);
     }
 
