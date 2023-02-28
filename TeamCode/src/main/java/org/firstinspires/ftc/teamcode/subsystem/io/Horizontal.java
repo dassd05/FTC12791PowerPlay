@@ -18,18 +18,12 @@ import org.firstinspires.ftc.teamcode.util.TelemetryUtil;
 
 @Config
 public class Horizontal {
-    // long is forward is outtake, short is backward is intake
-    public static double FORWARD_LEFT_IN = .765; // diff = .67
-    public static double FORWARD_LEFT_OUT = .095;
-    public static double FORWARD_RIGHT_IN = .085; // diff = .665
-    public static double FORWARD_RIGHT_OUT = .75;
-    public static double BACKWARD_LEFT_IN = .23; // diff = .555
-    public static double BACKWARD_LEFT_OUT = .785;
-    public static double BACKWARD_RIGHT_IN = .975; // diff = .565
-    public static double BACKWARD_RIGHT_OUT = .425;
-
     public static final double MAX_FORWARD = 2 * 360;
     public static final double MAX_BACKWARD = 2 * 240;
+
+    //rad
+    public static double safetyClipMin = .23;
+    public static double safetyClipMax = 2.9;
 
     public static boolean debugging = false;
 
@@ -89,8 +83,8 @@ public class Horizontal {
         backwardTarget = target < 0 ? Math.PI - backward.positionInv(-target + backward.rod - backward.crank).get(0) : 0; // thus it'll most likely be in the range [0, pi] todo
 
         // limit range so no hitting or weird behavior
-        forwardTarget = Range.clip(forwardTarget, .39, 2.75);
-        backwardTarget = Range.clip(backwardTarget, .39, 2.75);
+        forwardTarget = Range.clip(forwardTarget, safetyClipMin, safetyClipMax);
+        backwardTarget = Range.clip(backwardTarget, safetyClipMin, safetyClipMax);
 
 //        forward1.setPosition(angleToAxonServo(forwardTarget) + FORWARD1_OFFSET);
 //        forward2.setPosition(angleToAxonServo(forwardTarget) + FORWARD2_OFFSET);
@@ -116,7 +110,7 @@ public class Horizontal {
 
     private static double clipScale(double n, double a1, double a2, double b1, double b2) {
         // scale then clip in the SLIGHTEST chance of a floating point error and it extends outside the given range
-        return Range.clip(Range.scale(n, a1, a2, b1, b2), b1, b2);
+        return clip(Range.scale(n, a1, a2, b1, b2), b1, b2);
     }
     private static double clip(double n, double a, double b) {
         if (a < b) return Math.min(Math.max(n, a), b);
