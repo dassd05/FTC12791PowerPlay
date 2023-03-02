@@ -22,8 +22,8 @@ public class Horizontal {
     public static final double MAX_BACKWARD = 2 * 240;
 
     //rad
-    public static double safetyClipMin = .23;
-    public static double safetyClipMax = 2.9;
+    public static double safetyClipMin = .141592653589;
+    public static double safetyClipMax = 3.0;
 
     public static boolean debugging = false;
 
@@ -49,10 +49,10 @@ public class Horizontal {
         backwardLeft = hardwareMap.get(ServoImplEx.class, "hbl");
         backwardRight = hardwareMap.get(ServoImplEx.class, "hbr");
 
-        forwardLeft.setPwmRange(ServoStuff.AxonMiniServo.servoModePwmRange);
-        forwardRight.setPwmRange(ServoStuff.AxonMiniServo.servoModePwmRange);
-        backwardLeft.setPwmRange(ServoStuff.AxonMaxServo.servoModePwmRange);
-        backwardRight.setPwmRange(ServoStuff.AxonMaxServo.servoModePwmRange);
+//        forwardLeft.setPwmRange(ServoStuff.AxonMiniServo.servoModePwmRange);
+//        forwardRight.setPwmRange(ServoStuff.AxonMiniServo.servoModePwmRange);
+//        backwardLeft.setPwmRange(ServoStuff.AxonMaxServo.servoModePwmRange);
+//        backwardRight.setPwmRange(ServoStuff.AxonMaxServo.servoModePwmRange);
 
         // positive position = outwards
 //        forward1.setDirection(Servo.Direction.REVERSE);  // no use for this since we use Range.scale from angle to position

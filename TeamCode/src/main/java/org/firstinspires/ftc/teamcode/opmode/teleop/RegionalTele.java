@@ -1,16 +1,24 @@
 package org.firstinspires.ftc.teamcode.opmode.teleop;
 
 import static org.firstinspires.ftc.teamcode.subsystem.Constants.DEPLOYMENT.*;
+import static org.firstinspires.ftc.teamcode.subsystem.Constants.JUNCTIONS.*;
 import static org.firstinspires.ftc.teamcode.subsystem.io.Arm.*;
 
 import com.acmerobotics.dashboard.FtcDashboard;
+import com.acmerobotics.roadrunner.geometry.Pose2d;
+import com.acmerobotics.roadrunner.util.Angle;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 
+import org.firstinspires.ftc.robotcore.internal.camera.delegating.DelegatingCaptureSequence;
+import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
 import org.firstinspires.ftc.teamcode.gamepad.JustPressed;
+import org.firstinspires.ftc.teamcode.opmode.PoseStorage;
 import org.firstinspires.ftc.teamcode.subsystem.Butterfly;
+import org.firstinspires.ftc.teamcode.subsystem.Constants;
 import org.firstinspires.ftc.teamcode.subsystem.Robot;
 import org.firstinspires.ftc.teamcode.subsystem.Webcam;
 import org.firstinspires.ftc.teamcode.subsystem.io.Turret;
@@ -30,6 +38,13 @@ public class RegionalTele extends LinearOpMode {
     float driverArm = 0;
     double horizontalDriver = 0.0;
 
+    public boolean back = true;
+
+    public double distance = 0;
+
+    public double junction_x = 0;
+    public double junction_y = 0;
+
     @Override
     public void runOpMode() {
 
@@ -37,6 +52,13 @@ public class RegionalTele extends LinearOpMode {
         ElapsedTime FSMTimer = new ElapsedTime(ElapsedTime.Resolution.MILLISECONDS);
 
         Robot robot = new Robot(hardwareMap, telemetry);
+
+        SampleMecanumDrive drive = new SampleMecanumDrive(hardwareMap);
+
+        drive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        drive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+
+        drive.setPoseEstimate(new Pose2d(0,0,0));
 
         JustPressed justPressed1 = new JustPressed(gamepad1);
         JustPressed justPressed2 = new JustPressed(gamepad2);
@@ -47,6 +69,8 @@ public class RegionalTele extends LinearOpMode {
         int slidesTop = 1530;
         int slidesMiddle = 870;
         int safe = 20;
+
+        int clear = 920;
 
         boolean deployed = false;
 
@@ -75,6 +99,9 @@ public class RegionalTele extends LinearOpMode {
         long lastTime = System.nanoTime();
 
         while (opModeIsActive()) {
+
+            Pose2d poseEstimate = drive.getPoseEstimate();
+
             if (justPressed1.x()) robot.butterfly.setState(Butterfly.State.MECANUM);
             if (justPressed1.b() && !gamepad1.start)
                 robot.butterfly.setState(Butterfly.State.STANDSTILL);
@@ -172,6 +199,7 @@ public class RegionalTele extends LinearOpMode {
                     }
 
                     break;
+
                 case SCORE_PREP:
                     if (FSMTimer.time() < 1200 && FSMTimer.time() > 500) {
                         robot.intakeOuttake.horizontal.backwardLeft.setPosition(linearProfile(700, FSMTimer.time(), 1200, backLeftIntaking, BACKWARD_LEFT_IN));
@@ -215,6 +243,110 @@ public class RegionalTele extends LinearOpMode {
                         mySlides = Slides.MIDDLE;
                         myState = State.UP;
                     }
+
+                    if (gamepad2.b || gamepad2.x || gamepad2.y || gamepad2.a) {
+                        if (justPressed2.dpad_up()) {
+                            driverArm = 0;
+                            driverSlides = 0;
+                            driverTurret = 0;
+                            horizontalDriver = 0;
+                            armNeutral = false;
+                            if (gamepad2.a) {
+                                junction_x = C2.getX();
+                                junction_y = C2.getY();
+                            } else if (gamepad2.b) {
+                                junction_x = D3.getX();
+                                junction_y = D3.getY();
+                            } else if (gamepad2.y) {
+                                junction_x = C4.getX();
+                                junction_y = C4.getY();
+                            } else if (gamepad2.x) {
+                                junction_x = B3.getX();
+                                junction_y = B3.getY();
+                            }
+                            back = true;
+                            FSMTimer.reset();
+                            mySlides = Slides.HIGH;
+                            myState = State.UP_AUTOMATIC;
+                        }
+
+                        if (justPressed2.dpad_left() || justPressed2.dpad_right()) {
+                            driverArm = 0;
+                            driverSlides = 0;
+                            driverTurret = 0;
+                            horizontalDriver = 0;
+                            armNeutral = false;
+                            if (gamepad2.a) {
+                                junction_x = B2.getX();
+                                junction_y = B2.getY();
+                            } else if (gamepad2.b) {
+                                junction_x = D2.getX();
+                                junction_y = D2.getY();
+                            } else if (gamepad2.y) {
+                                junction_x = D4.getX();
+                                junction_y = D4.getY();
+                            } else if (gamepad2.x) {
+                                junction_x = B4.getX();
+                                junction_y = B4.getY();
+                            }
+                            back = true;
+                            FSMTimer.reset();
+                            mySlides = Slides.MIDDLE;
+                            myState = State.UP_AUTOMATIC;
+                        }
+                    }
+                    if (gamepad2.right_trigger > .5) {
+                        if (justPressed2.dpad_down() || justPressed2.dpad_up() || justPressed2.dpad_left() || justPressed2.dpad_right()) {
+                            driverArm = 0;
+                            driverSlides = 0;
+                            driverTurret = 0;
+                            horizontalDriver = 0;
+                            armNeutral = false;
+                            if (justPressed2.dpad_down()) {
+                                junction_x = D1.getX();
+                                junction_y = D1.getY();
+                            } else if (justPressed2.dpad_right()) {
+                                junction_x = E2.getX();
+                                junction_y = E2.getY();
+                            } else if (justPressed2.dpad_up()) {
+                                junction_x = E4.getX();
+                                junction_y = E4.getY();
+                            } else if (justPressed2.dpad_left()) {
+                                junction_x = D5.getX();
+                                junction_y = D5.getY();
+                            }
+                            back = true;
+                            FSMTimer.reset();
+                            mySlides = Slides.LOW;
+                            myState = State.UP_AUTOMATIC;
+                        }
+                    } else if (gamepad2.left_trigger > .5) {
+                        if (justPressed2.dpad_down() || justPressed2.dpad_up() || justPressed2.dpad_left() || justPressed2.dpad_right()) {
+                            driverArm = 0;
+                            driverSlides = 0;
+                            driverTurret = 0;
+                            horizontalDriver = 0;
+                            armNeutral = false;
+                            if (justPressed2.dpad_down()) {
+                                junction_x = B1.getX();
+                                junction_y = B1.getY();
+                            } else if (justPressed2.dpad_left()) {
+                                junction_x = A2.getX();
+                                junction_y = A2.getY();
+                            } else if (justPressed2.dpad_up()) {
+                                junction_x = A4.getX();
+                                junction_y = A4.getY();
+                            } else if (justPressed2.dpad_right()) {
+                                junction_x = B5.getX();
+                                junction_y = B5.getY();
+                            }
+                            back = true;
+                            FSMTimer.reset();
+                            mySlides = Slides.LOW;
+                            myState = State.UP_AUTOMATIC;
+                        }
+                    }
+
                     break;
                 case UP:
                     switch (mySlides) {
@@ -262,15 +394,108 @@ public class RegionalTele extends LinearOpMode {
                     if (gamepad1.left_bumper) {
                         firstTime = true;
                         FSMTimer.reset();
-                        if (mySlides != Slides.LOW)
+//                        if (mySlides != Slides.LOW)
                             myState = State.SCORE;
+//                        else
+//                            myState = State.DEEXTEND;
+                    }
+                    break;
+                case UP_AUTOMATIC:
+
+                    double y_difference = junction_y - poseEstimate.getX();
+                    double x_difference = junction_x - (-poseEstimate.getY());
+                    double theta = Math.atan2(y_difference, x_difference) - Math.PI/2;
+
+                    double turretTargetRad = (Angle.normDelta((back ? theta + Math.PI : theta) - poseEstimate.getHeading()));
+
+                    if (Math.abs(turretTargetRad) > Math.PI / 2) {
+                        back = false;
+                        if (turretTargetRad < 0)
+                            turretTargetRad += Math.PI;
                         else
-                            myState = State.DEEXTEND;
+                            turretTargetRad -= Math.PI;
+                    }
+
+                    int ttarget = -Turret.radiansToTicks(turretTargetRad);
+
+                    if (back)
+                        distance = Math.hypot(x_difference, y_difference) * 25.4 - 400;
+                    else {
+                        distance = -(Math.hypot(x_difference, y_difference) * 25.4) + 318;
+                    }
+
+                    turretTarget = ttarget;
+
+                    switch (mySlides) {
+                        case LOW:
+                            if (back) {
+                                robot.intakeOuttake.arm.wrist.setPosition(WRIST_OUTTAKE);
+                                if (FSMTimer.time() < 400)
+                                    robot.intakeOuttake.arm.arm.setPosition(linearProfile(400, FSMTimer.time(), 400, ARM_REST, ARM_OUTTAKE));
+                                else
+                                    robot.intakeOuttake.arm.arm.setPosition(ARM_OUTTAKE + driverArm);
+                            }  else {
+                                slidesTargetPos = clear;
+                                robot.intakeOuttake.arm.wrist.setPosition(WRIST_INTAKE);
+                                if (FSMTimer.time() < 400)
+                                    robot.intakeOuttake.arm.arm.setPosition(linearProfile(400, FSMTimer.time(), 400, ARM_REST, ARM_INTAKE));
+                                else
+                                    robot.intakeOuttake.arm.arm.setPosition(ARM_INTAKE + driverArm);
+                            }
+                            break;
+                        case MIDDLE:
+                            if (back) {
+                                slidesTargetPos = slidesMiddle;
+                                robot.intakeOuttake.arm.wrist.setPosition(WRIST_OUTTAKE);
+                                if (FSMTimer.time() < 700)
+                                    robot.intakeOuttake.arm.arm.setPosition(linearProfile(700, FSMTimer.time(), 800, ARM_REST, ARM_OUTTAKE));
+                                else
+                                    robot.intakeOuttake.arm.arm.setPosition(ARM_OUTTAKE + driverArm);
+                            } else {
+                                slidesTargetPos = slidesMiddle + clear;
+                                robot.intakeOuttake.arm.wrist.setPosition(WRIST_INTAKE);
+                                if (FSMTimer.time() < 700)
+                                    robot.intakeOuttake.arm.arm.setPosition(linearProfile(700, FSMTimer.time(), 800, ARM_REST, ARM_INTAKE));
+                                else
+                                    robot.intakeOuttake.arm.arm.setPosition(ARM_INTAKE + driverArm);
+                            }
+                            break;
+                        case HIGH:
+                            if (back) {
+                                slidesTargetPos = slidesTop;
+                                robot.intakeOuttake.arm.wrist.setPosition(WRIST_OUTTAKE);
+                                if (FSMTimer.time() < 1000)
+                                    robot.intakeOuttake.arm.arm.setPosition(linearProfile(1000, FSMTimer.time(), 800, ARM_REST, ARM_OUTTAKE));
+                                else
+                                    robot.intakeOuttake.arm.arm.setPosition(ARM_OUTTAKE + driverArm);
+                            } else {
+                                slidesTargetPos = slidesTop + clear;
+                                robot.intakeOuttake.arm.wrist.setPosition(WRIST_INTAKE);
+                                if (FSMTimer.time() < 1000)
+                                    robot.intakeOuttake.arm.arm.setPosition(linearProfile(1000, FSMTimer.time(), 800, ARM_REST, ARM_INTAKE));
+                                else
+                                    robot.intakeOuttake.arm.arm.setPosition(ARM_INTAKE + driverArm);
+                            }
+                            break;
+                    }
+
+                    if (Turret.getWithin() && Math.abs((slidesTargetPos + driverSlides) - robot.vertical.v2.getCurrentPosition()) < 50) {
+                        robot.intakeOuttake.horizontal.setTarget(distance + horizontalDriver);
+                        robot.intakeOuttake.horizontal.update();
+                    }
+
+                    if (gamepad1.left_bumper) {
+                        firstTime = true;
+                        FSMTimer.reset();
+//                        if (mySlides != Slides.LOW)
+                            myState = State.SCORE;
+//                        else
+//                            myState = State.DEEXTEND;
                     }
                     break;
                 case SCORE:
                     if (mySlides == Slides.LOW) {
-                        robot.intakeOuttake.arm.arm.setPosition(ARM_OUTTAKE - .1);
+                        robot.intakeOuttake.arm.claw.setPosition(CLAW_OPEN);
                     }
                     else {
                         if (firstTime)
@@ -356,12 +581,21 @@ public class RegionalTele extends LinearOpMode {
             lastTime = time;
             lastError = error;
 
-
             robot.vertical.v1.setPower(power + .01);
             robot.vertical.v2.setPower(power + .01);
             robot.vertical.v3.setPower(power + .01);
 
             robot.turret.setTurretTargetPosition(turretTarget + driverTurret);
+//
+//            telemetry.addData("x difference", x_difference);
+//            telemetry.addData("y difference", y_difference);
+//            telemetry.addData("theta", theta);
+//            telemetry.addData("rr heading", poseEstimate.getHeading());
+//            telemetry.addData("turret radians", turretTargetRad);
+//            telemetry.addData("turret target", ttarget);
+//            telemetry.addData("distaance", distance);
+
+            drive.update();
 
             telemetry.update();
             robot.update();
@@ -372,6 +606,7 @@ public class RegionalTele extends LinearOpMode {
 
     public enum State {
         UP,
+        UP_AUTOMATIC,
         REST,
         INTAKE_AUTOMATED,
         INTAKE_DRIVER,

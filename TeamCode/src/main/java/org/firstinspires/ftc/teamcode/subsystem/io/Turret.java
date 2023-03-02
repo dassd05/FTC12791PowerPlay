@@ -40,6 +40,8 @@ public class Turret {
 
     private int targetPosition = 0;
 
+    public static boolean within = false;
+
     public Turret(HardwareMap hardwareMap) {
         this.hardwareMap = hardwareMap;
 
@@ -153,11 +155,17 @@ public class Turret {
             else
                 power = 0;
 
+            within = Math.abs(error) < 75;
+
             //double power = PIDZeroed.p * error + (Math.abs(i) < INTEGRAL_CAP ? i : Math.signum(i) * INTEGRAL_CAP) + PIDZeroed.d * d;
             motor.setPower(power);
             lastTime = time;
             lastError = error;
         }
+    }
+
+    public static boolean getWithin() {
+        return within;
     }
 
     //public static double power1;

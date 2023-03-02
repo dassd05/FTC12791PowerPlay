@@ -457,7 +457,6 @@ public class PARK extends LinearOpMode {
             drive.update();
             telemetry.update();
         }
-        Constants.SavedData.endOfAutonPose = drive.getPoseEstimate();
     }
     public enum State {
         FORWARD,

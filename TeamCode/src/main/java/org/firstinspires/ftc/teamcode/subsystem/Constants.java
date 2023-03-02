@@ -1,7 +1,7 @@
 package org.firstinspires.ftc.teamcode.subsystem;
 
 import com.acmerobotics.dashboard.config.Config;
-import com.acmerobotics.roadrunner.geometry.Pose2d;
+import com.acmerobotics.roadrunner.geometry.Vector2d;
 
 @Config
 public final class Constants {
@@ -28,10 +28,6 @@ public final class Constants {
      */
 
     private Constants() {}
-
-    public static final class SavedData {
-        public static Pose2d endOfAutonPose = null;
-    }
 
     public static final class BUTTERFLY {
 
@@ -69,24 +65,6 @@ public final class Constants {
         public static double BACKWARD_RIGHT_IN = .975; // diff = .565
         public static double BACKWARD_RIGHT_OUT = .425;
 
-//        public static double FORWARD_LEFT_IN = .772; // diff = .667
-//        public static double FORWARD_LEFT_OUT = .105;
-//        public static double FORWARD_RIGHT_IN = .085; // diff = .665
-//        public static double FORWARD_RIGHT_OUT = .75;
-//        public static double BACKWARD_LEFT_IN = .23; // diff = .555
-//        public static double BACKWARD_LEFT_OUT = .785;
-//        public static double BACKWARD_RIGHT_IN = .99; // diff = .565
-//        public static double BACKWARD_RIGHT_OUT = .425;
-//        public static double ARM_BACKWARD = .994; // diff = .266
-//        public static double ARM_FORWARD = .462; // diff = .266
-//        public static double ARM_UP = .728;
-//
-//        // theoretically, axon has 355 degrees of freedom, so .507 difference should be 180 degrees
-//        public static double FORWARD_180 = .666;
-//        public static double BACKWARD_180 = .560;
-//        public static double ARM_180 = .532;
-
-
         public static double v4bIntakePrep = .68;
         public static double v4bIntake = .78;
         public static double v4bNeutral = .4;
@@ -116,6 +94,34 @@ public final class Constants {
 
 
         public static int slidesUp = 1650;
+    }
+
+    public static final class JUNCTIONS {
+        public static Vector2d A1 = new Vector2d(-10.25, 15);
+        public static Vector2d A2 = new Vector2d(A1.getX(), A1.getY() + 24);
+        public static Vector2d A3 = new Vector2d(A1.getX(), A1.getY() + 48);
+        public static Vector2d A4 = new Vector2d(A1.getX(), A1.getY() + 72);
+        public static Vector2d A5 = new Vector2d(A1.getX(), A1.getY() + 96);
+        public static Vector2d B1 = new Vector2d(A1.getX() + 24, A1.getY());
+        public static Vector2d B2 = new Vector2d(A1.getX() + 24, A1.getY() + 24);
+        public static Vector2d B3 = new Vector2d(A1.getX() + 24, A1.getY() + 48);
+        public static Vector2d B4 = new Vector2d(A1.getX() + 24, A1.getY() + 72);
+        public static Vector2d B5 = new Vector2d(A1.getX() + 24, A1.getY() + 96);
+        public static Vector2d C1 = new Vector2d(A1.getX() + 48, A1.getY());
+        public static Vector2d C2 = new Vector2d(A1.getX() + 48, A1.getY() + 24);
+        public static Vector2d C3 = new Vector2d(A1.getX() + 48, A1.getY() + 48);
+        public static Vector2d C4 = new Vector2d(A1.getX() + 48, A1.getY() + 72);
+        public static Vector2d C5 = new Vector2d(A1.getX() + 48, A1.getY() + 96);
+        public static Vector2d D1 = new Vector2d(A1.getX() + 72, A1.getY());
+        public static Vector2d D2 = new Vector2d(A1.getX() + 72, A1.getY() + 24);
+        public static Vector2d D3 = new Vector2d(A1.getX() + 72, A1.getY() + 48);
+        public static Vector2d D4 = new Vector2d(A1.getX() + 72, A1.getY() + 72);
+        public static Vector2d D5 = new Vector2d(A1.getX() + 72, A1.getY() + 96);
+        public static Vector2d E1 = new Vector2d(A1.getX() + 96, A1.getY());
+        public static Vector2d E2 = new Vector2d(A1.getX() + 96, A1.getY() + 24);
+        public static Vector2d E3 = new Vector2d(A1.getX() + 96, A1.getY() + 48);
+        public static Vector2d E4 = new Vector2d(A1.getX() + 96, A1.getY() + 72);
+        public static Vector2d E5 = new Vector2d(A1.getX() + 96, A1.getY() + 96);
     }
 
     // todo should we have all constants centralized like these, or should each of these constants go into their respective class?

@@ -24,7 +24,7 @@ public class Arm {
     boolean open = true;
 
     public static double CLAW_OPEN = .75;
-    public static double CLAW_CLOSE = .29;
+    public static double CLAW_CLOSE = .37;
 
     boolean intakeWrist = true;
 
