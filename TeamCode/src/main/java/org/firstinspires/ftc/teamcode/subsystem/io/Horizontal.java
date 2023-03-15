@@ -39,7 +39,7 @@ public class Horizontal {
     private double position = 0;
     private double target = 0;
     private double forwardTarget = 0;
-    private double backwardTarget= 0;
+    private double backwardTarget = 0;
 
     public Horizontal(HardwareMap hardwareMap) {
         this.hardwareMap = hardwareMap;
