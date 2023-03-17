@@ -29,7 +29,7 @@ import org.firstinspires.ftc.teamcode.subsystem.vision.Target;
 @TeleOp(name = "RegionalTele", group = "0")
 public class RegionalTele extends LinearOpMode {
 
-    public static double P = .0035, I = .0000000000007, D = 25;
+    public static double P = .0035, I = .000000000001 , D = 25;
 
     int slidesTargetPos = 0;
     int turretTarget = 0;
@@ -69,7 +69,7 @@ public class RegionalTele extends LinearOpMode {
 
         int slidesTop = 1530;
         int slidesMiddle = 870;
-        int safe = 20;
+        int safe = 150;
 
         int clear = 920;
 
@@ -199,7 +199,7 @@ public class RegionalTele extends LinearOpMode {
                         driverSlides = 0;
                         driverTurret = 0;
                         armNeutral = false;
-                        linkageAuto= true;
+                        linkageAuto = true;
                         FSMTimer.reset();
                         myState = State.SCORE_PREP;
                     }
@@ -248,18 +248,15 @@ public class RegionalTele extends LinearOpMode {
                             junction = C2;
                             FSMTimer.reset();
                             myState = State.UP_AUTOMATIC;
-                        }
-                        else if (justPressed2.dpad_left()) {
+                        } else if (justPressed2.dpad_left()) {
                             junction = B3;
                             FSMTimer.reset();
                             myState = State.UP_AUTOMATIC;
-                        }
-                        else if (justPressed2.dpad_right()) {
+                        } else if (justPressed2.dpad_right()) {
                             junction = D3;
                             FSMTimer.reset();
                             myState = State.UP_AUTOMATIC;
-                        }
-                        else if (justPressed2.dpad_up()) {
+                        } else if (justPressed2.dpad_up()) {
                             junction = C4;
                             FSMTimer.reset();
                             myState = State.UP_AUTOMATIC;
@@ -272,18 +269,15 @@ public class RegionalTele extends LinearOpMode {
                             junction = B2;
                             FSMTimer.reset();
                             myState = State.UP_AUTOMATIC;
-                        }
-                        else if (gamepad2.dpad_down && justPressed2.dpad_right() || gamepad2.dpad_right && justPressed2.dpad_down()) {
+                        } else if (gamepad2.dpad_down && justPressed2.dpad_right() || gamepad2.dpad_right && justPressed2.dpad_down()) {
                             junction = D2;
                             FSMTimer.reset();
                             myState = State.UP_AUTOMATIC;
-                        }
-                        else if (gamepad2.dpad_up && justPressed2.dpad_left() || gamepad2.dpad_left && justPressed2.dpad_up()) {
+                        } else if (gamepad2.dpad_up && justPressed2.dpad_left() || gamepad2.dpad_left && justPressed2.dpad_up()) {
                             junction = B4;
                             FSMTimer.reset();
                             myState = State.UP_AUTOMATIC;
-                        }
-                        else if (gamepad2.dpad_up && justPressed2.dpad_right() || gamepad2.dpad_right && justPressed2.dpad_up()) {
+                        } else if (gamepad2.dpad_up && justPressed2.dpad_right() || gamepad2.dpad_right && justPressed2.dpad_up()) {
                             junction = D4;
                             FSMTimer.reset();
                             myState = State.UP_AUTOMATIC;
@@ -296,18 +290,15 @@ public class RegionalTele extends LinearOpMode {
                             junction = B1;
                             FSMTimer.reset();
                             myState = State.UP_AUTOMATIC;
-                        }
-                        else if (gamepad2.dpad_down && justPressed2.dpad_right() || gamepad2.dpad_right && justPressed2.dpad_down()) {
+                        } else if (gamepad2.dpad_down && justPressed2.dpad_right() || gamepad2.dpad_right && justPressed2.dpad_down()) {
                             junction = D1;
                             FSMTimer.reset();
                             myState = State.UP_AUTOMATIC;
-                        }
-                        else if (gamepad2.dpad_up && justPressed2.dpad_left() || gamepad2.dpad_left && justPressed2.dpad_up()) {
+                        } else if (gamepad2.dpad_up && justPressed2.dpad_left() || gamepad2.dpad_left && justPressed2.dpad_up()) {
                             junction = A2;
                             FSMTimer.reset();
                             myState = State.UP_AUTOMATIC;
-                        }
-                        else if (gamepad2.dpad_up && justPressed2.dpad_right() || gamepad2.dpad_right && justPressed2.dpad_up()) {
+                        } else if (gamepad2.dpad_up && justPressed2.dpad_right() || gamepad2.dpad_right && justPressed2.dpad_up()) {
                             junction = E2;
                             FSMTimer.reset();
                             myState = State.UP_AUTOMATIC;
@@ -320,18 +311,15 @@ public class RegionalTele extends LinearOpMode {
                             junction = B5;
                             FSMTimer.reset();
                             myState = State.UP_AUTOMATIC;
-                        }
-                        else if (gamepad2.dpad_up && justPressed2.dpad_right() || gamepad2.dpad_right && justPressed2.dpad_up()) {
+                        } else if (gamepad2.dpad_up && justPressed2.dpad_right() || gamepad2.dpad_right && justPressed2.dpad_up()) {
                             junction = D5;
                             FSMTimer.reset();
                             myState = State.UP_AUTOMATIC;
-                        }
-                        else if (gamepad2.dpad_up && justPressed2.dpad_left() || gamepad2.dpad_left && justPressed2.dpad_up()) {
+                        } else if (gamepad2.dpad_up && justPressed2.dpad_left() || gamepad2.dpad_left && justPressed2.dpad_up()) {
                             junction = A4;
                             FSMTimer.reset();
                             myState = State.UP_AUTOMATIC;
-                        }
-                        else if (gamepad2.dpad_up && justPressed2.dpad_right() || gamepad2.dpad_right && justPressed2.dpad_up()) {
+                        } else if (gamepad2.dpad_up && justPressed2.dpad_right() || gamepad2.dpad_right && justPressed2.dpad_up()) {
                             junction = E4;
                             FSMTimer.reset();
                             myState = State.UP_AUTOMATIC;
@@ -343,6 +331,7 @@ public class RegionalTele extends LinearOpMode {
                         driverSlides = 0;
                         driverTurret = 0;
                         armNeutral = false;
+                        firstTime = true;
                     }
 
                     break;
@@ -393,34 +382,40 @@ public class RegionalTele extends LinearOpMode {
                         firstTime = true;
                         FSMTimer.reset();
 //                        if (mySlides != Slides.LOW)
-                            myState = State.SCORE;
+                        myState = State.SCORE;
 //                        else
 //                            myState = State.DEEXTEND;
                     }
+                    linkageAuto = true;
                     break;
                 case UP_AUTOMATIC:
 
-                    double y_difference = junction.getY() - poseEstimate.getX();
-                    double x_difference = junction.getX() + poseEstimate.getY();
-                    double theta = Math.atan2(y_difference, x_difference) - Math.PI/2;
+                    if (firstTime) {
+                        double y_difference = junction.getY() - poseEstimate.getX();
+                        double x_difference = junction.getX() + poseEstimate.getY();
+                        double theta = Math.atan2(y_difference, x_difference) - Math.PI / 2;
 
-                    double turretTargetRad = (Angle.normDelta((back ? theta + Math.PI : theta) - poseEstimate.getHeading()));
+                        double turretTargetRad = (Angle.normDelta((back ? theta + Math.PI : theta) - poseEstimate.getHeading()));
 
-                    if (Math.abs(turretTargetRad) > Math.PI / 2) {
-                        back = false;
-                        if (turretTargetRad < 0)
-                            turretTargetRad += Math.PI;
-                        else
-                            turretTargetRad -= Math.PI;
+                        if (Math.abs(turretTargetRad) > Math.PI / 2) {
+                            back = false;
+                            if (turretTargetRad < 0)
+                                turretTargetRad += Math.PI;
+                            else
+                                turretTargetRad -= Math.PI;
+                        }
+
+                        if (back)
+                            distance = Math.hypot(x_difference, y_difference) * 25.4 - 400;
+                        else {
+                            distance = -(Math.hypot(x_difference, y_difference) * 25.4) + 318;
+                        }
+
+                        turretTarget = -Turret.radiansToTicks(turretTargetRad);
+
+                        firstTime = false;
                     }
 
-                    if (back)
-                        distance = Math.hypot(x_difference, y_difference) * 25.4 - 400;
-                    else {
-                        distance = -(Math.hypot(x_difference, y_difference) * 25.4) + 318;
-                    }
-
-                    turretTarget = -Turret.radiansToTicks(turretTargetRad);
 
                     switch (mySlides) {
                         case LOW:
@@ -475,7 +470,7 @@ public class RegionalTele extends LinearOpMode {
                             break;
                     }
 
-                    if (Turret.getWithin() && Math.abs((slidesTargetPos + driverSlides) - robot.vertical.v2.getCurrentPosition()) < 50) {
+                    if (Turret.getWithin() && Math.abs((slidesTargetPos + driverSlides) - robot.vertical.v2.getCurrentPosition()) < 150) {
                         robot.intakeOuttake.horizontal.setTarget(distance + horizontalDriver);
                         robot.intakeOuttake.horizontal.update();
                     }
@@ -488,6 +483,7 @@ public class RegionalTele extends LinearOpMode {
 //                        else
 //                            myState = State.DEEXTEND;
                     }
+                    linkageAuto = false;
                     break;
                 case SCORE:
                     if (mySlides == Slides.LOW) {
@@ -509,7 +505,8 @@ public class RegionalTele extends LinearOpMode {
                     break;
                 case DEEXTEND:
                     slidesTargetPos = safe;
-                    turretTarget = 0;
+                    if (robot.intakeOuttake.horizontal.forwardLeft.getPosition() > (FORWARD_LEFT_IN * 3 + FORWARD_LEFT_OUT) / 4)
+                        turretTarget = 0;
 
                     if (FSMTimer.time() < 350)
                         robot.intakeOuttake.arm.claw.setPosition(CLAW_OPEN);
@@ -518,20 +515,22 @@ public class RegionalTele extends LinearOpMode {
                         robot.intakeOuttake.arm.claw.setPosition(CLAW_CLOSE);
                         robot.intakeOuttake.arm.wrist.setPosition(WRIST_SAFE);
                     } else {
-                        robot.intakeOuttake.arm.claw.setPosition(CLAW_OPEN);
-                        robot.intakeOuttake.arm.wrist.setPosition(WRIST_INTAKE);
+//                        robot.intakeOuttake.arm.claw.setPosition(CLAW_OPEN);
+//                        robot.intakeOuttake.arm.wrist.setPosition(WRIST_INTAKE);
                     }
 
-                    if (linkageAuto) {
-                        if (FSMTimer.time() < 750)
-                            robot.intakeOuttake.arm.arm.setPosition(linearProfile(750, FSMTimer.time(), 750, ARM_OUTTAKE, ARM_INTAKE));
-                        else
-                            robot.intakeOuttake.arm.arm.setPosition(ARM_INTAKE);
-                    } else {
-                        if (FSMTimer.time() < 750)
-                            robot.intakeOuttake.arm.arm.setPosition(linearProfile(750, FSMTimer.time(), 750, ARM_OUTTAKE, ARM_REST));
-                        else
-                            robot.intakeOuttake.arm.arm.setPosition(ARM_REST);
+                    if (robot.intakeOuttake.horizontal.forwardLeft.getPosition() > (FORWARD_LEFT_IN * 3 + FORWARD_LEFT_OUT) / 4) {
+                        if (linkageAuto) {
+                            if (FSMTimer.time() < 750)
+                                robot.intakeOuttake.arm.arm.setPosition(linearProfile(750, FSMTimer.time(), 750, ARM_OUTTAKE, ARM_INTAKE));
+                            else
+                                robot.intakeOuttake.arm.arm.setPosition(ARM_INTAKE);
+                        } else {
+                            if (FSMTimer.time() < 750)
+                                robot.intakeOuttake.arm.arm.setPosition(linearProfile(750, FSMTimer.time(), 750, ARM_OUTTAKE, ARM_REST));
+                            else
+                                robot.intakeOuttake.arm.arm.setPosition(ARM_REST);
+                        }
                     }
 
                     if (linkageAuto) {

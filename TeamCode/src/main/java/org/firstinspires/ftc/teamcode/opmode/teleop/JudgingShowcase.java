@@ -138,6 +138,9 @@ public class JudgingShowcase extends LinearOpMode {
 
             robot.update();
             justPressed.update();
+
+            telemetry.addData("wrist pos", robot.intakeOuttake.arm.wrist.getPosition());
+            telemetry.update();
         }
     }
 }

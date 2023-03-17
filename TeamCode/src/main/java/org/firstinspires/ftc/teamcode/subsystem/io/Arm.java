@@ -14,23 +14,23 @@ import org.firstinspires.ftc.teamcode.subsystem.ServoStuff;
 @Config
 public class Arm {
 //    public static double ARM_OFFSET = 0;
-    public static double ARM_INTAKE = .9;
-    public static double ARM_REST = .53;
-    public static double ARM_OUTTAKE = .38;
+    public static double ARM_INTAKE = .78;
+    public static double ARM_REST = .36;
+    public static double ARM_OUTTAKE = .22; //old .38
 
     public static double ARM_LENGTH = 250;
     public static double ARM_HORIZONTAL_LENGTH = 346.17;
 
     boolean open = true;
 
-    public static double CLAW_OPEN = .35;
-    public static double CLAW_CLOSE = .76;
+    public static double CLAW_OPEN = .25;
+    public static double CLAW_CLOSE = .57;
 
     boolean intakeWrist = true;
 
-    public static double WRIST_INTAKE = .28;
-    public static double WRIST_OUTTAKE = .96;
-    public static double WRIST_SAFE = 0;
+    public static double WRIST_INTAKE = .715;
+    public static double WRIST_OUTTAKE = .055;
+    public static double WRIST_SAFE = 1;
 
     public HardwareMap hardwareMap;
     public ServoImplEx arm;

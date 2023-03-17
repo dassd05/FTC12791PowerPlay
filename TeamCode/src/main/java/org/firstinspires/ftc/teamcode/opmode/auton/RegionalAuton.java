@@ -146,7 +146,7 @@ public class RegionalAuton extends LinearOpMode {
             telemetry.update();
 
             robot.intakeOuttake.arm.claw.setPosition(CLAW_OPEN);
-            robot.intakeOuttake.arm.arm.setPosition(.688);
+            robot.intakeOuttake.arm.arm.setPosition(.53);
             robot.intakeOuttake.arm.wrist.setPosition(WRIST_INTAKE);
 
             robot.intakeOuttake.horizontal.backwardLeft.setPosition(BACKWARD_LEFT_IN);
@@ -371,7 +371,7 @@ public class RegionalAuton extends LinearOpMode {
                                 robot.intakeOuttake.arm.arm.setPosition(((ARM_REST + ARM_OUTTAKE) / 2) + (.47 - ((ARM_REST + ARM_OUTTAKE) / 2)) * (1 - (650 - myTimer.time()) / 650));
                             else if (myTimer.time() < 700)
                                 //robot.intakeOuttake.arm.arm.setPosition(ARM_OUTTAKE);
-                                robot.intakeOuttake.arm.arm.setPosition(.47);
+                                robot.intakeOuttake.arm.arm.setPosition(.31);
 
 
                             if (myTimer.time() > 700) {
