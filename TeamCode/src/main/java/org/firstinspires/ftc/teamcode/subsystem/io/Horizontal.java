@@ -68,7 +68,11 @@ public class Horizontal {
 
     // mm
     public double getPosition() {
-        return position;
+        double fla = Range.scale(forwardLeft.getPosition(), Constants.DEPLOYMENT.FORWARD_LEFT_IN, Constants.DEPLOYMENT.FORWARD_LEFT_OUT, 0, Math.PI);
+        double fra = Range.scale(forwardRight.getPosition(), Constants.DEPLOYMENT.FORWARD_RIGHT_IN, Constants.DEPLOYMENT.FORWARD_RIGHT_OUT, 0, Math.PI);
+        double bla = Range.scale(backwardLeft.getPosition(), Constants.DEPLOYMENT.BACKWARD_LEFT_IN, Constants.DEPLOYMENT.BACKWARD_LEFT_OUT, 0, Math.PI);
+        double bra = Range.scale(backwardRight.getPosition(), Constants.DEPLOYMENT.BACKWARD_RIGHT_IN, Constants.DEPLOYMENT.BACKWARD_RIGHT_OUT, 0, Math.PI);
+        return (forward.position(fla) + forward.position(fra) - backward.position(bla) - backward.position(bra)) * .5;
     }
     public double getTarget() {
         return target;
