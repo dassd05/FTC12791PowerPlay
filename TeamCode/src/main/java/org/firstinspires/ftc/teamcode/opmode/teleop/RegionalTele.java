@@ -101,9 +101,7 @@ public class RegionalTele extends LinearOpMode {
 
         while (opModeIsActive()) {
 
-            if (gamepad2.left_bumper && justPressed2.right_bumper())
-                drive.setPoseEstimate(new Pose2d(0, -24.25, Math.toRadians(180)));
-            else if (justPressed2.left_bumper() && gamepad2.right_bumper)
+            if (gamepad2.left_bumper && justPressed2.right_bumper() || justPressed2.left_bumper() && gamepad2.right_bumper)
                 drive.setPoseEstimate(new Pose2d(0, -24.25, Math.toRadians(180)));
 
             Pose2d poseEstimate = drive.getPoseEstimate();
@@ -203,6 +201,14 @@ public class RegionalTele extends LinearOpMode {
                         FSMTimer.reset();
                         myState = State.SCORE_PREP;
                     }
+
+                    // cone placement odo adjust
+//                    if (gamepad2.left_bumper && justPressed2.right_bumper() || justPressed2.left_bumper() && gamepad2.right_bumper) {
+//                        double turTheta = Turret.ticksToRadians(robot.turret.pos);
+//                        double aiming = poseEstimate.getHeading() + turTheta;
+//                        double extension = robot.intakeOuttake.horizontal.getPosition();
+//                        drive.setPoseEstimate(new Pose2d(0, -24.25, Math.toRadians(180)));
+//                    }
 
                     break;
 
@@ -479,13 +485,23 @@ public class RegionalTele extends LinearOpMode {
                         firstTime = true;
                         FSMTimer.reset();
 //                        if (mySlides != Slides.LOW)
-                            myState = State.SCORE;
+                        myState = State.SCORE;
 //                        else
 //                            myState = State.DEEXTEND;
                     }
                     linkageAuto = false;
                     break;
                 case SCORE:
+                    if (firstTime) {
+                        double turTheta = Turret.ticksToRadians(robot.turret.pos);
+                        double aiming = poseEstimate.getHeading() + turTheta;
+                        double extension = robot.intakeOuttake.horizontal.getPosition();
+                        double xOffset = Math.cos(aiming) * extension;
+                        double yOffset = Math.sin(aiming) * extension;
+                        drive.setPoseEstimate(new Pose2d(junction.getX() - xOffset, junction.getY() - yOffset, poseEstimate.getHeading()));
+                        // todo heading estimate bad
+                    }
+
                     if (mySlides == Slides.LOW) {
                         robot.intakeOuttake.arm.claw.setPosition(CLAW_OPEN);
                     }
