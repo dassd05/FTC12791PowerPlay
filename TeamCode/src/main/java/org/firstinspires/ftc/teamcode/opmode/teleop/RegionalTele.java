@@ -69,7 +69,7 @@ public class RegionalTele extends LinearOpMode {
 
         int slidesTop = 1530;
         int slidesMiddle = 870;
-        int safe = 150;
+        int safe = 125;
 
         int clear = 920;
 

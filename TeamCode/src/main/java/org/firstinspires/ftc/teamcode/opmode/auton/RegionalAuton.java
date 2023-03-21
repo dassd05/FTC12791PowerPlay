@@ -35,15 +35,15 @@ import java.util.ArrayList;
 
 public class RegionalAuton extends LinearOpMode {
 
-    public static double P = .0035, I = .0000000000007, D = 25;
+    public static double P = .0035, I = .000000000001 , D = 25;
 
     public double targetPos = 0.0;
 
-    public double coneOffset = 72;
-    public double webcamOffset = 15;
-    public double safeClear = 440;
+    public double coneOffset = 84.5;
+    public double webcamOffset = 150;
+    public double safeClear = 440; //440
     //public double slidesUp = 1440;
-    public double slidesUp = 1045;
+    public double slidesUp = 1095;
 
 
     public int turret = 0;
@@ -107,11 +107,11 @@ public class RegionalAuton extends LinearOpMode {
         Pose2d pose1_2 = new Pose2d(3,47,45);
         Pose2d pose2 = new Pose2d(-8,50.5,90);
 
-        Pose2d left = new Pose2d(-25,50.5,0);
-        Pose2d right = new Pose2d(23,50.5,0);
-        Pose2d middle = new Pose2d(-2,50.5,0);
+        Pose2d left = new Pose2d(-24,50.5,0);
+        Pose2d right = new Pose2d(24,50.5,0);
+        Pose2d middle = new Pose2d(0,50.5,0);
 
-        int cycles = 0;
+        int cycles = -1;
 
         ElapsedTime myTimer = new ElapsedTime(ElapsedTime.Resolution.MILLISECONDS);
 
@@ -161,6 +161,7 @@ public class RegionalAuton extends LinearOpMode {
         double lastError = 0.0;
 
         waitForStart();
+        robot.intakeOuttake.arm.claw.setPosition(CLAW_CLOSE);
         myTimer.reset();
 
         boolean reached = false;
@@ -173,7 +174,7 @@ public class RegionalAuton extends LinearOpMode {
         resetRuntime();
 
         state = State.FORWARD;
-        score = Score.EXTEND;
+        score = Score.UP;
 
         robot.butterfly.setState(Butterfly.State.MECANUM);
 //        camera.setActiveCamera(webcam2);
@@ -189,15 +190,17 @@ public class RegionalAuton extends LinearOpMode {
                 case FORWARD:
                     if (!reached) {
                         robot.butterfly.runToPosition(pose1.getX(), pose1.getY(), pose1.getHeading(),
-                                .85, .85, -poseEstimate.getY(), poseEstimate.getX(),
+                                .9, .9, -poseEstimate.getY(), poseEstimate.getX(),
                                 poseEstimate.getHeading());
                         if (robot.butterfly.positionReached || myTimer.time() > 2000)
                             reached = true;
                     }
                     if (reached) {
                         robot.butterfly.runToPosition(pose1_2.getX(), pose1_2.getY(), pose1_2.getHeading(),
-                                .85, .4, -poseEstimate.getY(), poseEstimate.getX(),
+                                .9, .4, -poseEstimate.getY(), poseEstimate.getX(),
                                 poseEstimate.getHeading());
+
+                        robot.intakeOuttake.arm.arm.setPosition((ARM_REST + ARM_OUTTAKE) / 2);
 
                         //robot.intakeOuttake.horizontal.backwardLeft.setPosition((BACKWARD_LEFT_IN + BACKWARD_LEFT_OUT) / 2);
                         //robot.intakeOuttake.horizontal.backwardRight.setPosition((BACKWARD_RIGHT_IN + BACKWARD_RIGHT_OUT) / 2);
@@ -227,17 +230,17 @@ public class RegionalAuton extends LinearOpMode {
                         case EXTEND:
                             targetPos = (5 - cycles) * coneOffset + webcamOffset;
 
-                            if (myTimer.time() < 875) {
+                            if (myTimer.time() < 750) {
                                 if (cycles == 0) {
-                                    robot.intakeOuttake.horizontal.backwardLeft.setPosition(linearProfile(875, myTimer.time(), 875, BACKWARD_LEFT_IN, (BACKWARD_LEFT_OUT - .102)));
-                                    robot.intakeOuttake.horizontal.backwardRight.setPosition(linearProfile(875, myTimer.time(), 875, BACKWARD_RIGHT_IN, BACKWARD_RIGHT_OUT + .102));
+                                    robot.intakeOuttake.horizontal.backwardLeft.setPosition(linearProfile(750, myTimer.time(), 750, BACKWARD_LEFT_IN, (BACKWARD_LEFT_OUT - .074)));
+                                    robot.intakeOuttake.horizontal.backwardRight.setPosition(linearProfile(750, myTimer.time(), 750, BACKWARD_RIGHT_IN, BACKWARD_RIGHT_OUT + .074));
                                 } else if (cycles < 6) {
-                                    robot.intakeOuttake.horizontal.backwardLeft.setPosition(linearProfile(875, myTimer.time(), 875, ((BACKWARD_LEFT_IN + BACKWARD_LEFT_OUT) / 2), (BACKWARD_LEFT_OUT - .102)));
-                                    robot.intakeOuttake.horizontal.backwardRight.setPosition(linearProfile(875, myTimer.time(), 875, ((BACKWARD_RIGHT_IN + BACKWARD_RIGHT_OUT) / 2), BACKWARD_RIGHT_OUT + .102));
+                                    robot.intakeOuttake.horizontal.backwardLeft.setPosition(linearProfile(750, myTimer.time(), 750, ((BACKWARD_LEFT_IN + BACKWARD_LEFT_OUT) / 2), (BACKWARD_LEFT_OUT - .074)));
+                                    robot.intakeOuttake.horizontal.backwardRight.setPosition(linearProfile(750, myTimer.time(), 750, ((BACKWARD_RIGHT_IN + BACKWARD_RIGHT_OUT) / 2), BACKWARD_RIGHT_OUT + .074));
                                 }
                             } else {
-                                robot.intakeOuttake.horizontal.backwardLeft.setPosition(BACKWARD_LEFT_OUT - .102);
-                                robot.intakeOuttake.horizontal.backwardRight.setPosition(BACKWARD_RIGHT_OUT + .102);
+                                robot.intakeOuttake.horizontal.backwardLeft.setPosition(BACKWARD_LEFT_OUT - .074);
+                                robot.intakeOuttake.horizontal.backwardRight.setPosition(BACKWARD_RIGHT_OUT + .074);
                             }
 
                             //if (myTimer.time() > 200) {
@@ -258,20 +261,20 @@ public class RegionalAuton extends LinearOpMode {
 //                            }
 
 
-                            if (cycles < 2) {
-                                if (myTimer.time() > 100 && myTimer.time() < 500)
-                                    robot.intakeOuttake.arm.arm.setPosition(linearProfile(400, myTimer.time(), 500, (ARM_REST + ARM_INTAKE) / 2, ARM_INTAKE));
-                                else if (myTimer.time() >= 500)
+                            if (cycles < 0) {
+                                if (myTimer.time() > 50 && myTimer.time() < 600)
+                                    robot.intakeOuttake.arm.arm.setPosition(linearProfile(550, myTimer.time(), 600, (ARM_REST + ARM_INTAKE) / 2, ARM_INTAKE));
+                                else if (myTimer.time() >= 600)
                                     robot.intakeOuttake.arm.arm.setPosition(ARM_INTAKE);
-                            } else  if (cycles == 2) {
-                                if (myTimer.time() > 100 && myTimer.time() < 500)
-                                    robot.intakeOuttake.arm.arm.setPosition(linearProfile(400, myTimer.time(), 500, (ARM_REST + ARM_INTAKE) / 2, ARM_INTAKE + .006));
-                                else if (myTimer.time() >= 500)
+                            } else if (cycles < 2) {
+                                if (myTimer.time() > 50 && myTimer.time() < 600)
+                                    robot.intakeOuttake.arm.arm.setPosition(linearProfile(550, myTimer.time(), 600, (ARM_REST + ARM_INTAKE) / 2, ARM_INTAKE + .006));
+                                else if (myTimer.time() >= 600)
                                     robot.intakeOuttake.arm.arm.setPosition(ARM_INTAKE + .006);
                             } else {
-                                if (myTimer.time() > 100 && myTimer.time() < 500)
-                                    robot.intakeOuttake.arm.arm.setPosition(linearProfile(400, myTimer.time(), 500, (ARM_REST + ARM_INTAKE) / 2, ARM_INTAKE + .01));
-                                else if (myTimer.time() >= 500)
+                                if (myTimer.time() > 50 && myTimer.time() < 600)
+                                    robot.intakeOuttake.arm.arm.setPosition(linearProfile(550, myTimer.time(), 600, (ARM_REST + ARM_INTAKE) / 2, ARM_INTAKE + .01));
+                                else if (myTimer.time() >= 600)
                                     robot.intakeOuttake.arm.arm.setPosition(ARM_INTAKE + .01);
                             }
 
@@ -280,9 +283,9 @@ public class RegionalAuton extends LinearOpMode {
                             if (myTimer.time() > 50)
                                 robot.intakeOuttake.arm.claw.setPosition(CLAW_OPEN);
 
-                            if (myTimer.time() > 975) {
-                                robot.intakeOuttake.horizontal.backwardLeft.setPosition(BACKWARD_LEFT_OUT - .102);
-                                robot.intakeOuttake.horizontal.backwardRight.setPosition(BACKWARD_RIGHT_OUT + .102);
+                            if (myTimer.time() > 785) {
+                                robot.intakeOuttake.horizontal.backwardLeft.setPosition(BACKWARD_LEFT_OUT - .074);
+                                robot.intakeOuttake.horizontal.backwardRight.setPosition(BACKWARD_RIGHT_OUT + .074);
                                 robot.intakeOuttake.arm.claw.setPosition(CLAW_CLOSE);
                                 myTimer.reset();
                                 reached = true;
@@ -291,7 +294,7 @@ public class RegionalAuton extends LinearOpMode {
                             break;
                         case GRAB:
 
-                            if (myTimer.time() < 650) {
+                            if (myTimer.time() < 625) {
                                 robot.intakeOuttake.horizontal.forwardRight.setPosition((((FORWARD_RIGHT_IN + FORWARD_RIGHT_OUT) / 2) + (FORWARD_RIGHT_IN)) / 2);
                                 robot.intakeOuttake.horizontal.forwardLeft.setPosition((((FORWARD_LEFT_IN + FORWARD_LEFT_OUT) / 2) + (FORWARD_LEFT_IN)) / 2);
 
@@ -303,26 +306,26 @@ public class RegionalAuton extends LinearOpMode {
 
                             robot.intakeOuttake.arm.claw.setPosition(CLAW_CLOSE);
 
-                            if (myTimer.time() > 300 && reached) {
+                            if (myTimer.time() > 375 && reached) {
                                 targetPos += safeClear;
                                 reached = false;
                             }
-                            if (myTimer.time() > 450) {
+                            if (myTimer.time() > 525) {
                                 robot.intakeOuttake.horizontal.backwardLeft.setPosition(BACKWARD_LEFT_IN);
                                 robot.intakeOuttake.horizontal.backwardRight.setPosition(BACKWARD_RIGHT_IN);
 //                                robot.intakeOuttake.horizontal.backwardLeft.setPosition(linearProfile(400, myTimer.time(), 850,BACKWARD_LEFT_OUT - .144, BACKWARD_LEFT_IN));
 //                                robot.intakeOuttake.horizontal.backwardRight.setPosition(linearProfile(400, myTimer.time(), 850, BACKWARD_RIGHT_OUT + .144, BACKWARD_RIGHT_IN));
                             }
 
-                            if( myTimer.time() >= 650 && myTimer.time() <= 1200) {
-                                robot.intakeOuttake.arm.arm.setPosition((ARM_INTAKE + ((ARM_REST + ARM_OUTTAKE) / 2 - ARM_INTAKE) * (1 - (1200 - myTimer.time()) / 550)));
+                            if( myTimer.time() >= 625 && myTimer.time() <= 1025) {
+                                robot.intakeOuttake.arm.arm.setPosition((ARM_INTAKE + ((ARM_REST + ARM_OUTTAKE) / 2 - ARM_INTAKE) * (1 - (950 - myTimer.time()) / 400)));
                             }
 
-                            if (myTimer.time() > 1200) {
+                            if (myTimer.time() > 1025) {
                                 robot.intakeOuttake.horizontal.backwardLeft.setPosition(BACKWARD_LEFT_IN);
                                 robot.intakeOuttake.horizontal.backwardRight.setPosition(BACKWARD_RIGHT_IN);
 
-                                turret = -360;
+                                turret = -365;
                                 robot.intakeOuttake.arm.arm.setPosition((ARM_REST + ARM_OUTTAKE) / 2);
                                 myTimer.reset();
                                 score = Score.UP;
@@ -330,6 +333,7 @@ public class RegionalAuton extends LinearOpMode {
 
                             break;
                         case UP:
+                            turret = -365;
                             robot.intakeOuttake.horizontal.backwardLeft.setPosition(BACKWARD_LEFT_IN);
                             robot.intakeOuttake.horizontal.backwardRight.setPosition(BACKWARD_RIGHT_IN);
 
@@ -341,7 +345,7 @@ public class RegionalAuton extends LinearOpMode {
                             targetPos = slidesUp;
 
                             robot.intakeOuttake.arm.wrist.setPosition(WRIST_OUTTAKE);
-                            if (myTimer.time() > 650) {
+                            if (myTimer.time() > 600) {
                                 myTimer.reset();
                                 score = Score.EXTENDSCORE;
                             }
@@ -356,33 +360,33 @@ public class RegionalAuton extends LinearOpMode {
 //                                }
 //                            }
 
-                            if (myTimer.time() <= 650) {
+                            if (myTimer.time() <= 475) {
 //                                robot.intakeOuttake.horizontal.forwardLeft.setPosition(((FORWARD_LEFT_OUT + FORWARD_LEFT_IN) / 2 - .03));
 //                                robot.intakeOuttake.horizontal.forwardRight.setPosition(((FORWARD_RIGHT_OUT + FORWARD_RIGHT_IN) / 2 + .03));
-                                robot.intakeOuttake.horizontal.forwardLeft.setPosition(((FORWARD_LEFT_OUT + FORWARD_LEFT_IN) / 2 - .07));
-                                robot.intakeOuttake.horizontal.forwardRight.setPosition(((FORWARD_RIGHT_OUT + FORWARD_RIGHT_IN) / 2 + .07));
+                                robot.intakeOuttake.horizontal.forwardLeft.setPosition(((FORWARD_LEFT_OUT + FORWARD_LEFT_IN) / 2 - .065));
+                                robot.intakeOuttake.horizontal.forwardRight.setPosition(((FORWARD_RIGHT_OUT + FORWARD_RIGHT_IN) / 2 + .065));
 
 //                                //robot.intakeOuttake.horizontal.forwardLeft.setPosition(linearProfile(650, myTimer.time(), 650,((((FORWARD_LEFT_IN + FORWARD_LEFT_OUT) / 2) + (FORWARD_LEFT_IN)) / 2), ((FORWARD_LEFT_OUT + FORWARD_LEFT_IN) / 2 - .025)));
                                 //robot.intakeOuttake.horizontal.forwardRight.setPosition(linearProfile(650, myTimer.time(), 650, ((((FORWARD_RIGHT_IN + FORWARD_RIGHT_OUT) / 2) + (FORWARD_RIGHT_IN)) / 2), ((FORWARD_RIGHT_OUT + FORWARD_RIGHT_IN) / 2 + .025)));
                             }
 
-                            if (myTimer.time() <= 650)
+                            if (myTimer.time() <= 475)
                                 //robot.intakeOuttake.arm.arm.setPosition(((ARM_REST + ARM_OUTTAKE) / 2) + (ARM_OUTTAKE - ((ARM_REST + ARM_OUTTAKE) / 2)) * (1 - (650 - myTimer.time()) / 650));
-                                robot.intakeOuttake.arm.arm.setPosition(((ARM_REST + ARM_OUTTAKE) / 2) + (.47 - ((ARM_REST + ARM_OUTTAKE) / 2)) * (1 - (650 - myTimer.time()) / 650));
-                            else if (myTimer.time() < 700)
+                                robot.intakeOuttake.arm.arm.setPosition(((ARM_REST + ARM_OUTTAKE) / 2) + (.31 - ((ARM_REST + ARM_OUTTAKE) / 2)) * (1 - (475 - myTimer.time()) / 475));
+                            else if (myTimer.time() < 525)
                                 //robot.intakeOuttake.arm.arm.setPosition(ARM_OUTTAKE);
                                 robot.intakeOuttake.arm.arm.setPosition(.31);
 
 
-                            if (myTimer.time() > 700) {
+                            if (myTimer.time() > 525) {
 //                                robot.intakeOuttake.horizontal.forwardLeft.setPosition((FORWARD_LEFT_OUT + FORWARD_LEFT_IN) / 2 - .03);
 //                                robot.intakeOuttake.horizontal.forwardRight.setPosition((FORWARD_RIGHT_OUT + FORWARD_RIGHT_IN) / 2 + .03);
-                                robot.intakeOuttake.horizontal.forwardLeft.setPosition(((FORWARD_LEFT_OUT + FORWARD_LEFT_IN) / 2 - .07));
-                                robot.intakeOuttake.horizontal.forwardRight.setPosition(((FORWARD_RIGHT_OUT + FORWARD_RIGHT_IN) / 2 + .07));
+                                robot.intakeOuttake.horizontal.forwardLeft.setPosition(((FORWARD_LEFT_OUT + FORWARD_LEFT_IN) / 2 - .065));
+                                robot.intakeOuttake.horizontal.forwardRight.setPosition(((FORWARD_RIGHT_OUT + FORWARD_RIGHT_IN) / 2 + .065));
 
                                 robot.intakeOuttake.arm.arm.setPosition(ARM_OUTTAKE - .1);
 
-                                if (myTimer.time() > 900) {
+                                if (myTimer.time() > 700) {
                                     targetPos -= 500;
                                     myTimer.reset();
                                     score = Score.REST;
@@ -402,8 +406,8 @@ public class RegionalAuton extends LinearOpMode {
                                 robot.intakeOuttake.arm.claw.setPosition(CLAW_OPEN);
                             if (myTimer.time() > 300) {
 
-                                robot.intakeOuttake.horizontal.forwardLeft.setPosition(linearProfile(600, myTimer.time(), 900, ((FORWARD_LEFT_OUT + FORWARD_LEFT_IN) / 2 - .069), ((((FORWARD_LEFT_IN + FORWARD_LEFT_OUT) / 2) + (FORWARD_LEFT_IN)) / 2)));
-                                robot.intakeOuttake.horizontal.forwardRight.setPosition(linearProfile(600, myTimer.time(), 900, ((FORWARD_RIGHT_OUT + FORWARD_RIGHT_IN) / 2 + .069), ((((FORWARD_RIGHT_IN + FORWARD_RIGHT_OUT) / 2) + (FORWARD_RIGHT_IN)) / 2)));
+                                robot.intakeOuttake.horizontal.forwardLeft.setPosition(linearProfile(600, myTimer.time(), 900, ((FORWARD_LEFT_OUT + FORWARD_LEFT_IN) / 2 - .065), ((((FORWARD_LEFT_IN + FORWARD_LEFT_OUT) / 2) + (FORWARD_LEFT_IN)) / 2)));
+                                robot.intakeOuttake.horizontal.forwardRight.setPosition(linearProfile(600, myTimer.time(), 900, ((FORWARD_RIGHT_OUT + FORWARD_RIGHT_IN) / 2 + .065), ((((FORWARD_RIGHT_IN + FORWARD_RIGHT_OUT) / 2) + (FORWARD_RIGHT_IN)) / 2)));
 
                                 robot.intakeOuttake.arm.wrist.setPosition(WRIST_SAFE);
                             }
@@ -497,7 +501,7 @@ public class RegionalAuton extends LinearOpMode {
 
             PoseStorage.currentPose = poseEstimate;
 
-            if (getRuntime() > 29.9) {
+            if (getRuntime() > 29.95) {
                 robot.turret.motor.setPower(0);
                 break;
             }
