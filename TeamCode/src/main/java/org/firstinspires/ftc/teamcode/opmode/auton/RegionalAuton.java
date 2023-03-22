@@ -231,7 +231,7 @@ public class RegionalAuton extends LinearOpMode {
                             targetPos = (5 - cycles) * coneOffset + webcamOffset;
 
                             if (myTimer.time() < 750) {
-                                if (cycles == 0) {
+                                if (cycles == -1) {
                                     robot.intakeOuttake.horizontal.backwardLeft.setPosition(linearProfile(750, myTimer.time(), 750, BACKWARD_LEFT_IN, (BACKWARD_LEFT_OUT - .074)));
                                     robot.intakeOuttake.horizontal.backwardRight.setPosition(linearProfile(750, myTimer.time(), 750, BACKWARD_RIGHT_IN, BACKWARD_RIGHT_OUT + .074));
                                 } else if (cycles < 6) {
@@ -262,19 +262,19 @@ public class RegionalAuton extends LinearOpMode {
 
 
                             if (cycles < 0) {
-                                if (myTimer.time() > 50 && myTimer.time() < 600)
-                                    robot.intakeOuttake.arm.arm.setPosition(linearProfile(550, myTimer.time(), 600, (ARM_REST + ARM_INTAKE) / 2, ARM_INTAKE));
-                                else if (myTimer.time() >= 600)
+                                if (myTimer.time() > 50 && myTimer.time() < 450)
+                                    robot.intakeOuttake.arm.arm.setPosition(linearProfile(400, myTimer.time(), 450, (ARM_REST + ARM_INTAKE) / 2, ARM_INTAKE));
+                                else if (myTimer.time() >= 450)
                                     robot.intakeOuttake.arm.arm.setPosition(ARM_INTAKE);
                             } else if (cycles < 2) {
-                                if (myTimer.time() > 50 && myTimer.time() < 600)
-                                    robot.intakeOuttake.arm.arm.setPosition(linearProfile(550, myTimer.time(), 600, (ARM_REST + ARM_INTAKE) / 2, ARM_INTAKE + .006));
-                                else if (myTimer.time() >= 600)
+                                if (myTimer.time() > 50 && myTimer.time() < 450)
+                                    robot.intakeOuttake.arm.arm.setPosition(linearProfile(400, myTimer.time(), 450, (ARM_REST + ARM_INTAKE) / 2, ARM_INTAKE + .006));
+                                else if (myTimer.time() >= 450)
                                     robot.intakeOuttake.arm.arm.setPosition(ARM_INTAKE + .006);
                             } else {
-                                if (myTimer.time() > 50 && myTimer.time() < 600)
-                                    robot.intakeOuttake.arm.arm.setPosition(linearProfile(550, myTimer.time(), 600, (ARM_REST + ARM_INTAKE) / 2, ARM_INTAKE + .01));
-                                else if (myTimer.time() >= 600)
+                                if (myTimer.time() > 50 && myTimer.time() < 450)
+                                    robot.intakeOuttake.arm.arm.setPosition(linearProfile(400, myTimer.time(), 450, (ARM_REST + ARM_INTAKE) / 2, ARM_INTAKE + .01));
+                                else if (myTimer.time() >= 450)
                                     robot.intakeOuttake.arm.arm.setPosition(ARM_INTAKE + .01);
                             }
 
@@ -443,6 +443,7 @@ public class RegionalAuton extends LinearOpMode {
                     break;
 
                 case PARK:
+                    robot.butterfly.setState(Butterfly.State.MECANUM);
 
                     robot.intakeOuttake.arm.wrist.setPosition(WRIST_INTAKE);
                     robot.intakeOuttake.arm.arm.setPosition(ARM_REST);
