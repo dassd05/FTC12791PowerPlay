@@ -77,6 +77,9 @@ public class RegionalTele extends LinearOpMode {
 
         boolean firstTime = true;
 
+        int autoIntake = 0;
+        boolean waitTurret = false;
+
         double backLeftIntaking = Range.scale(.65, 0, 1, BACKWARD_LEFT_IN, BACKWARD_LEFT_OUT);
         double backRightIntaking = Range.scale(.65, 0, 1, BACKWARD_RIGHT_IN, BACKWARD_RIGHT_OUT);
 
@@ -108,7 +111,7 @@ public class RegionalTele extends LinearOpMode {
 
             if (justPressed1.x()) robot.butterfly.setState(Butterfly.State.MECANUM);
             if (justPressed1.b() && !gamepad1.start)
-                robot.butterfly.setState(Butterfly.State.STANDSTILL);
+                robot.butterfly.setState(Butterfly.State.BAD_TRACTION);
 
             double[] fields = {-Math.cbrt(gamepad1.left_stick_y), Math.cbrt(gamepad1.left_stick_x), Math.cbrt(gamepad1.right_stick_x)};
             if (gamepad1.right_bumper)
@@ -163,6 +166,9 @@ public class RegionalTele extends LinearOpMode {
                     }
                     break;
                 case INTAKE_AUTOMATED:
+                    if (gamepad2.left_bumper) autoIntake = 1;
+                    if (gamepad2.right_bumper) autoIntake = 2;
+
                     slidesTargetPos = safe;
 
                     robot.intakeOuttake.arm.claw.setPosition(CLAW_OPEN);
@@ -170,22 +176,28 @@ public class RegionalTele extends LinearOpMode {
 
                     robot.intakeOuttake.arm.wrist.setPosition(WRIST_INTAKE);
 
-                    if (FSMTimer.time() < 700) {
-                        if (linkageAuto) {
-                            robot.intakeOuttake.horizontal.backwardLeft.setPosition(linearProfile(700, FSMTimer.time(), 700, (BACKWARD_LEFT_IN + BACKWARD_LEFT_OUT) / 2, backLeftIntaking));
-                            robot.intakeOuttake.horizontal.backwardRight.setPosition(linearProfile(700, FSMTimer.time(), 700, (BACKWARD_RIGHT_IN + BACKWARD_RIGHT_OUT) / 2, backRightIntaking));
+                    if (autoIntake == 0) {
+                        if (FSMTimer.time() < 700) {
+                            if (linkageAuto) {
+                                robot.intakeOuttake.horizontal.backwardLeft.setPosition(linearProfile(700, FSMTimer.time(), 700, (BACKWARD_LEFT_IN + BACKWARD_LEFT_OUT) / 2, backLeftIntaking));
+                                robot.intakeOuttake.horizontal.backwardRight.setPosition(linearProfile(700, FSMTimer.time(), 700, (BACKWARD_RIGHT_IN + BACKWARD_RIGHT_OUT) / 2, backRightIntaking));
+                            } else {
+                                robot.intakeOuttake.horizontal.backwardLeft.setPosition(linearProfile(700, FSMTimer.time(), 700, BACKWARD_LEFT_IN, backLeftIntaking));
+                                robot.intakeOuttake.horizontal.backwardRight.setPosition(linearProfile(700, FSMTimer.time(), 700, BACKWARD_RIGHT_IN, backRightIntaking));
+                            }
                         } else {
-                            robot.intakeOuttake.horizontal.backwardLeft.setPosition(linearProfile(700, FSMTimer.time(), 700, BACKWARD_LEFT_IN, backLeftIntaking));
-                            robot.intakeOuttake.horizontal.backwardRight.setPosition(linearProfile(700, FSMTimer.time(), 700, BACKWARD_RIGHT_IN, backRightIntaking));
+                            if (horizontalDriver < 0) {
+                                robot.intakeOuttake.horizontal.backwardLeft.setPosition(backLeftIntaking - horizontalDriver);
+                                robot.intakeOuttake.horizontal.backwardRight.setPosition(backRightIntaking + horizontalDriver);
+                            } else {
+                                robot.intakeOuttake.horizontal.backwardLeft.setPosition(backLeftIntaking + horizontalDriver);
+                                robot.intakeOuttake.horizontal.backwardRight.setPosition(backRightIntaking - horizontalDriver);
+                            }
                         }
                     } else {
-                        if (horizontalDriver < 0) {
-                            robot.intakeOuttake.horizontal.backwardLeft.setPosition(backLeftIntaking - horizontalDriver);
-                            robot.intakeOuttake.horizontal.backwardRight.setPosition(backRightIntaking + horizontalDriver);
-                        } else {
-                            robot.intakeOuttake.horizontal.backwardLeft.setPosition(backLeftIntaking + horizontalDriver);
-                            robot.intakeOuttake.horizontal.backwardRight.setPosition(backRightIntaking - horizontalDriver);
-                        }
+                        Vector2d target = autoIntake == 1 ? new Vector2d() : new Vector2d();
+                        double distance = Math.max(poseEstimate.vec().distTo(target) - 2, 0);
+                        robot.intakeOuttake.horizontal.setTarget(-distance * 25.4);
                     }
                     robot.intakeOuttake.horizontal.forwardRight.setPosition(FORWARD_RIGHT_IN);
                     robot.intakeOuttake.horizontal.forwardLeft.setPosition(FORWARD_LEFT_IN);
@@ -321,11 +333,11 @@ public class RegionalTele extends LinearOpMode {
                             junction = D5;
                             FSMTimer.reset();
                             myState = State.UP_AUTOMATIC;
-                        } else if (gamepad2.dpad_up && justPressed2.dpad_left() || gamepad2.dpad_left && justPressed2.dpad_up()) {
+                        } else if (gamepad2.dpad_down && justPressed2.dpad_left() || gamepad2.dpad_left && justPressed2.dpad_down()) {
                             junction = A4;
                             FSMTimer.reset();
                             myState = State.UP_AUTOMATIC;
-                        } else if (gamepad2.dpad_up && justPressed2.dpad_right() || gamepad2.dpad_right && justPressed2.dpad_up()) {
+                        } else if (gamepad2.dpad_down && justPressed2.dpad_right() || gamepad2.dpad_right && justPressed2.dpad_down()) {
                             junction = E4;
                             FSMTimer.reset();
                             myState = State.UP_AUTOMATIC;
@@ -414,7 +426,7 @@ public class RegionalTele extends LinearOpMode {
                         if (back)
                             distance = Math.hypot(x_difference, y_difference) * 25.4 - 400;
                         else {
-                            distance = -(Math.hypot(x_difference, y_difference) * 25.4) + 318;
+                            distance = -(Math.hypot(x_difference, y_difference) * 25.4) + 260;
                         }
 
                         turretTarget = -Turret.radiansToTicks(turretTargetRad);
@@ -492,15 +504,15 @@ public class RegionalTele extends LinearOpMode {
                     linkageAuto = false;
                     break;
                 case SCORE:
-                    if (firstTime) {
-                        double turTheta = Turret.ticksToRadians(robot.turret.pos);
-                        double aiming = poseEstimate.getHeading() + turTheta;
-                        double extension = robot.intakeOuttake.horizontal.getPosition();
-                        double xOffset = Math.cos(aiming) * extension;
-                        double yOffset = Math.sin(aiming) * extension;
-                        drive.setPoseEstimate(new Pose2d(junction.getX() - xOffset, junction.getY() - yOffset, poseEstimate.getHeading()));
-                        // todo heading estimate bad
-                    }
+//                    if (firstTime) {
+//                        double turTheta = Turret.ticksToRadians(robot.turret.pos);
+//                        double aiming = poseEstimate.getHeading() + turTheta;
+//                        double extension = robot.intakeOuttake.horizontal.getPosition();
+//                        double xOffset = Math.cos(aiming) * extension;
+//                        double yOffset = Math.sin(aiming) * extension;
+//                        drive.setPoseEstimate(new Pose2d(junction.getX() - xOffset, junction.getY() - yOffset, poseEstimate.getHeading()));
+//                        // todo heading estimate bad
+//                    }
 
                     if (mySlides == Slides.LOW) {
                         robot.intakeOuttake.arm.claw.setPosition(CLAW_OPEN);
@@ -510,6 +522,11 @@ public class RegionalTele extends LinearOpMode {
                             slidesTargetPos -= 500;
                     }
                     firstTime = false;
+
+                    if (justPressed1.dpad_up())
+                        slidesTargetPos += 500;
+                    if (justPressed1.left_bumper())
+                        slidesTargetPos -= 500;
 
                     if (gamepad1.dpad_down) {
                         FSMTimer.reset();
@@ -521,7 +538,11 @@ public class RegionalTele extends LinearOpMode {
                     break;
                 case DEEXTEND:
                     slidesTargetPos = safe;
-                    if (robot.intakeOuttake.horizontal.forwardLeft.getPosition() > (FORWARD_LEFT_IN * 3 + FORWARD_LEFT_OUT) / 4)
+//                    if (robot.intakeOuttake.horizontal.forwardLeft.getPosition() > (FORWARD_LEFT_IN * 3 + FORWARD_LEFT_OUT) / 4)
+//                        turretTarget = 0;
+                    if (Math.abs(robot.intakeOuttake.horizontal.getPosition()) > 300)
+                        waitTurret = true;
+                    if (waitTurret && FSMTimer.time() > 500)
                         turretTarget = 0;
 
                     if (FSMTimer.time() < 350)
@@ -564,6 +585,7 @@ public class RegionalTele extends LinearOpMode {
                         horizontalDriver = 0;
                         driverArm = 0;
                         driverSlides = 0;
+                        waitTurret = false;
                         FSMTimer.reset();
                         myState = State.REST;
                     }
@@ -571,7 +593,7 @@ public class RegionalTele extends LinearOpMode {
             }
 
             long timeDelta = System.nanoTime() - lastTime;
-            driverTurret += (int) (cube(gamepad2.right_stick_x) * (timeDelta / 1e9) * 350);
+            driverTurret += (int) (cube(gamepad2.right_stick_x) * (timeDelta / 1e9) * 700 / Math.max(Math.abs(robot.intakeOuttake.horizontal.getPosition()), 150) * 150);
             if (back)
                 driverArm -= cube(gamepad2.left_stick_y) * timeDelta / 1e9 * .2;
             else

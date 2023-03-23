@@ -37,6 +37,7 @@ public class Butterfly {
 //    public static double FRONT_RIGHT_OUT = 0;
     public static double FRONT_RIGHT_SS = .61;
     public static double OUT_STAND_DISTANCE = .31;
+    public static double OUT_STAND_DISTANCE_2 = .05;
     public static double IN_STAND_DISTANCE = .2;
 
 
@@ -119,6 +120,7 @@ public class Butterfly {
                 backRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
                 frontRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
                 break;
+            case BAD_TRACTION:
             case TRACTION:
                 frontLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
                 backLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
@@ -350,6 +352,11 @@ public class Butterfly {
                 servoBackRight.setPosition(BACK_RIGHT_SS);
                 servoFrontRight.setPosition(FRONT_RIGHT_SS);
                 break;
+            case BAD_TRACTION:
+                servoFrontLeft.setPosition(FRONT_LEFT_SS - OUT_STAND_DISTANCE_2);
+                servoBackLeft.setPosition(BACK_LEFT_SS + OUT_STAND_DISTANCE_2);
+                servoBackRight.setPosition(BACK_RIGHT_SS - OUT_STAND_DISTANCE_2);
+                servoFrontRight.setPosition(FRONT_RIGHT_SS + OUT_STAND_DISTANCE_2);
         }
     }
 
@@ -357,6 +364,7 @@ public class Butterfly {
         MECANUM,
         TRACTION,
         STANDSTILL,
+        BAD_TRACTION,
     }
 
 
