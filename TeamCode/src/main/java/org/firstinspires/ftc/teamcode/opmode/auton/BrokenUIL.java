@@ -31,9 +31,9 @@ import org.openftc.easyopencv.OpenCvSwitchableWebcam;
 
 import java.util.ArrayList;
 
-@Autonomous (name = "RegionalAuton", group = "0", preselectTeleOp = "RegionalTele")
+@Autonomous (name = "BrokenUIL", group = "0", preselectTeleOp = "RegionalTele")
 
-public class RegionalAuton extends LinearOpMode {
+public class BrokenUIL extends LinearOpMode {
 
     public static double P = .0035, I = .000000000001 , D = 25;
 
@@ -256,7 +256,7 @@ public class RegionalAuton extends LinearOpMode {
 //                                robot.intakeOuttake.horizontal.forwardRight.setPosition(FORWARD_RIGHT_IN);
 //                                robot.intakeOuttake.horizontal.forwardLeft.setPosition(FORWARD_LEFT_IN);
 //                            } else {
-                            if (myTimer.time() > 325) {
+                            if (myTimer.time() > 300) {
                                 robot.intakeOuttake.horizontal.forwardRight.setPosition((((FORWARD_RIGHT_IN + FORWARD_RIGHT_OUT) / 2) + (FORWARD_RIGHT_IN)) / 2);
                                 robot.intakeOuttake.horizontal.forwardLeft.setPosition((((FORWARD_LEFT_IN + FORWARD_LEFT_OUT) / 2) + (FORWARD_LEFT_IN)) / 2);
                             }
@@ -273,7 +273,7 @@ public class RegionalAuton extends LinearOpMode {
                                     robot.intakeOuttake.arm.arm.setPosition(linearProfile(400, myTimer.time(), 450, (ARM_REST + ARM_INTAKE) / 2, ARM_INTAKE));
                                 else if (myTimer.time() >= 450)
                                     robot.intakeOuttake.arm.arm.setPosition(ARM_INTAKE);
-                            } else if (cycles < 1) {
+                            } else if (cycles < 2) {
                                 if (myTimer.time() > 50 && myTimer.time() < 450)
                                     robot.intakeOuttake.arm.arm.setPosition(linearProfile(400, myTimer.time(), 450, (ARM_REST + ARM_INTAKE) / 2, ARM_INTAKE + .006));
                                 else if (myTimer.time() >= 450)
@@ -332,7 +332,7 @@ public class RegionalAuton extends LinearOpMode {
                                 robot.intakeOuttake.horizontal.backwardLeft.setPosition(BACKWARD_LEFT_IN);
                                 robot.intakeOuttake.horizontal.backwardRight.setPosition(BACKWARD_RIGHT_IN);
 
-                                turret = -330;
+                                turret = -290;
                                 robot.intakeOuttake.arm.arm.setPosition((ARM_REST + ARM_OUTTAKE) / 2);
                                 myTimer.reset();
                                 score = Score.UP;
@@ -340,7 +340,7 @@ public class RegionalAuton extends LinearOpMode {
 
                             break;
                         case UP:
-                            turret = -330;
+                            turret = -290;
                             robot.intakeOuttake.horizontal.backwardLeft.setPosition(BACKWARD_LEFT_IN);
                             robot.intakeOuttake.horizontal.backwardRight.setPosition(BACKWARD_RIGHT_IN);
 
@@ -445,7 +445,7 @@ public class RegionalAuton extends LinearOpMode {
                             }
                             break;
                     }
-                    if (cycles == 5)
+                    if (cycles == 0)
                         state = State.PARK;
                     break;
 

@@ -111,7 +111,8 @@ public class RegionalTele extends LinearOpMode {
 
             if (justPressed1.x()) robot.butterfly.setState(Butterfly.State.MECANUM);
             if (justPressed1.b() && !gamepad1.start)
-                robot.butterfly.setState(Butterfly.State.BAD_TRACTION);
+                //robot.butterfly.setState(Butterfly.State.BAD_TRACTION);
+                robot.butterfly.setState(Butterfly.State.STANDSTILL);
 
             double[] fields = {-Math.cbrt(gamepad1.left_stick_y), Math.cbrt(gamepad1.left_stick_x), Math.cbrt(gamepad1.right_stick_x)};
             if (gamepad1.right_bumper)
@@ -521,12 +522,12 @@ public class RegionalTele extends LinearOpMode {
                         if (firstTime)
                             slidesTargetPos -= 500;
                     }
-                    firstTime = false;
-
                     if (justPressed1.dpad_up())
                         slidesTargetPos += 500;
-                    if (justPressed1.left_bumper())
+                    if (justPressed1.left_bumper() && !firstTime)
                         slidesTargetPos -= 500;
+
+                    firstTime = false;
 
                     if (gamepad1.dpad_down) {
                         FSMTimer.reset();
