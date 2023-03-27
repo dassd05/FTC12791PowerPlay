@@ -32,13 +32,13 @@ public class Butterfly {
     public static double BACK_LEFT_SS = .67;
 //    public static double BACK_RIGHT_IN = 0;
 //    public static double BACK_RIGHT_OUT = 0;
-    public static double BACK_RIGHT_SS = .59;
+    public static double BACK_RIGHT_SS = .53;
 //    public static double FRONT_RIGHT_IN = 0;
 //    public static double FRONT_RIGHT_OUT = 0;
     public static double FRONT_RIGHT_SS = .56;
     public static double OUT_STAND_DISTANCE = .31;
     public static double OUT_STAND_DISTANCE_2 = .05;
-    public static double IN_STAND_DISTANCE = .2;
+    public static double IN_STAND_DISTANCE = .3;
 
 
     public HardwareMap hardwareMap;

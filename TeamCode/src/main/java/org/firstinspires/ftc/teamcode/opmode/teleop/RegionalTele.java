@@ -69,7 +69,7 @@ public class RegionalTele extends LinearOpMode {
 
         int slidesTop = 1530;
         int slidesMiddle = 870;
-        int safe = 125;
+        int safe = 110;
 
         int clear = 920;
 
@@ -87,6 +87,8 @@ public class RegionalTele extends LinearOpMode {
 
         boolean armNeutral = true;
         boolean linkageAuto = false;
+
+        boolean hdistance = false;
 
         robot.intakeOuttake.horizontal.forwardRight.setPosition(FORWARD_RIGHT_IN);
         robot.intakeOuttake.horizontal.forwardLeft.setPosition(FORWARD_LEFT_IN);
@@ -111,8 +113,8 @@ public class RegionalTele extends LinearOpMode {
 
             if (justPressed1.x()) robot.butterfly.setState(Butterfly.State.MECANUM);
             if (justPressed1.b() && !gamepad1.start)
-                //robot.butterfly.setState(Butterfly.State.BAD_TRACTION);
-                robot.butterfly.setState(Butterfly.State.STANDSTILL);
+                robot.butterfly.setState(Butterfly.State.BAD_TRACTION);
+//                robot.butterfly.setState(Butterfly.State.STANDSTILL);
 
             double[] fields = {-Math.cbrt(gamepad1.left_stick_y), Math.cbrt(gamepad1.left_stick_x), Math.cbrt(gamepad1.right_stick_x)};
             if (gamepad1.right_bumper)
@@ -408,6 +410,7 @@ public class RegionalTele extends LinearOpMode {
                     linkageAuto = true;
                     break;
                 case UP_AUTOMATIC:
+                    hdistance = true;
 
                     if (firstTime) {
                         double y_difference = junction.getY() - poseEstimate.getX();
@@ -527,6 +530,11 @@ public class RegionalTele extends LinearOpMode {
                     if (justPressed1.left_bumper() && !firstTime)
                         slidesTargetPos -= 500;
 
+                    if (hdistance) {
+                        robot.intakeOuttake.horizontal.setTarget(distance + horizontalDriver);
+                        robot.intakeOuttake.horizontal.update();
+                    }
+
                     firstTime = false;
 
                     if (gamepad1.dpad_down) {
@@ -534,6 +542,7 @@ public class RegionalTele extends LinearOpMode {
                         driverTurret = 0;
                         driverSlides = 0;
                         driverArm = 0;
+                        hdistance = false;
                         myState = State.DEEXTEND;
                     }
                     break;
@@ -600,7 +609,7 @@ public class RegionalTele extends LinearOpMode {
             else
                 driverArm += cube(gamepad2.left_stick_y) * timeDelta / 1e9 * .2;
             if (myState != State.SCORE_PREP) {
-                if (myState == State.UP_AUTOMATIC)
+                if (myState == State.UP_AUTOMATIC || myState == State.SCORE)
                     horizontalDriver += timeDelta / 1e9 * (gamepad1.right_trigger > .5 ? 270 : gamepad1.left_trigger > .5 ? -270 : 0);
                 else
                     horizontalDriver += timeDelta / 1e9 * .175 * (gamepad1.right_trigger > .5 ? 1.3 : gamepad1.left_trigger > .5 ? -1.3 : 0);
