@@ -382,7 +382,7 @@ public class RegionalAuton extends LinearOpMode {
                                 robot.intakeOuttake.arm.arm.setPosition(((ARM_REST + ARM_OUTTAKE) / 2) + (.31 - ((ARM_REST + ARM_OUTTAKE) / 2)) * (1 - (475 - myTimer.time()) / 475));
                             else if (myTimer.time() < 525)
                                 //robot.intakeOuttake.arm.arm.setPosition(ARM_OUTTAKE);
-                                robot.intakeOuttake.arm.arm.setPosition(.31);
+                                robot.intakeOuttake.arm.arm.setPosition(ARM_ANGLED);
 
 
                             if (myTimer.time() > 525) {

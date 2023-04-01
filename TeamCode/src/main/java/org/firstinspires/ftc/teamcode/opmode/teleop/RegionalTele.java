@@ -382,6 +382,13 @@ public class RegionalTele extends LinearOpMode {
                             break;
                     }
 
+                    if (gamepad1.dpad_down)
+                        mySlides = Slides.LOW;
+                    if (gamepad1.dpad_up)
+                        mySlides = Slides.HIGH;
+                    if (gamepad1.dpad_right || gamepad1.dpad_left)
+                        mySlides = Slides.MIDDLE;
+
                     if (horizontalDriver < 0) {
                         robot.intakeOuttake.horizontal.forwardRight.setPosition(FORWARD_RIGHT_IN);
                         robot.intakeOuttake.horizontal.forwardLeft.setPosition(FORWARD_LEFT_IN);
@@ -434,6 +441,9 @@ public class RegionalTele extends LinearOpMode {
                         }
 
                         turretTarget = -Turret.radiansToTicks(turretTargetRad);
+
+                        robot.turret.setTurretTargetPosition(turretTarget + driverTurret);
+                        robot.update();
 
                         firstTime = false;
                     }
@@ -492,7 +502,7 @@ public class RegionalTele extends LinearOpMode {
                             break;
                     }
 
-                    if (Turret.getWithin() && Math.abs((slidesTargetPos + driverSlides) - robot.vertical.v2.getCurrentPosition()) < 150) {
+                    if (Turret.getWithin() && Math.abs((slidesTargetPos + driverSlides) - robot.vertical.v2.getCurrentPosition()) < 350) {
                         robot.intakeOuttake.horizontal.setTarget(distance + horizontalDriver);
                         robot.intakeOuttake.horizontal.update();
                     }

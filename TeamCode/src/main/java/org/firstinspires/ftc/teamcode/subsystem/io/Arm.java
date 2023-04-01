@@ -17,6 +17,7 @@ public class Arm {
     public static double ARM_INTAKE = .78;
     public static double ARM_REST = .36;
     public static double ARM_OUTTAKE = .22; //old .38
+    public static double ARM_ANGLED = .31;
 
     public static double ARM_LENGTH = 250;
     public static double ARM_HORIZONTAL_LENGTH = 346.17;
