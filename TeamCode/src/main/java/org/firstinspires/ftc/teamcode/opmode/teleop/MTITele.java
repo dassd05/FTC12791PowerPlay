@@ -212,13 +212,13 @@ public class MTITele extends LinearOpMode {
                     robot.intakeOuttake.arm.wrist.setPosition(WRIST_INTAKE);
 
                     if (autoIntake == 0) {
-                        if (FSMTimer.time() < 700) {
+                        if (FSMTimer.time() < 400) {
                             if (linkageAuto) {
-                                robot.intakeOuttake.horizontal.backwardLeft.setPosition(linearProfile(700, FSMTimer.time(), 700, (BACKWARD_LEFT_IN + BACKWARD_LEFT_OUT) / 2, backLeftIntaking));
-                                robot.intakeOuttake.horizontal.backwardRight.setPosition(linearProfile(700, FSMTimer.time(), 700, (BACKWARD_RIGHT_IN + BACKWARD_RIGHT_OUT) / 2, backRightIntaking));
+                                robot.intakeOuttake.horizontal.backwardLeft.setPosition(linearProfile(400, FSMTimer.time(), 400, (BACKWARD_LEFT_IN + BACKWARD_LEFT_OUT) / 2, backLeftIntaking));
+                                robot.intakeOuttake.horizontal.backwardRight.setPosition(linearProfile(400, FSMTimer.time(), 400, (BACKWARD_RIGHT_IN + BACKWARD_RIGHT_OUT) / 2, backRightIntaking));
                             } else {
-                                robot.intakeOuttake.horizontal.backwardLeft.setPosition(linearProfile(700, FSMTimer.time(), 700, BACKWARD_LEFT_IN, backLeftIntaking));
-                                robot.intakeOuttake.horizontal.backwardRight.setPosition(linearProfile(700, FSMTimer.time(), 700, BACKWARD_RIGHT_IN, backRightIntaking));
+                                robot.intakeOuttake.horizontal.backwardLeft.setPosition(linearProfile(400, FSMTimer.time(), 400, BACKWARD_LEFT_IN, backLeftIntaking));
+                                robot.intakeOuttake.horizontal.backwardRight.setPosition(linearProfile(400, FSMTimer.time(), 400, BACKWARD_RIGHT_IN, backRightIntaking));
                             }
                         } else {
                             if (horizontalDriver < 0) {
@@ -609,7 +609,7 @@ public class MTITele extends LinearOpMode {
                     if (FSMTimer.time() < 350)
                         robot.intakeOuttake.arm.claw.setPosition(CLAW_OPEN);
 
-                    if (FSMTimer.time() < 750 && FSMTimer.time() > 350) {
+                    if (FSMTimer.time() < (waitTurret ? 750 : 500) && FSMTimer.time() > 350) {
                         robot.intakeOuttake.arm.claw.setPosition(CLAW_CLOSE);
                         robot.intakeOuttake.arm.wrist.setPosition(WRIST_SAFE);
                     } else {
@@ -619,13 +619,13 @@ public class MTITele extends LinearOpMode {
 
                     if (robot.intakeOuttake.horizontal.forwardLeft.getPosition() > (FORWARD_LEFT_IN * 3 + FORWARD_LEFT_OUT) / 4) {
                         if (linkageAuto) {
-                            if (FSMTimer.time() < 750)
-                                robot.intakeOuttake.arm.arm.setPosition(linearProfile(750, FSMTimer.time(), 750, ARM_OUTTAKE, ARM_INTAKE));
+                            if (FSMTimer.time() < (waitTurret ? 750 : 500))
+                                robot.intakeOuttake.arm.arm.setPosition(linearProfile((waitTurret ? 750 : 500), FSMTimer.time(), (waitTurret ? 750 : 500), ARM_OUTTAKE, ARM_INTAKE));
                             else
                                 robot.intakeOuttake.arm.arm.setPosition(ARM_INTAKE);
                         } else {
-                            if (FSMTimer.time() < 750)
-                                robot.intakeOuttake.arm.arm.setPosition(linearProfile(750, FSMTimer.time(), 750, ARM_OUTTAKE, ARM_REST));
+                            if (FSMTimer.time() < (waitTurret ? 750 : 500))
+                                robot.intakeOuttake.arm.arm.setPosition(linearProfile((waitTurret ? 750 : 500), FSMTimer.time(), (waitTurret ? 750 : 500), ARM_OUTTAKE, ARM_REST));
                             else
                                 robot.intakeOuttake.arm.arm.setPosition(ARM_REST);
                         }
@@ -641,7 +641,7 @@ public class MTITele extends LinearOpMode {
                     robot.intakeOuttake.horizontal.forwardRight.setPosition(FORWARD_RIGHT_IN);
                     robot.intakeOuttake.horizontal.forwardLeft.setPosition(FORWARD_LEFT_IN);
 
-                    if (FSMTimer.time() > 750) {
+                    if (FSMTimer.time() > (waitTurret ? 750 : 500)) {
                         driverTurret = 0;
                         horizontalDriver = 0;
                         driverArm = 0;
