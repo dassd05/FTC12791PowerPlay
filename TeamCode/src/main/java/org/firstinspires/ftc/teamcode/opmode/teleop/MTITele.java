@@ -1,10 +1,38 @@
 package org.firstinspires.ftc.teamcode.opmode.teleop;
 
-import static org.firstinspires.ftc.teamcode.subsystem.Constants.DEPLOYMENT.*;
-import static org.firstinspires.ftc.teamcode.subsystem.Constants.JUNCTIONS.*;
-import static org.firstinspires.ftc.teamcode.subsystem.io.Arm.*;
+import static org.firstinspires.ftc.teamcode.subsystem.Constants.DEPLOYMENT.BACKWARD_LEFT_IN;
+import static org.firstinspires.ftc.teamcode.subsystem.Constants.DEPLOYMENT.BACKWARD_LEFT_OUT;
+import static org.firstinspires.ftc.teamcode.subsystem.Constants.DEPLOYMENT.BACKWARD_RIGHT_IN;
+import static org.firstinspires.ftc.teamcode.subsystem.Constants.DEPLOYMENT.BACKWARD_RIGHT_OUT;
+import static org.firstinspires.ftc.teamcode.subsystem.Constants.DEPLOYMENT.FORWARD_LEFT_IN;
+import static org.firstinspires.ftc.teamcode.subsystem.Constants.DEPLOYMENT.FORWARD_LEFT_OUT;
+import static org.firstinspires.ftc.teamcode.subsystem.Constants.DEPLOYMENT.FORWARD_RIGHT_IN;
+import static org.firstinspires.ftc.teamcode.subsystem.Constants.JUNCTIONS.A2;
+import static org.firstinspires.ftc.teamcode.subsystem.Constants.JUNCTIONS.A4;
+import static org.firstinspires.ftc.teamcode.subsystem.Constants.JUNCTIONS.B1;
+import static org.firstinspires.ftc.teamcode.subsystem.Constants.JUNCTIONS.B2;
+import static org.firstinspires.ftc.teamcode.subsystem.Constants.JUNCTIONS.B3;
+import static org.firstinspires.ftc.teamcode.subsystem.Constants.JUNCTIONS.B4;
+import static org.firstinspires.ftc.teamcode.subsystem.Constants.JUNCTIONS.B5;
+import static org.firstinspires.ftc.teamcode.subsystem.Constants.JUNCTIONS.C2;
+import static org.firstinspires.ftc.teamcode.subsystem.Constants.JUNCTIONS.C4;
+import static org.firstinspires.ftc.teamcode.subsystem.Constants.JUNCTIONS.D1;
+import static org.firstinspires.ftc.teamcode.subsystem.Constants.JUNCTIONS.D2;
+import static org.firstinspires.ftc.teamcode.subsystem.Constants.JUNCTIONS.D3;
+import static org.firstinspires.ftc.teamcode.subsystem.Constants.JUNCTIONS.D4;
+import static org.firstinspires.ftc.teamcode.subsystem.Constants.JUNCTIONS.D5;
+import static org.firstinspires.ftc.teamcode.subsystem.Constants.JUNCTIONS.E2;
+import static org.firstinspires.ftc.teamcode.subsystem.Constants.JUNCTIONS.E4;
+import static org.firstinspires.ftc.teamcode.subsystem.io.Arm.ARM_ANGLED;
+import static org.firstinspires.ftc.teamcode.subsystem.io.Arm.ARM_INTAKE;
+import static org.firstinspires.ftc.teamcode.subsystem.io.Arm.ARM_OUTTAKE;
+import static org.firstinspires.ftc.teamcode.subsystem.io.Arm.ARM_REST;
+import static org.firstinspires.ftc.teamcode.subsystem.io.Arm.CLAW_CLOSE;
+import static org.firstinspires.ftc.teamcode.subsystem.io.Arm.CLAW_OPEN;
+import static org.firstinspires.ftc.teamcode.subsystem.io.Arm.WRIST_INTAKE;
+import static org.firstinspires.ftc.teamcode.subsystem.io.Arm.WRIST_OUTTAKE;
+import static org.firstinspires.ftc.teamcode.subsystem.io.Arm.WRIST_SAFE;
 
-import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.geometry.Vector2d;
 import com.acmerobotics.roadrunner.util.Angle;
@@ -14,20 +42,15 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 
-import org.firstinspires.ftc.robotcore.internal.camera.delegating.DelegatingCaptureSequence;
 import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
 import org.firstinspires.ftc.teamcode.gamepad.JustPressed;
 import org.firstinspires.ftc.teamcode.opmode.PoseStorage;
 import org.firstinspires.ftc.teamcode.subsystem.Butterfly;
-import org.firstinspires.ftc.teamcode.subsystem.Constants;
 import org.firstinspires.ftc.teamcode.subsystem.Robot;
-import org.firstinspires.ftc.teamcode.subsystem.Webcam;
 import org.firstinspires.ftc.teamcode.subsystem.io.Turret;
-import org.firstinspires.ftc.teamcode.subsystem.vision.JunctionDetectionPipeline;
-import org.firstinspires.ftc.teamcode.subsystem.vision.Target;
 
-@TeleOp(name = "RegionalTele", group = "0")
-public class RegionalTele extends LinearOpMode {
+@TeleOp(group = "0")
+public class MTITele extends LinearOpMode {
 
     public static double P = .0035, I = .000000000001 , D = 25;
 
@@ -90,6 +113,8 @@ public class RegionalTele extends LinearOpMode {
 
         boolean hdistance = false;
 
+        double preloadTurret = 0;
+
         robot.intakeOuttake.horizontal.forwardRight.setPosition(FORWARD_RIGHT_IN);
         robot.intakeOuttake.horizontal.forwardLeft.setPosition(FORWARD_LEFT_IN);
         robot.intakeOuttake.horizontal.backwardLeft.setPosition(BACKWARD_LEFT_IN);
@@ -126,6 +151,13 @@ public class RegionalTele extends LinearOpMode {
                 armNeutral = !armNeutral;
             if (justPressed2.a())
                 linkageAuto = !linkageAuto;
+
+            if (gamepad1.back && gamepad1.left_bumper)
+                preloadTurret = -45;
+            if (gamepad1.back && gamepad1.right_bumper)
+                preloadTurret = 45;
+            if (gamepad1.y)
+                preloadTurret = 0;
 
             switch (myState) {
                 case REST:
@@ -391,22 +423,29 @@ public class RegionalTele extends LinearOpMode {
                     if (gamepad1.dpad_right || gamepad1.dpad_left)
                         mySlides = Slides.MIDDLE;
 
-                    if (horizontalDriver < 0) {
-                        robot.intakeOuttake.horizontal.forwardRight.setPosition(FORWARD_RIGHT_IN);
-                        robot.intakeOuttake.horizontal.forwardLeft.setPosition(FORWARD_LEFT_IN);
-                        robot.intakeOuttake.horizontal.backwardLeft.setPosition(BACKWARD_LEFT_IN - horizontalDriver);
-                        robot.intakeOuttake.horizontal.backwardRight.setPosition(BACKWARD_RIGHT_IN + horizontalDriver);
-                    } else if (horizontalDriver > 0) {
-                        robot.intakeOuttake.horizontal.forwardRight.setPosition(FORWARD_RIGHT_IN + horizontalDriver);
-                        robot.intakeOuttake.horizontal.forwardLeft.setPosition(FORWARD_LEFT_IN - horizontalDriver);
-                        robot.intakeOuttake.horizontal.backwardLeft.setPosition(BACKWARD_LEFT_IN);
-                        robot.intakeOuttake.horizontal.backwardRight.setPosition(BACKWARD_RIGHT_IN);
+                    if (Math.abs(preloadTurret) > 10) {
+                        robot.intakeOuttake.horizontal.setTarget(70);
+                        robot.intakeOuttake.horizontal.update();
                     } else {
-                        robot.intakeOuttake.horizontal.forwardRight.setPosition(FORWARD_RIGHT_IN);
-                        robot.intakeOuttake.horizontal.forwardLeft.setPosition(FORWARD_LEFT_IN);
-                        robot.intakeOuttake.horizontal.backwardLeft.setPosition(BACKWARD_LEFT_IN);
-                        robot.intakeOuttake.horizontal.backwardRight.setPosition(BACKWARD_RIGHT_IN);
+                        if (horizontalDriver < 0) {
+                            robot.intakeOuttake.horizontal.forwardRight.setPosition(FORWARD_RIGHT_IN);
+                            robot.intakeOuttake.horizontal.forwardLeft.setPosition(FORWARD_LEFT_IN);
+                            robot.intakeOuttake.horizontal.backwardLeft.setPosition(BACKWARD_LEFT_IN - horizontalDriver);
+                            robot.intakeOuttake.horizontal.backwardRight.setPosition(BACKWARD_RIGHT_IN + horizontalDriver);
+                        } else if (horizontalDriver > 0) {
+                            robot.intakeOuttake.horizontal.forwardRight.setPosition(FORWARD_RIGHT_IN + horizontalDriver);
+                            robot.intakeOuttake.horizontal.forwardLeft.setPosition(FORWARD_LEFT_IN - horizontalDriver);
+                            robot.intakeOuttake.horizontal.backwardLeft.setPosition(BACKWARD_LEFT_IN);
+                            robot.intakeOuttake.horizontal.backwardRight.setPosition(BACKWARD_RIGHT_IN);
+                        } else {
+                            robot.intakeOuttake.horizontal.forwardRight.setPosition(FORWARD_RIGHT_IN);
+                            robot.intakeOuttake.horizontal.forwardLeft.setPosition(FORWARD_LEFT_IN);
+                            robot.intakeOuttake.horizontal.backwardLeft.setPosition(BACKWARD_LEFT_IN);
+                            robot.intakeOuttake.horizontal.backwardRight.setPosition(BACKWARD_RIGHT_IN);
+                        }
                     }
+
+                    turretTarget = Turret.radiansToTicks(Math.toRadians(preloadTurret));
 
                     if (gamepad1.left_bumper) {
                         firstTime = true;
@@ -437,7 +476,7 @@ public class RegionalTele extends LinearOpMode {
                         }
 
                         if (back)
-                            distance = Math.hypot(x_difference, y_difference) * 25.4 - 400;
+                            distance = Math.hypot(x_difference, y_difference) * 25.4 - 400;//(mySlides == Slides.LOW ? 400 : 300);
                         else {
                             distance = -(Math.hypot(x_difference, y_difference) * 25.4) + 260;
                         }
