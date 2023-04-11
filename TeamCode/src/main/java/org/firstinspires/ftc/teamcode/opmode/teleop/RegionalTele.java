@@ -450,6 +450,8 @@ public class RegionalTele extends LinearOpMode {
                         firstTime = false;
                     }
 
+                    if (back && FSMTimer.milliseconds() > Math.abs(distance))
+                        robot.intakeOuttake.arm.aligner.setPosition(ALIGNER_ALIGNING); // todo get constant
 
                     switch (mySlides) {
                         case LOW:
@@ -601,6 +603,8 @@ public class RegionalTele extends LinearOpMode {
                     }
                     robot.intakeOuttake.horizontal.forwardRight.setPosition(FORWARD_RIGHT_IN);
                     robot.intakeOuttake.horizontal.forwardLeft.setPosition(FORWARD_LEFT_IN);
+
+                    robot.intakeOuttake.arm.aligner.setPosition(ALIGNER_HIDDEN); // todo get constant
 
                     if (FSMTimer.time() > 750) {
                         driverTurret = 0;

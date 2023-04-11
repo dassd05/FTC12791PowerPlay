@@ -37,6 +37,7 @@ public class Arm {
     public ServoImplEx arm;
     public ServoImplEx claw;
     public ServoImplEx wrist;
+    public ServoImplEx aligner;
 
     private double position = 0;
     private double target = 0;
@@ -48,6 +49,7 @@ public class Arm {
         arm = hardwareMap.get(ServoImplEx.class, "arm");
         claw = hardwareMap.get(ServoImplEx.class, "claw");
         wrist = hardwareMap.get(ServoImplEx.class, "wrist");
+        aligner = hardwareMap.get(ServoImplEx.class, "align"); // todo change
 
         //arm.setPwmRange(ServoStuff.AxonMaxServo.servoModePwmRange);
         //claw.setPwmRange(ServoStuff.GobildaSpeedServo.servoModePwmRange);
@@ -91,6 +93,13 @@ public class Arm {
             wrist.setPosition(WRIST_INTAKE);
         else
             wrist.setPosition(WRIST_OUTTAKE);
+    }
+
+    public void setAligner(boolean aligning) {
+        if (aligning) // todo set constants
+            aligner.setPosition(-1);
+        else
+            aligner.setPosition(-1);
     }
 
 
