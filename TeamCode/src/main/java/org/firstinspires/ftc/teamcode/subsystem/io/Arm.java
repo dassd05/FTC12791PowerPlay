@@ -17,21 +17,24 @@ public class Arm {
     public static double ARM_INTAKE = .78;
     public static double ARM_REST = .36;
     public static double ARM_OUTTAKE = .22; //old .38
-    public static double ARM_ANGLED = .31;
+    public static double ARM_ANGLED = .33;
 
     public static double ARM_LENGTH = 250;
     public static double ARM_HORIZONTAL_LENGTH = 346.17;
 
     boolean open = true;
 
-    public static double CLAW_OPEN = .37;
-    public static double CLAW_CLOSE = .663;
+    public static double CLAW_OPEN = .35;
+    public static double CLAW_CLOSE = .56;
+
+    public static double MECH_ALIGN_OPEN = .72;
+    public static double MECH_ALIGN_CLOSE = .52;
 
     boolean intakeWrist = true;
 
-    public static double WRIST_INTAKE = .715;
-    public static double WRIST_OUTTAKE = .055;
-    public static double WRIST_SAFE = 1;
+    public static double WRIST_INTAKE = .02;
+    public static double WRIST_OUTTAKE = .69;
+    public static double WRIST_SAFE = .35;
 
     public HardwareMap hardwareMap;
     public ServoImplEx arm;
@@ -49,7 +52,7 @@ public class Arm {
         arm = hardwareMap.get(ServoImplEx.class, "arm");
         claw = hardwareMap.get(ServoImplEx.class, "claw");
         wrist = hardwareMap.get(ServoImplEx.class, "wrist");
-        aligner = hardwareMap.get(ServoImplEx.class, "align"); // todo change
+        aligner = hardwareMap.get(ServoImplEx.class, "align");
 
         //arm.setPwmRange(ServoStuff.AxonMaxServo.servoModePwmRange);
         //claw.setPwmRange(ServoStuff.GobildaSpeedServo.servoModePwmRange);
@@ -96,10 +99,10 @@ public class Arm {
     }
 
     public void setAligner(boolean aligning) {
-        if (aligning) // todo set constants
-            aligner.setPosition(-1);
+        if (aligning)
+            aligner.setPosition(MECH_ALIGN_CLOSE);
         else
-            aligner.setPosition(-1);
+            aligner.setPosition(MECH_ALIGN_OPEN);
     }
 
 

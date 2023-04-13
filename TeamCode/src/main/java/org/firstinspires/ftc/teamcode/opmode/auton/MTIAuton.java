@@ -31,19 +31,19 @@ import org.openftc.easyopencv.OpenCvSwitchableWebcam;
 
 import java.util.ArrayList;
 
-@Autonomous (name = "RegionalAuton", group = "0", preselectTeleOp = "RegionalTele")
+@Autonomous (name = "MTI Auton", group = "0", preselectTeleOp = "altMTITele")
 
-public class RegionalAuton extends LinearOpMode {
+public class MTIAuton extends LinearOpMode {
 
-    public static double P = .007, I = 7e-11 , D = 400;
+    public static double P = .0035, I = .000000000001 , D = 25;
 
     public double targetPos = 0.0;
 
-    public double coneOffset = 84;
-    public double webcamOffset = 50;
-    public double safeClear = 440; //440 //TODO: fix
+    public double coneOffset = 84.5;
+    public double webcamOffset = 175;
+    public double safeClear = 440; //440
     //public double slidesUp = 1440;
-    public double slidesUp = 580;
+    public double slidesUp = 1125;
 
 
     public int turret = 0;
@@ -103,13 +103,17 @@ public class RegionalAuton extends LinearOpMode {
 
         //SignalDetectionPipeline.ParkPosition parkPosition = SignalDetectionPipeline.ParkPosition.MIDDLE;
 
-        Pose2d pose1 = new Pose2d(0,60,0);
-        Pose2d pose1_2 = new Pose2d(3,47,45);
-        Pose2d pose2 = new Pose2d(-8,50.5,90);
+        double rightOffset = 75.5;
 
-        Pose2d left = new Pose2d(-24,50.5,0);
-        Pose2d right = new Pose2d(24,50.5,0);
-        Pose2d middle = new Pose2d(0,50.5,0);
+        drive.setPoseEstimate(new Pose2d(0, -rightOffset,0));
+
+        Pose2d pose1 = new Pose2d(0 + rightOffset,60,0);
+        Pose2d pose1_2 = new Pose2d(-3 + rightOffset,47,-45);
+        Pose2d pose2 = new Pose2d(5 + rightOffset,50.5,-90);
+
+        Pose2d left = new Pose2d(-24 + rightOffset,50.5,0);
+        Pose2d right = new Pose2d(24 + rightOffset,50.5,0);
+        Pose2d middle = new Pose2d(0 + rightOffset,50.5,0);
 
         int cycles = -1;
 
@@ -228,24 +232,24 @@ public class RegionalAuton extends LinearOpMode {
                 case SCORE:
                     //robot.butterfly.setState(Butterfly.State.STANDSTILL);
                     robot.butterfly.runToPosition(pose2.getX(), pose2.getY(), pose2.getHeading(),
-                            .10, .25, -poseEstimate.getY(), poseEstimate.getX(),
+                            .10, .3, -poseEstimate.getY(), poseEstimate.getX(),
                             poseEstimate.getHeading(), true);
 
                     switch (score) {
                         case EXTEND:
                             targetPos = (5 - cycles) * coneOffset + webcamOffset;
 
-                            if (myTimer.time() < 750) {
+                            if (myTimer.time() < 700) {
                                 if (cycles == -1) {
-                                    robot.intakeOuttake.horizontal.backwardLeft.setPosition(linearProfile(750, myTimer.time(), 750, BACKWARD_LEFT_IN, (BACKWARD_LEFT_OUT - .091)));
-                                    robot.intakeOuttake.horizontal.backwardRight.setPosition(linearProfile(750, myTimer.time(), 750, BACKWARD_RIGHT_IN, BACKWARD_RIGHT_OUT + .091));
+                                    robot.intakeOuttake.horizontal.backwardLeft.setPosition(linearProfile(700, myTimer.time(), 700, BACKWARD_LEFT_IN, (BACKWARD_LEFT_OUT - .074)));
+                                    robot.intakeOuttake.horizontal.backwardRight.setPosition(linearProfile(700, myTimer.time(), 700, BACKWARD_RIGHT_IN, BACKWARD_RIGHT_OUT + .074));
                                 } else if (cycles < 6) {
-                                    robot.intakeOuttake.horizontal.backwardLeft.setPosition(linearProfile(750, myTimer.time(), 750, ((BACKWARD_LEFT_IN + BACKWARD_LEFT_OUT) / 2), (BACKWARD_LEFT_OUT - .091)));
-                                    robot.intakeOuttake.horizontal.backwardRight.setPosition(linearProfile(750, myTimer.time(), 750, ((BACKWARD_RIGHT_IN + BACKWARD_RIGHT_OUT) / 2), BACKWARD_RIGHT_OUT + .091));
+                                    robot.intakeOuttake.horizontal.backwardLeft.setPosition(linearProfile(700, myTimer.time(), 700, ((BACKWARD_LEFT_IN + BACKWARD_LEFT_OUT) / 2), (BACKWARD_LEFT_OUT - .074)));
+                                    robot.intakeOuttake.horizontal.backwardRight.setPosition(linearProfile(700, myTimer.time(), 700, ((BACKWARD_RIGHT_IN + BACKWARD_RIGHT_OUT) / 2), BACKWARD_RIGHT_OUT + .074));
                                 }
                             } else {
-                                robot.intakeOuttake.horizontal.backwardLeft.setPosition(BACKWARD_LEFT_OUT - .091);
-                                robot.intakeOuttake.horizontal.backwardRight.setPosition(BACKWARD_RIGHT_OUT + .091);
+                                robot.intakeOuttake.horizontal.backwardLeft.setPosition(BACKWARD_LEFT_OUT - .074);
+                                robot.intakeOuttake.horizontal.backwardRight.setPosition(BACKWARD_RIGHT_OUT + .074);
                             }
 
                             //if (myTimer.time() > 200) {
@@ -291,8 +295,8 @@ public class RegionalAuton extends LinearOpMode {
                                 robot.intakeOuttake.arm.claw.setPosition(CLAW_OPEN);
 
                             if (myTimer.time() > 785) {
-                                robot.intakeOuttake.horizontal.backwardLeft.setPosition(BACKWARD_LEFT_OUT - .091);
-                                robot.intakeOuttake.horizontal.backwardRight.setPosition(BACKWARD_RIGHT_OUT + .091);
+                                robot.intakeOuttake.horizontal.backwardLeft.setPosition(BACKWARD_LEFT_OUT - .074);
+                                robot.intakeOuttake.horizontal.backwardRight.setPosition(BACKWARD_RIGHT_OUT + .074);
                                 robot.intakeOuttake.arm.claw.setPosition(CLAW_CLOSE);
                                 myTimer.reset();
                                 reached = true;
@@ -332,7 +336,7 @@ public class RegionalAuton extends LinearOpMode {
                                 robot.intakeOuttake.horizontal.backwardLeft.setPosition(BACKWARD_LEFT_IN);
                                 robot.intakeOuttake.horizontal.backwardRight.setPosition(BACKWARD_RIGHT_IN);
 
-                                turret = -325;
+                                turret = 420;
                                 robot.intakeOuttake.arm.arm.setPosition((ARM_REST + ARM_OUTTAKE) / 2);
                                 myTimer.reset();
                                 score = Score.UP;
@@ -340,7 +344,7 @@ public class RegionalAuton extends LinearOpMode {
 
                             break;
                         case UP:
-                            turret = -325;
+                            turret = 420;
                             robot.intakeOuttake.horizontal.backwardLeft.setPosition(BACKWARD_LEFT_IN);
                             robot.intakeOuttake.horizontal.backwardRight.setPosition(BACKWARD_RIGHT_IN);
 
@@ -382,7 +386,7 @@ public class RegionalAuton extends LinearOpMode {
                                 robot.intakeOuttake.arm.arm.setPosition(((ARM_REST + ARM_OUTTAKE) / 2) + (.31 - ((ARM_REST + ARM_OUTTAKE) / 2)) * (1 - (475 - myTimer.time()) / 475));
                             else if (myTimer.time() < 525)
                                 //robot.intakeOuttake.arm.arm.setPosition(ARM_OUTTAKE);
-                                robot.intakeOuttake.arm.arm.setPosition(ARM_ANGLED);
+                                robot.intakeOuttake.arm.arm.setPosition(.31);
 
 
                             if (myTimer.time() > 525) {
@@ -550,3 +554,4 @@ public class RegionalAuton extends LinearOpMode {
         return (initial + (fin - initial) * (1 - (endTime - currentTime) / totalTime));
     }
 }
+
