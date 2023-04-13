@@ -150,7 +150,7 @@ public final class Constants {
                     "forwardRight",
                     "claw"
             };
-            // port 2/3 is axon analog
+            // analog port 2/3 is axon analog
         }
         public static final class EXPANSION_HUB {
             public static final String[] MOTORS = new String[] {
@@ -162,11 +162,12 @@ public final class Constants {
             public static final String[] SERVOS = new String[] {
                     "arm",
                     "forwardLeft",
-                    "",
+                    "aligner",
                     "frontRight",
                     "backwardLeft",
                     "backRight"
             };
+            // I2C bus 1 distance
         }
         public static final String[] SERVO_POWER_MODULE = new String[] {
                 "backwardLeft",

@@ -14,6 +14,7 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 
+import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.robotcore.internal.camera.delegating.DelegatingCaptureSequence;
 import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
 import org.firstinspires.ftc.teamcode.gamepad.JustPressed;
@@ -25,6 +26,9 @@ import org.firstinspires.ftc.teamcode.subsystem.Webcam;
 import org.firstinspires.ftc.teamcode.subsystem.io.Turret;
 import org.firstinspires.ftc.teamcode.subsystem.vision.JunctionDetectionPipeline;
 import org.firstinspires.ftc.teamcode.subsystem.vision.Target;
+import org.openftc.easyopencv.OpenCvCamera;
+import org.openftc.easyopencv.OpenCvCameraFactory;
+import org.openftc.easyopencv.OpenCvCameraRotation;
 
 @TeleOp(name = "RegionalTele", group = "0")
 public class RegionalTele extends LinearOpMode {
@@ -52,6 +56,26 @@ public class RegionalTele extends LinearOpMode {
         ElapsedTime FSMTimer = new ElapsedTime(ElapsedTime.Resolution.MILLISECONDS);
 
         Robot robot = new Robot(hardwareMap, telemetry);
+
+        JunctionDetectionPipeline pipeline = new JunctionDetectionPipeline();
+        WebcamName webcamName = hardwareMap.get(WebcamName.class, "Webcam 2");
+        OpenCvCamera cvCamera = OpenCvCameraFactory.getInstance().createWebcam(
+                webcamName,
+                hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName())
+        );
+        cvCamera.setPipeline(pipeline);
+        cvCamera.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener() {
+            @Override
+            public void onOpened() {
+                cvCamera.startStreaming(960, 720, OpenCvCameraRotation.UPRIGHT);
+            }
+
+            @Override
+            public void onError(int errorCode) {
+                telemetry.addLine("Warning: " + webcamName + " could not be opened. Error Code: " + errorCode);
+            }
+        });
+        FtcDashboard.getInstance().startCameraStream(cvCamera, 60);
 
         SampleMecanumDrive drive = new SampleMecanumDrive(hardwareMap);
 
@@ -89,6 +113,8 @@ public class RegionalTele extends LinearOpMode {
         boolean linkageAuto = false;
 
         boolean hdistance = false;
+
+        boolean visionCorrection = true;
 
         robot.intakeOuttake.horizontal.forwardRight.setPosition(FORWARD_RIGHT_IN);
         robot.intakeOuttake.horizontal.forwardLeft.setPosition(FORWARD_LEFT_IN);
@@ -448,7 +474,15 @@ public class RegionalTele extends LinearOpMode {
                         robot.update();
 
                         firstTime = false;
+                        visionCorrection = true;
                     }
+
+                    if (visionCorrection && Math.abs(robot.turret.quadratureEncoder.getCurrentPosition() - turretTarget) < 10
+                            && Math.abs(robot.turret.quadratureEncoder.getRawVelocity()) < 5 && pipeline.getJunctions().size() > 0) {
+                        visionCorrection = false;
+                        turretTarget = -robot.turret.quadratureEncoder.getCurrentPosition() - Turret.radiansToTicks(Math.toRadians(pipeline.getMostCenteredJunction().offset));
+                    }
+
 
                     if (back && FSMTimer.milliseconds() > Math.abs(distance))
                         robot.intakeOuttake.arm.aligner.setPosition(ALIGNER_ALIGNING); // todo get constant

@@ -6,24 +6,46 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
-import org.firstinspires.ftc.teamcode.subsystem.Webcam;
+import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.teamcode.subsystem.io.Turret;
 import org.firstinspires.ftc.teamcode.subsystem.vision.JunctionDetectionPipeline;
 import org.firstinspires.ftc.teamcode.subsystem.vision.Target;
 import org.firstinspires.ftc.teamcode.util.TelemetryUtil;
+import org.openftc.easyopencv.OpenCvCamera;
+import org.openftc.easyopencv.OpenCvCameraFactory;
+import org.openftc.easyopencv.OpenCvCameraRotation;
 
 @Config
 @TeleOp(group = "test")
 public class JunctionDetectionTest extends LinearOpMode {
     public static boolean turretLocking = false;
+    public static int frameHeightPixels = 720;
+    public static int frameWidthPixels = 960;
 
     @Override
     public void runOpMode() throws InterruptedException {
         telemetry = TelemetryUtil.initTelemetry(telemetry);
         JunctionDetectionPipeline pipeline = new JunctionDetectionPipeline();
-        Webcam webcam = new Webcam(hardwareMap, "Webcam 2", pipeline);
-        //FtcDashboard dashboard = FtcDashboard.getInstance();
-        //dashboard.startCameraStream(webcam.cvCamera, 60);
+//        Webcam webcam = new Webcam(hardwareMap, "Webcam 2", pipeline);
+        WebcamName webcamName = hardwareMap.get(WebcamName.class, "Webcam 2");
+        OpenCvCamera cvCamera = OpenCvCameraFactory.getInstance().createWebcam(
+                webcamName,
+                hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName())
+        );
+        cvCamera.setPipeline(pipeline);
+        cvCamera.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener() {
+            @Override
+            public void onOpened() {
+                cvCamera.startStreaming(frameWidthPixels, frameHeightPixels, OpenCvCameraRotation.UPRIGHT);
+            }
+
+            @Override
+            public void onError(int errorCode) {
+                telemetry.addLine("Warning: " + webcamName + " could not be opened. Error Code: " + errorCode);
+            }
+        });
+        FtcDashboard dashboard = FtcDashboard.getInstance();
+        dashboard.startCameraStream(cvCamera, 60);
         Turret turret = null;
         try {
             turret = new Turret(hardwareMap);
@@ -42,7 +64,7 @@ public class JunctionDetectionTest extends LinearOpMode {
 
         while (opModeIsActive()) {
             int numJunctions = pipeline.getJunctions().size();
-            Target junction = pipeline.getClosestJunction();
+            Target junction = pipeline.getMostCenteredJunction();
 
             // has the stream updated yet, or is it still the same thing?
 //            if (junction == lastJunction) continue;
@@ -52,17 +74,20 @@ public class JunctionDetectionTest extends LinearOpMode {
                 turretZeroedTimer.reset();
             }
 
-            if (junction != lastJunction && turretLocking && turret != null && numJunctions > 0 && junction != null && turret.zeroed() && Math.abs(turret.quadratureEncoder.getRawVelocity()) < 5 && turretZeroedTimer.time() > 2000) {
-                turret.setTurretTargetPosition(-turret.quadratureEncoder.getCurrentPosition() + Turret.radiansToTicks(Math.toRadians(junction.offset)));
+            if (/*junction != lastJunction &&*/ turretLocking && turret != null && numJunctions > 0 && junction != null && turret.zeroed()
+                    && Math.abs(turret.quadratureEncoder.getRawVelocity()) < 5 && turretZeroedTimer.time() > 2000) {
+                turret.setTurretTargetPosition(-turret.quadratureEncoder.getCurrentPosition() - Turret.radiansToTicks(Math.toRadians(junction.offset)));
             }
+            turretLocking = false;
 
             telemetry.addData("Number of Junctions", numJunctions);
-            if (junction != null && junction != lastJunction) {
+            if (junction != null /*&& junction != lastJunction*/) {
                 telemetry.addData("Junction Offset", junction.offset);
                 telemetry.addData("Junction Size", junction.rect.width + " x " + junction.rect.height);
             }
-            telemetry.addData("Turret Status", !turretLocking ? "disabled" : turret != null ? "enabled" : "Error: Not configured properly!");
-            if (turret != null && turretLocking) {
+//            telemetry.addData("Turret Status", !turretLocking ? "disabled" : turret != null ? "enabled" : "Error: Not configured properly!");
+            telemetry.addData("Turret Status", turret != null ? "enabled" : "Error: Not configured properly!");
+            if (turret != null) {
                 telemetry.addData("Turret Zeroed", turret.zeroed());
 //                telemetry.addData("Turret Target (deg)", Math.toDegrees(turret.getTurretTargetPosition()));
 //                telemetry.addData("Turret Position (deg)", Math.toDegrees(turret.quadratureEncoder.getCurrentPosition()));
@@ -71,12 +96,12 @@ public class JunctionDetectionTest extends LinearOpMode {
                 telemetry.addData("Turret Velocity", -turret.quadratureEncoder.getRawVelocity());
                 turret.update();
             }
-            telemetry.addData("Camera", webcam.webcamName.toString());
-            telemetry.addData("Frame Rate (fps)", webcam.cvCamera.getFps());
-            telemetry.addData("Theoretical Max FPS", webcam.cvCamera.getCurrentPipelineMaxFps());
-            telemetry.addData("Pipeline Time (ms)", webcam.cvCamera.getPipelineTimeMs());
-            telemetry.addData("Overhead Time (ms)", webcam.cvCamera.getOverheadTimeMs());
-            telemetry.addData("Total Frame Time (ms)", webcam.cvCamera.getTotalFrameTimeMs());
+            telemetry.addData("Camera", webcamName.toString());
+            telemetry.addData("Frame Rate (fps)", cvCamera.getFps());
+            telemetry.addData("Theoretical Max FPS", cvCamera.getCurrentPipelineMaxFps());
+            telemetry.addData("Pipeline Time (ms)", cvCamera.getPipelineTimeMs());
+            telemetry.addData("Overhead Time (ms)", cvCamera.getOverheadTimeMs());
+            telemetry.addData("Total Frame Time (ms)", cvCamera.getTotalFrameTimeMs());
             telemetry.update();
 
             // if junction is null, then we basically won't try to update anything until a junction is detected.

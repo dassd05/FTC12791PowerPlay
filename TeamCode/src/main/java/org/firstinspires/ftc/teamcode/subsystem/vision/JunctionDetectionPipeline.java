@@ -22,8 +22,8 @@ import java.util.Locale;
 @Config
 public class JunctionDetectionPipeline extends OpenCvPipeline {
     public static boolean maskedView = false;
-    public static int yellowLowH = 95;//20;
-    public static int yellowLowS = 175;
+    public static int yellowLowH = 90;//95;//20;
+    public static int yellowLowS = 125;//175;
     public static int yellowLowV = 120;
     public static int yellowHighH = 100;//30;
     public static int yellowHighS = 255;
@@ -114,7 +114,7 @@ public class JunctionDetectionPipeline extends OpenCvPipeline {
         List<Rect> rects = new ArrayList<>();
         for (MatOfPoint contour : contours) {
             Rect rectangle = Imgproc.boundingRect(contour);
-            if (rectangle.width > 5 && rectangle.width < 150 && rectangle.height > 75) {
+            if (rectangle.width > .005 * frame.width() && rectangle.width < .16 * frame.width() && rectangle.height > .10 * frame.height()) {
                 rects.add(rectangle);
                 Imgproc.rectangle(
                         frame,
