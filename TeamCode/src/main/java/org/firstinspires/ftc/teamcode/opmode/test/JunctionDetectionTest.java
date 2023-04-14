@@ -15,12 +15,15 @@ import org.openftc.easyopencv.OpenCvCamera;
 import org.openftc.easyopencv.OpenCvCameraFactory;
 import org.openftc.easyopencv.OpenCvCameraRotation;
 
+import java.util.List;
+
 @Config
 @TeleOp(group = "test")
 public class JunctionDetectionTest extends LinearOpMode {
     public static boolean turretLocking = false;
     public static int frameHeightPixels = 720;
     public static int frameWidthPixels = 960;
+    public static boolean listAllJunctions = true;
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -63,7 +66,8 @@ public class JunctionDetectionTest extends LinearOpMode {
         waitForStart();
 
         while (opModeIsActive()) {
-            int numJunctions = pipeline.getJunctions().size();
+            List<Target> junctions = pipeline.getJunctions();
+            int numJunctions = junctions.size();
             Target junction = pipeline.getMostCenteredJunction();
 
             // has the stream updated yet, or is it still the same thing?
@@ -81,9 +85,12 @@ public class JunctionDetectionTest extends LinearOpMode {
             turretLocking = false;
 
             telemetry.addData("Number of Junctions", numJunctions);
+            if (listAllJunctions)
+                for (Target j : junctions)
+                    telemetry.addData("Junction at " + j.offset, j.rect.toString());
             if (junction != null /*&& junction != lastJunction*/) {
-                telemetry.addData("Junction Offset", junction.offset);
-                telemetry.addData("Junction Size", junction.rect.width + " x " + junction.rect.height);
+                telemetry.addData("Target Junction Offset", junction.offset);
+                telemetry.addData("Target Junction Size", junction.rect.width + " x " + junction.rect.height);
             }
 //            telemetry.addData("Turret Status", !turretLocking ? "disabled" : turret != null ? "enabled" : "Error: Not configured properly!");
             telemetry.addData("Turret Status", turret != null ? "enabled" : "Error: Not configured properly!");

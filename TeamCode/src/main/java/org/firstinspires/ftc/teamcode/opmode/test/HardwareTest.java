@@ -11,11 +11,9 @@ import com.qualcomm.hardware.lynx.commands.core.LynxGetADCCommand;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.AnalogInput;
-import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DigitalChannel;
 import com.qualcomm.robotcore.hardware.HardwareDevice;
-import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.ServoImplEx;
 import com.qualcomm.robotcore.hardware.configuration.LynxConstants;
 
@@ -25,15 +23,12 @@ import org.firstinspires.ftc.robotcore.external.navigation.VoltageUnit;
 import org.firstinspires.ftc.teamcode.util.TelemetryUtil;
 
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
-import java.util.Locale;
-import java.util.function.Predicate;
 
 @Config
 @TeleOp(group = "test")
 public class HardwareTest extends LinearOpMode {
-    public static boolean CONTROL_HUB_SELECTED = false;
+    public static boolean CONTROL_HUB_SELECTED = true;
     public static double MOTOR0_POWER = 0;
     public static double MOTOR1_POWER = 0;
     public static double MOTOR2_POWER = 0;
@@ -44,6 +39,7 @@ public class HardwareTest extends LinearOpMode {
     public static double SERVO3_POSITION = -1;
     public static double SERVO4_POSITION = -1;
     public static double SERVO5_POSITION = -1;
+    public static String SELECTED_LYNX_MODULE_NAME = "Control Hub";
 
     public boolean controlHubLastSelected = CONTROL_HUB_SELECTED;
 
@@ -69,8 +65,10 @@ public class HardwareTest extends LinearOpMode {
         List<LynxDcMotorController> motorControllers = hardwareMap.getAll(LynxDcMotorController.class);
         List<LynxServoController> servoControllers = hardwareMap.getAll(LynxServoController.class);
 
-        assert lynxModules.size() == motorControllers.size() && lynxModules.size() == servoControllers.size();
-        assert lynxModules.size() >= 1 && lynxModules.size() <= 2;
+        if (lynxModules.size() != motorControllers.size() || lynxModules.size() != servoControllers.size())
+            throw new IllegalStateException("The number of LynxModules, MotorControllers, and ServoControllers are different.");
+        if (lynxModules.size() < 1 || lynxModules.size() > 2)
+            throw new IllegalStateException("There is either less than one or more than two LynxModules.");
 
         boolean MUST_BE_CONTROL_HUB = lynxModules.size() == 1;
 
@@ -123,16 +121,29 @@ public class HardwareTest extends LinearOpMode {
                 for (DcMotorEx motor : hardwareMap.getAll(DcMotorEx.class)) if (motor.getController() == activeMotorController) activeMotors.add(motor);
                 for (ServoImplEx servo : hardwareMap.getAll(ServoImplEx.class)) if (servo.getController() == activeServoController) activeServos.add(servo);
             }
+//            if (hardwareMap.tryGet(LynxModule.class, SELECTED_LYNX_MODULE_NAME) != null) {
+//                telemetry.addData("Selected Lynx Module Name", "Successfully detected and activated lynx module");
+//                activeLynxModule = hardwareMap.get(LynxModule.class, SELECTED_LYNX_MODULE_NAME);
+//                activeMotorController = hardwareMap.get(LynxDcMotorController.class, SELECTED_LYNX_MODULE_NAME);
+//                activeServoController = hardwareMap.get(LynxServoController.class, SELECTED_LYNX_MODULE_NAME);
+//            }
+//            else {
+//                telemetry.addData("Selected Lynx Module Name", "Could not identify a lynx module with that name");
+//            }
 
             motorPowers = new double[]{ MOTOR0_POWER, MOTOR1_POWER, MOTOR2_POWER, MOTOR3_POWER };
             servoPositions = new double[]{ SERVO0_POSITION, SERVO1_POSITION, SERVO2_POSITION, SERVO3_POSITION, SERVO4_POSITION, SERVO5_POSITION };
 
-            assert activeLynxModule != null && activeMotorController != null && activeServoController != null;
+            if (activeLynxModule == null || activeMotorController == null || activeServoController == null)
+                throw new IllegalStateException("activeLynxModule, activeMotorController, or activeServoController was null.");
 
             for (DcMotorEx motor : activeMotors) motor.setPower(motorPowers[motor.getPortNumber()]);
             for (ServoImplEx servo : activeServos) if (servoPositions[servo.getPortNumber()] == -1) servo.setPwmDisable(); else servo.setPosition(servoPositions[servo.getPortNumber()]);
 
-
+            String moduleNames = "";
+            for (LynxModule lynxModule : lynxModules)
+                moduleNames += ", " + hardwareMap.getNamesOf(lynxModule).iterator().next();
+            telemetry.addData("detected lynx modules", moduleNames.substring(2));
             telemetry.addData("currently operating hub", (CONTROL_HUB_SELECTED ? "control hub " : "expansion hub ") + formatName(activeLynxModule));
             telemetry.addData(formatName(activeLynxModule) + " connection info", activeLynxModule.getConnectionInfo());
             telemetry.addData(formatName(activeLynxModule) + " auxiliary voltage (volts)", activeLynxModule.getAuxiliaryVoltage(VoltageUnit.VOLTS));

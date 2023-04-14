@@ -54,8 +54,10 @@ public class RegionalTele extends LinearOpMode {
 
         ElapsedTime myTimer = new ElapsedTime(ElapsedTime.Resolution.MILLISECONDS);
         ElapsedTime FSMTimer = new ElapsedTime(ElapsedTime.Resolution.MILLISECONDS);
+        ElapsedTime visionTimer = new ElapsedTime(ElapsedTime.Resolution.MILLISECONDS);
 
         Robot robot = new Robot(hardwareMap, telemetry);
+        telemetry = robot.telemetry;
 
         JunctionDetectionPipeline pipeline = new JunctionDetectionPipeline();
         WebcamName webcamName = hardwareMap.get(WebcamName.class, "Webcam 2");
@@ -68,6 +70,7 @@ public class RegionalTele extends LinearOpMode {
             @Override
             public void onOpened() {
                 cvCamera.startStreaming(960, 720, OpenCvCameraRotation.UPRIGHT);
+                FtcDashboard.getInstance().startCameraStream(cvCamera, 60);
             }
 
             @Override
@@ -75,7 +78,6 @@ public class RegionalTele extends LinearOpMode {
                 telemetry.addLine("Warning: " + webcamName + " could not be opened. Error Code: " + errorCode);
             }
         });
-        FtcDashboard.getInstance().startCameraStream(cvCamera, 60);
 
         SampleMecanumDrive drive = new SampleMecanumDrive(hardwareMap);
 
@@ -91,8 +93,8 @@ public class RegionalTele extends LinearOpMode {
         double totalError = 0.0;
         double lastError = 0.0;
 
-        int slidesTop = 580;
-        int slidesMiddle = 200;
+        int slidesTop = 680;
+        int slidesMiddle = 310;
         int safe = 50;
 
         int clear = 920;
@@ -115,7 +117,9 @@ public class RegionalTele extends LinearOpMode {
 
         boolean hdistance = false;
 
+        boolean turretStill = false;
         boolean visionCorrection = true;
+        boolean visionCorrected = false;
 
         robot.intakeOuttake.horizontal.forwardRight.setPosition(FORWARD_RIGHT_IN);
         robot.intakeOuttake.horizontal.forwardLeft.setPosition(FORWARD_LEFT_IN);
@@ -138,10 +142,10 @@ public class RegionalTele extends LinearOpMode {
 
             Pose2d poseEstimate = drive.getPoseEstimate();
 
-            if (justPressed1.x()) robot.butterfly.setState(Butterfly.State.MECANUM);
+//            if (justPressed1.x()) robot.butterfly.setState(Butterfly.State.MECANUM);
             if (justPressed1.b() && !gamepad1.start)
-                robot.butterfly.setState(Butterfly.State.BAD_TRACTION);
-//                robot.butterfly.setState(Butterfly.State.STANDSTILL);
+                robot.butterfly.setState(robot.butterfly.getState() != Butterfly.State.MECANUM ? Butterfly.State.MECANUM : Butterfly.State.BAD_TRACTION);
+//                robot.butterfly.setState(Butterfly.State.STANDSTILL); // todo make the robot standstill when we're scoring
 
             double[] fields = {-Math.cbrt(gamepad1.left_stick_y), Math.cbrt(gamepad1.left_stick_x), Math.cbrt(gamepad1.right_stick_x)};
             if (gamepad1.right_bumper || gamepad1.left_stick_button || gamepad1.right_stick_button)
@@ -186,6 +190,8 @@ public class RegionalTele extends LinearOpMode {
                     slidesTargetPos = safe;
                     turretTarget = 0;
 
+                    robot.intakeOuttake.arm.setAligner(linkageAuto);
+
                     if (justPressed1.a()) {
                         driverArm = 0;
                         driverSlides = 0;
@@ -201,10 +207,14 @@ public class RegionalTele extends LinearOpMode {
 
                     slidesTargetPos = safe;
 
-                    robot.intakeOuttake.arm.claw.setPosition(CLAW_OPEN);
-                    robot.intakeOuttake.arm.arm.setPosition(ARM_INTAKE);
+                    if (FSMTimer.time() > 150) {
+                        robot.intakeOuttake.arm.claw.setPosition(CLAW_OPEN);
+                        robot.intakeOuttake.arm.arm.setPosition(ARM_INTAKE);
 
-                    robot.intakeOuttake.arm.wrist.setPosition(WRIST_INTAKE);
+                        robot.intakeOuttake.arm.wrist.setPosition(WRIST_INTAKE);
+                    }
+
+                    robot.intakeOuttake.arm.setAligner(true);
 
                     if (autoIntake == 0) {
                         if (FSMTimer.time() < 700) {
@@ -268,6 +278,10 @@ public class RegionalTele extends LinearOpMode {
 
                     if (FSMTimer.time() > 1000) {
                         robot.intakeOuttake.arm.wrist.setPosition(WRIST_OUTTAKE);
+                    }
+
+                    if (FSMTimer.time() > 1500) {
+                        robot.intakeOuttake.arm.setAligner(false);
                     }
 
                     boolean reset = false;
@@ -380,6 +394,7 @@ public class RegionalTele extends LinearOpMode {
                         driverTurret = 0;
                         armNeutral = false;
                         firstTime = true;
+                        robot.intakeOuttake.arm.setAligner(false);
                     }
 
                     break;
@@ -389,7 +404,7 @@ public class RegionalTele extends LinearOpMode {
                             slidesTargetPos = safe;
 
                             if (FSMTimer.time() < 400)
-                                robot.intakeOuttake.arm.arm.setPosition(linearProfile(400, FSMTimer.time(), 400, ARM_REST, ARM_OUTTAKE));
+                                robot.intakeOuttake.arm.arm.setPosition(linearProfile(400, FSMTimer.time(), 400, ARM_REST, ARM_ANGLED));
                             else
                                 robot.intakeOuttake.arm.arm.setPosition(ARM_OUTTAKE + driverArm);
                             break;
@@ -397,7 +412,7 @@ public class RegionalTele extends LinearOpMode {
                             slidesTargetPos = slidesMiddle;
 
                             if (FSMTimer.time() < 700)
-                                robot.intakeOuttake.arm.arm.setPosition(linearProfile(700, FSMTimer.time(), 800, ARM_REST, ARM_OUTTAKE));
+                                robot.intakeOuttake.arm.arm.setPosition(linearProfile(700, FSMTimer.time(), 800, ARM_REST, ARM_ANGLED));
                             else
                                 robot.intakeOuttake.arm.arm.setPosition(ARM_OUTTAKE + driverArm);
                             break;
@@ -405,7 +420,7 @@ public class RegionalTele extends LinearOpMode {
                             slidesTargetPos = slidesTop;
 
                             if (FSMTimer.time() < 1000)
-                                robot.intakeOuttake.arm.arm.setPosition(linearProfile(1000, FSMTimer.time(), 800, ARM_REST, ARM_OUTTAKE));
+                                robot.intakeOuttake.arm.arm.setPosition(linearProfile(1000, FSMTimer.time(), 800, ARM_REST, ARM_ANGLED));
                             else
                                 robot.intakeOuttake.arm.arm.setPosition(ARM_OUTTAKE + driverArm);
                             break;
@@ -434,6 +449,9 @@ public class RegionalTele extends LinearOpMode {
                         robot.intakeOuttake.horizontal.backwardLeft.setPosition(BACKWARD_LEFT_IN);
                         robot.intakeOuttake.horizontal.backwardRight.setPosition(BACKWARD_RIGHT_IN);
                     }
+
+                    if (justPressed1.x())
+                        robot.intakeOuttake.arm.setAligner(!robot.intakeOuttake.arm.isAligning());
 
                     if (gamepad1.left_bumper) {
                         firstTime = true;
@@ -464,7 +482,7 @@ public class RegionalTele extends LinearOpMode {
                         }
 
                         if (back)
-                            distance = Math.hypot(x_difference, y_difference) * 25.4 - 400;
+                            distance = Math.hypot(x_difference, y_difference) * 25.4 - (mySlides == Slides.LOW ? 400 : 300);
                         else {
                             distance = -(Math.hypot(x_difference, y_difference) * 25.4) + 260;
                         }
@@ -476,24 +494,40 @@ public class RegionalTele extends LinearOpMode {
 
                         firstTime = false;
                         visionCorrection = true;
+                        visionCorrected = false;
+                        turretStill = false;
+                        visionTimer.reset();
                     }
 
-                    if (visionCorrection && Math.abs(robot.turret.quadratureEncoder.getCurrentPosition() - turretTarget) < 10
+                    if (visionCorrection && !turretStill && Turret.getWithin() //Math.abs(robot.turret.quadratureEncoder.getCurrentPosition() + turretTarget) < 50
+                            && Math.abs(robot.turret.quadratureEncoder.getRawVelocity()) < 5) {
+                        visionTimer.reset();
+                        turretStill = true;
+                    }
+                    if (visionCorrection && turretStill && visionTimer.time() > 200 //&& Math.abs(robot.turret.quadratureEncoder.getCurrentPosition() - turretTarget) < 10
                             && Math.abs(robot.turret.quadratureEncoder.getRawVelocity()) < 5 && pipeline.getJunctions().size() > 0) {
                         visionCorrection = false;
-                        turretTarget = -robot.turret.quadratureEncoder.getCurrentPosition() - Turret.radiansToTicks(Math.toRadians(pipeline.getMostCenteredJunction().offset));
+                        visionCorrected = true;
+                        turretStill = false;
+                        turretTarget = -robot.turret.quadratureEncoder.getCurrentPosition() - Turret.radiansToTicks(Math.toRadians(pipeline.getJunctionTeleop().offset));
                     }
 
+                    if (distance > 250) {
+                        if (visionTimer.time() > 350 && visionTimer.time() < distance/2+250)
+                            robot.intakeOuttake.arm.aligner.setPosition(MECH_ALIGN_BACK);
+                    }
 
-                    if (back && FSMTimer.milliseconds() > Math.abs(distance))
-                        robot.intakeOuttake.arm.setAligner(true);
+//                    if (back && FSMTimer.milliseconds() > Math.abs(distance))
+//                        robot.intakeOuttake.arm.setAligner(true);
+                    if (justPressed1.x())
+                        robot.intakeOuttake.arm.setAligner(!robot.intakeOuttake.arm.isAligning());
 
                     switch (mySlides) {
                         case LOW:
                             if (back) {
                                 robot.intakeOuttake.arm.wrist.setPosition(WRIST_OUTTAKE);
                                 if (FSMTimer.time() < 400)
-                                    robot.intakeOuttake.arm.arm.setPosition(linearProfile(400, FSMTimer.time(), 400, ARM_REST, ARM_OUTTAKE));
+                                    robot.intakeOuttake.arm.arm.setPosition(linearProfile(400, FSMTimer.time(), 400, ARM_REST, ARM_ANGLED));
                                 else
                                     robot.intakeOuttake.arm.arm.setPosition(ARM_OUTTAKE + driverArm);
                             }  else {
@@ -510,9 +544,9 @@ public class RegionalTele extends LinearOpMode {
                                 slidesTargetPos = slidesMiddle;
                                 robot.intakeOuttake.arm.wrist.setPosition(WRIST_OUTTAKE);
                                 if (FSMTimer.time() < 700)
-                                    robot.intakeOuttake.arm.arm.setPosition(linearProfile(700, FSMTimer.time(), 800, ARM_REST, ARM_OUTTAKE));
+                                    robot.intakeOuttake.arm.arm.setPosition(linearProfile(700, FSMTimer.time(), 800, ARM_REST, ARM_ANGLED));
                                 else
-                                    robot.intakeOuttake.arm.arm.setPosition(ARM_OUTTAKE + driverArm);
+                                    robot.intakeOuttake.arm.arm.setPosition(ARM_ANGLED + driverArm);
                             } else {
                                 slidesTargetPos = slidesMiddle + clear;
                                 robot.intakeOuttake.arm.wrist.setPosition(WRIST_INTAKE);
@@ -527,9 +561,9 @@ public class RegionalTele extends LinearOpMode {
                                 slidesTargetPos = slidesTop;
                                 robot.intakeOuttake.arm.wrist.setPosition(WRIST_OUTTAKE);
                                 if (FSMTimer.time() < 1000)
-                                    robot.intakeOuttake.arm.arm.setPosition(linearProfile(1000, FSMTimer.time(), 800, ARM_REST, ARM_OUTTAKE));
+                                    robot.intakeOuttake.arm.arm.setPosition(linearProfile(1000, FSMTimer.time(), 800, ARM_REST, ARM_ANGLED));
                                 else
-                                    robot.intakeOuttake.arm.arm.setPosition(ARM_OUTTAKE + driverArm);
+                                    robot.intakeOuttake.arm.arm.setPosition(ARM_ANGLED + driverArm);
                             } else {
                                 slidesTargetPos = slidesTop + clear;
                                 robot.intakeOuttake.arm.wrist.setPosition(WRIST_INTAKE);
@@ -541,7 +575,7 @@ public class RegionalTele extends LinearOpMode {
                             break;
                     }
 
-                    if (Turret.getWithin() && Math.abs((slidesTargetPos + driverSlides) - robot.vertical.v2.getCurrentPosition()) < 350) {
+                    if (Turret.getWithin() && Math.abs((slidesTargetPos + driverSlides) - robot.vertical.v2.getCurrentPosition()) < 100 && visionCorrected) {
                         robot.intakeOuttake.horizontal.setTarget(distance + horizontalDriver);
                         robot.intakeOuttake.horizontal.update();
                     }
@@ -572,17 +606,23 @@ public class RegionalTele extends LinearOpMode {
                     }
                     else {
                         if (firstTime)
-                            slidesTargetPos -= 500;
+//                            slidesTargetPos -= 500;
+                            robot.intakeOuttake.arm.arm.setPosition(robot.intakeOuttake.arm.arm.getPosition() - .08);
                     }
                     if (justPressed1.dpad_up())
-                        slidesTargetPos += 500;
+//                        slidesTargetPos += 500;
+                        robot.intakeOuttake.arm.arm.setPosition(robot.intakeOuttake.arm.arm.getPosition() + .08);
                     if (justPressed1.left_bumper() && !firstTime)
-                        slidesTargetPos -= 500;
+//                        slidesTargetPos -= 500;
+                        robot.intakeOuttake.arm.arm.setPosition(robot.intakeOuttake.arm.arm.getPosition() - .08);
 
                     if (hdistance) {
                         robot.intakeOuttake.horizontal.setTarget(distance + horizontalDriver);
                         robot.intakeOuttake.horizontal.update();
                     }
+
+                    if (justPressed1.x())
+                        robot.intakeOuttake.arm.setAligner(!robot.intakeOuttake.arm.isAligning());
 
                     firstTime = false;
 
@@ -601,7 +641,7 @@ public class RegionalTele extends LinearOpMode {
 //                        turretTarget = 0;
                     if (Math.abs(robot.intakeOuttake.horizontal.getPosition()) > 300)
                         waitTurret = true;
-                    if (waitTurret && FSMTimer.time() > 500)
+                    if (waitTurret && FSMTimer.time() > 750)
                         turretTarget = 0;
 
                     if (FSMTimer.time() < 350)
@@ -618,12 +658,12 @@ public class RegionalTele extends LinearOpMode {
                     if (robot.intakeOuttake.horizontal.forwardLeft.getPosition() > (FORWARD_LEFT_IN * 3 + FORWARD_LEFT_OUT) / 4) {
                         if (linkageAuto) {
                             if (FSMTimer.time() < 750)
-                                robot.intakeOuttake.arm.arm.setPosition(linearProfile(750, FSMTimer.time(), 750, ARM_OUTTAKE, ARM_INTAKE));
+                                robot.intakeOuttake.arm.arm.setPosition(linearProfile(750, FSMTimer.time(), 750, ARM_ANGLED, ARM_INTAKE));
                             else
                                 robot.intakeOuttake.arm.arm.setPosition(ARM_INTAKE);
                         } else {
                             if (FSMTimer.time() < 750)
-                                robot.intakeOuttake.arm.arm.setPosition(linearProfile(750, FSMTimer.time(), 750, ARM_OUTTAKE, ARM_REST));
+                                robot.intakeOuttake.arm.arm.setPosition(linearProfile(750, FSMTimer.time(), 750, ARM_ANGLED, ARM_REST));
                             else
                                 robot.intakeOuttake.arm.arm.setPosition(ARM_REST);
                         }
@@ -639,7 +679,7 @@ public class RegionalTele extends LinearOpMode {
                     robot.intakeOuttake.horizontal.forwardRight.setPosition(FORWARD_RIGHT_IN);
                     robot.intakeOuttake.horizontal.forwardLeft.setPosition(FORWARD_LEFT_IN);
 
-                    robot.intakeOuttake.arm.setAligner(false);
+                    robot.intakeOuttake.arm.setAligner(true);
 
                     if (FSMTimer.time() > 750) {
                         driverTurret = 0;
@@ -666,6 +706,8 @@ public class RegionalTele extends LinearOpMode {
                     horizontalDriver += timeDelta / 1e9 * .175 * (gamepad1.right_trigger > .5 ? 1.3 : gamepad1.left_trigger > .5 ? -1.3 : 0);
             }
             driverSlides += timeDelta / 1e9 * 300 * (gamepad2.dpad_up ? 1 : gamepad2.dpad_down ? -1 : 0);
+            if (myState == State.UP_AUTOMATIC || myState == State.UP)
+                robot.intakeOuttake.arm.adjustAlignerDegrees(timeDelta / 1e9 * 10 * (-gamepad2.left_trigger + gamepad2.right_trigger));
 
             long time = System.nanoTime();
             double error = (slidesTargetPos + driverSlides) - robot.vertical.v2.getCurrentPosition();
@@ -687,6 +729,10 @@ public class RegionalTele extends LinearOpMode {
             robot.vertical.v3.setPower(power + .01);
 
             robot.turret.setTurretTargetPosition(turretTarget + driverTurret);
+
+//            if (robot.intakeOuttake.horizontal.getPosition() < 0)
+//                robot.intakeOuttake.arm.setAligner(true);
+
 //
 //            telemetry.addData("x difference", x_difference);
 //            telemetry.addData("y difference", y_difference);
@@ -695,6 +741,18 @@ public class RegionalTele extends LinearOpMode {
 //            telemetry.addData("turret radians", turretTargetRad);
 //            telemetry.addData("turret target", ttarget);
 //            telemetry.addData("distaance", distance);
+            telemetry.addData("State", myState);
+            telemetry.addData("Pose x*", -poseEstimate.getY());
+            telemetry.addData("Pose y*", poseEstimate.getX());
+            telemetry.addData("Pose Heading", poseEstimate.getHeading());
+            telemetry.addData("horizontal distance (mm)", robot.intakeOuttake.horizontal.getPosition());
+            telemetry.addData("Turret Target", turretTarget);
+            telemetry.addData("Turret Position", robot.intakeOuttake.turret.quadratureEncoder.getCurrentPosition());
+            telemetry.addData("Turret Velocity", robot.intakeOuttake.turret.quadratureEncoder.getRawVelocity());
+            telemetry.addData("TurretStill", turretStill);
+            telemetry.addData("VisionCorrection", visionCorrection);
+            Target jjjjj = pipeline.getJunctionTeleop();
+            telemetry.addData("Junction", jjjjj == null ? "null" : jjjjj.rect.toString());
 
             drive.update();
 

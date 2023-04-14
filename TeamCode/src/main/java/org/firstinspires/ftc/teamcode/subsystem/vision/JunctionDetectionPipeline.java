@@ -22,18 +22,22 @@ import java.util.Locale;
 @Config
 public class JunctionDetectionPipeline extends OpenCvPipeline {
     public static boolean maskedView = false;
-    public static int yellowLowH = 90;//95;//20;
+    public static int yellowLowH = 95;//20;
     public static int yellowLowS = 125;//175;
     public static int yellowLowV = 120;
     public static int yellowHighH = 100;//30;
     public static int yellowHighS = 255;
     public static int yellowHighV = 255;
+    public static double junctionMinWidth = .040;
+    public static double junctionMinHeight = .15;
+    public static double junctionMaxWidth = .12;
+    public static double junctionMaxHeight = 1.1;
 
     private Mat copy;
 
     private final Object junctionLock = new Object();
 
-    private List<Target> junctions;
+    private List<Target> junctions = new ArrayList<>();
 
     public List<Target> getJunctions() {
         synchronized (junctionLock) {
@@ -58,6 +62,18 @@ public class JunctionDetectionPipeline extends OpenCvPipeline {
                 if (Math.abs(junction.offset) < Math.abs(closest.offset)) closest = junction;
             }
             return closest;
+        }
+    }
+    @Nullable public Target getJunctionTeleop() {
+        synchronized (junctionLock) {
+            Target target = null;
+            for (Target junction : junctions) {
+                if (junction.rect.y + junction.rect.height > copy.height() * .45 && junction.rect.y < copy.height() * .7
+                        && junction.rect.x > copy.width() * .2 && junction.rect.x + junction.rect.width < copy.width() * .8
+                        && (target == null || Math.abs(junction.offset) < Math.abs(target.offset)))
+                    target = junction;
+            }
+            return target;
         }
     }
     // todo get junction by height
@@ -114,7 +130,8 @@ public class JunctionDetectionPipeline extends OpenCvPipeline {
         List<Rect> rects = new ArrayList<>();
         for (MatOfPoint contour : contours) {
             Rect rectangle = Imgproc.boundingRect(contour);
-            if (rectangle.width > .005 * frame.width() && rectangle.width < .16 * frame.width() && rectangle.height > .10 * frame.height()) {
+            if (rectangle.width > junctionMinWidth * frame.width() && rectangle.width < junctionMaxWidth * frame.width()
+                    && rectangle.height > junctionMinHeight * frame.height() && rectangle.height < junctionMaxHeight * frame.height()) {
                 rects.add(rectangle);
                 Imgproc.rectangle(
                         frame,

@@ -1,15 +1,9 @@
 package org.firstinspires.ftc.teamcode.subsystem.io;
 
 import com.acmerobotics.dashboard.config.Config;
-import com.acmerobotics.roadrunner.util.Angle;
-import com.qualcomm.robotcore.hardware.CRServoImplEx;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.ServoImplEx;
 import com.qualcomm.robotcore.util.Range;
-
-import org.apache.commons.math3.geometry.euclidean.twod.Vector2D;
-import org.firstinspires.ftc.teamcode.subsystem.ServoStuff;
 
 @Config
 public class Arm {
@@ -17,7 +11,7 @@ public class Arm {
     public static double ARM_INTAKE = .78;
     public static double ARM_REST = .36;
     public static double ARM_OUTTAKE = .22; //old .38
-    public static double ARM_ANGLED = .33;
+    public static double ARM_ANGLED = .30;
 
     public static double ARM_LENGTH = 250;
     public static double ARM_HORIZONTAL_LENGTH = 346.17;
@@ -27,8 +21,9 @@ public class Arm {
     public static double CLAW_OPEN = .35;
     public static double CLAW_CLOSE = .56;
 
-    public static double MECH_ALIGN_OPEN = .72;
-    public static double MECH_ALIGN_CLOSE = .52;
+    public static double MECH_ALIGN_OPEN = .81;
+    public static double MECH_ALIGN_CLOSE = .64;
+    public static double MECH_ALIGN_BACK = .97;
 
     boolean intakeWrist = true;
 
@@ -98,11 +93,21 @@ public class Arm {
             wrist.setPosition(WRIST_OUTTAKE);
     }
 
+    public boolean isAligning() {
+        return aligner.getPosition() - MECH_ALIGN_CLOSE < (MECH_ALIGN_OPEN - MECH_ALIGN_CLOSE) / 2;
+    }
     public void setAligner(boolean aligning) {
         if (aligning)
             aligner.setPosition(MECH_ALIGN_CLOSE);
         else
             aligner.setPosition(MECH_ALIGN_OPEN);
+    }
+    // positive moves to more open
+    public void adjustAligner(double amount) {
+        aligner.setPosition(Range.clip(aligner.getPosition() + amount, MECH_ALIGN_CLOSE, MECH_ALIGN_OPEN));
+    }
+    public void adjustAlignerDegrees(double amount) {
+        adjustAligner(amount * (MECH_ALIGN_OPEN - MECH_ALIGN_CLOSE) / 90);
     }
 
 
