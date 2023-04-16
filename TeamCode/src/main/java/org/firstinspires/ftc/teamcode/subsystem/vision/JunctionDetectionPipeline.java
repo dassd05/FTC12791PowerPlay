@@ -16,6 +16,8 @@ import org.opencv.imgproc.Imgproc;
 import org.openftc.easyopencv.OpenCvPipeline;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 
@@ -28,7 +30,7 @@ public class JunctionDetectionPipeline extends OpenCvPipeline {
     public static int yellowHighH = 100;//30;
     public static int yellowHighS = 255;
     public static int yellowHighV = 255;
-    public static double junctionMinWidth = .037;
+    public static double junctionMinWidth = .038;
     public static double junctionMinHeight = .15;
     public static double junctionMaxWidth = .12;
     public static double junctionMaxHeight = 1.1;
@@ -74,6 +76,17 @@ public class JunctionDetectionPipeline extends OpenCvPipeline {
                     target = junction;
             }
             return target;
+        }
+    }
+    @Nullable public List<Target> getJunctionsTeleop() {
+        synchronized (junctionLock) {
+            List<Target> js = new ArrayList<>();
+            for (Target junction : junctions) {
+                if (junction.rect.y + junction.rect.height > copy.height() * .45 && junction.rect.y < copy.height() * .7
+                        && junction.rect.x > copy.width() * .2 && junction.rect.x + junction.rect.width < copy.width() * .8)
+                    js.add(Math.abs(-Collections.binarySearch(js, junction, (t1, t2) -> (int) (1000*(Math.abs(t1.offset) - Math.abs(t2.offset))))-1), junction);
+            }
+            return js;
         }
     }
     // todo get junction by height

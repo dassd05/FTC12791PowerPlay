@@ -7,6 +7,7 @@ import com.qualcomm.hardware.lynx.LynxModule;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.HardwareMap;
+import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.ServoImplEx;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
@@ -28,10 +29,10 @@ public class Horizontal {
     public static boolean debugging = false;
 
     public HardwareMap hardwareMap;
-    public ServoImplEx forwardLeft;
-    public ServoImplEx forwardRight;
-    public ServoImplEx backwardLeft;
-    public ServoImplEx backwardRight;
+    public Servo forwardLeft;
+    public Servo forwardRight;
+    public Servo backwardLeft;
+    public Servo backwardRight;
 
     public SliderCrankLinkage forward;
     public SliderCrankLinkage backward;
@@ -44,10 +45,10 @@ public class Horizontal {
     public Horizontal(HardwareMap hardwareMap) {
         this.hardwareMap = hardwareMap;
 
-        forwardLeft = hardwareMap.get(ServoImplEx.class, "hfl");
-        forwardRight = hardwareMap.get(ServoImplEx.class, "hfr");
-        backwardLeft = hardwareMap.get(ServoImplEx.class, "hbl");
-        backwardRight = hardwareMap.get(ServoImplEx.class, "hbr");
+        forwardLeft = hardwareMap.get(Servo.class, "hfl");
+        forwardRight = hardwareMap.get(Servo.class, "hfr");
+        backwardLeft = hardwareMap.get(Servo.class, "hbl");
+        backwardRight = hardwareMap.get(Servo.class, "hbr");
 
 //        forwardLeft.setPwmRange(ServoStuff.AxonMiniServo.servoModePwmRange);
 //        forwardRight.setPwmRange(ServoStuff.AxonMiniServo.servoModePwmRange);

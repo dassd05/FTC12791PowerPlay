@@ -30,8 +30,10 @@ import org.openftc.easyopencv.OpenCvCamera;
 import org.openftc.easyopencv.OpenCvCameraFactory;
 import org.openftc.easyopencv.OpenCvCameraRotation;
 
-@TeleOp(name = "RegionalTele", group = "0")
-public class RegionalTele extends LinearOpMode {
+import java.util.List;
+
+@TeleOp(name = "WorldsTeleLeft", group = "0")
+public class RegionalTeleLeft extends LinearOpMode {
 
     public static double P = .007, I = 7e-11 , D = 400;
 
@@ -404,6 +406,18 @@ public class RegionalTele extends LinearOpMode {
 
                     break;
                 case UP:
+
+                    if (firstTime) {
+                        aligning = true;
+                        firstTime = false;
+                    }
+
+                    if(justPressed1.x())
+                        aligning = !aligning;
+
+                    robot.intakeOuttake.arm.setAligner(aligning, FSMTimer.time(), 800);
+
+
                     switch (mySlides) {
                         case LOW:
                             slidesTargetPos = safe;
@@ -419,7 +433,7 @@ public class RegionalTele extends LinearOpMode {
                             if (FSMTimer.time() < 700)
                                 robot.intakeOuttake.arm.arm.setPosition(linearProfile(700, FSMTimer.time(), 800, ARM_REST, ARM_ANGLED));
                             else
-                                robot.intakeOuttake.arm.arm.setPosition(ARM_OUTTAKE + driverArm);
+                                robot.intakeOuttake.arm.arm.setPosition(ARM_ANGLED + driverArm);
                             break;
                         case HIGH:
                             slidesTargetPos = slidesTop;
@@ -427,7 +441,7 @@ public class RegionalTele extends LinearOpMode {
                             if (FSMTimer.time() < 1000)
                                 robot.intakeOuttake.arm.arm.setPosition(linearProfile(1000, FSMTimer.time(), 800, ARM_REST, ARM_ANGLED));
                             else
-                                robot.intakeOuttake.arm.arm.setPosition(ARM_OUTTAKE + driverArm);
+                                robot.intakeOuttake.arm.arm.setPosition(ARM_ANGLED + driverArm);
                             break;
                     }
 
@@ -500,24 +514,27 @@ public class RegionalTele extends LinearOpMode {
                         robot.update();
 
                         firstTime = false;
-                        visionCorrection = true;
+                        visionCorrection = junction != B2 && junction != C2;
                         visionCorrected = false;
                         turretStill = false;
                         visionTimer.reset();
                     }
+
 
                     if (visionCorrection && !turretStill && Turret.getWithin() //Math.abs(robot.turret.quadratureEncoder.getCurrentPosition() + turretTarget) < 50
                             && Math.abs(robot.turret.quadratureEncoder.getRawVelocity()) < 5) {
                         visionTimer.reset();
                         turretStill = true;
                     }
-                    Target target;
-                    if (visionCorrection && turretStill && visionTimer.time() > 200 //&& Math.abs(robot.turret.quadratureEncoder.getCurrentPosition() - turretTarget) < 10
-                            && Math.abs(robot.turret.quadratureEncoder.getRawVelocity()) < 5 && (target = pipeline.getJunctionTeleop()) != null) {
+                    List<Target> targets;
+                    if (visionCorrection && turretStill && visionTimer.time() > (junction == B2 || junction == C2 ? 200 : 200)
+                            //&& Math.abs(robot.turret.quadratureEncoder.getCurrentPosition() - turretTarget) < 10
+                            && Math.abs(robot.turret.quadratureEncoder.getRawVelocity()) < 5 && (targets = pipeline.getJunctionsTeleop()).size() > 0) {
                         visionCorrection = false;
                         visionCorrected = true;
                         turretStill = false;
-                        turretTarget = -robot.turret.quadratureEncoder.getCurrentPosition() - Turret.radiansToTicks(Math.toRadians(target.offset));
+                        turretTarget = -robot.turret.quadratureEncoder.getCurrentPosition() - Turret.radiansToTicks(Math.toRadians(
+                                targets.size() == 1 ? targets.get(0).offset : targets.get(0).rect.width > targets.get(1).rect.width ? targets.get(0).offset : targets.get(1).offset));
                     }
 
 //                    if (distance > 250) {
@@ -586,7 +603,7 @@ public class RegionalTele extends LinearOpMode {
                             break;
                     }
 
-                    if (Turret.getWithin() && Math.abs((slidesTargetPos + driverSlides) - robot.vertical.v2.getCurrentPosition()) < 100) {
+                    if (Turret.getWithin() && Math.abs((slidesTargetPos + driverSlides) - robot.vertical.v2.getCurrentPosition()) < 100 /*&& (junction != B2 && junction != C2 || visionCorrected)*/) {
                         robot.intakeOuttake.horizontal.setTarget(distance + horizontalDriver);
                         robot.intakeOuttake.horizontal.update();
                     }

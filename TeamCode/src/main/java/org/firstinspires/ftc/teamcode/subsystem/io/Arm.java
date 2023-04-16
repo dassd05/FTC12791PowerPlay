@@ -115,6 +115,18 @@ public class Arm {
             aligner.setPosition(MECH_ALIGN_PREP);
     }
 
+    public void setAligner(boolean aligning, double time, double cut) {
+        if (time > cut) {
+            if (aligning)
+                aligner.setPosition(MECH_ALIGN_CLOSE);
+            else
+                aligner.setPosition(MECH_ALIGN_OPEN);
+        }
+        else
+            aligner.setPosition(MECH_ALIGN_PREP);
+    }
+
+
     // positive moves to more open
     public void adjustAligner(double amount) {
         aligner.setPosition(Range.clip(aligner.getPosition() + amount, MECH_ALIGN_CLOSE, MECH_ALIGN_OPEN));
