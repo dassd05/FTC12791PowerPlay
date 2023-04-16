@@ -14,13 +14,13 @@ import org.firstinspires.ftc.teamcode.util.Encoder;
 
 @Config
 public class Turret {
-    public static double ABSOLUTE_FORWARD = .79; // volts. ccw is decreasing
+    public static double ABSOLUTE_FORWARD = .87; // volts. ccw is decreasing
     //public static double ABSOLUTE_FORWARD = .89; // volts. ccw is decreasing
-    public static PIDCoefficients PID = new PIDCoefficients(9.0, 1e-8, 0);
+    public static PIDCoefficients PID = new PIDCoefficients(2.2, 7e-7, 0);
     public static double INTEGRAL_CAP = .55;
 
 
-    public static PIDCoefficients PIDZeroed = new PIDCoefficients(.07, 1e-9, 700000);
+    public static PIDCoefficients PIDZeroed = new PIDCoefficients(.06, 8e-10, /*2000000*/ 0);
 
     public HardwareMap hardwareMap;
     public DcMotorEx motor;
@@ -119,7 +119,7 @@ public class Turret {
 
             // todo temp
             long time = System.nanoTime();
-            double error = ABSOLUTE_FORWARD - voltage;
+            double error = -ABSOLUTE_FORWARD + voltage;
             if (error * lastError <= 0) totalError = 0;
             else totalError += (error - lastError) * (time - lastTime);
             double d = (error - lastError) / (time - lastTime);
@@ -150,7 +150,7 @@ public class Turret {
             double d = (error - lastError) / (time - lastTime);
             double i = totalError * PIDZeroed.i;
 
-            if (Math.abs(error) > 20)
+            if (Math.abs(error) > 10)
                 power = PIDZeroed.p * error + (Math.abs(i) < INTEGRAL_CAP ? i : Math.signum(i) * INTEGRAL_CAP) + PIDZeroed.d * d;
             else
                 power = 0;
@@ -193,7 +193,7 @@ public class Turret {
 
             // todo temp
             long time = System.nanoTime();
-            double error = ABSOLUTE_FORWARD - voltage;
+            double error = -ABSOLUTE_FORWARD + voltage;
             if (error * lastError <= 0) totalError = 0;
             else totalError += (error - lastError) * (time - lastTime);
             double d = (error - lastError) / (time - lastTime);

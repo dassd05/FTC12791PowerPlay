@@ -22,13 +22,13 @@ import java.util.Locale;
 @Config
 public class JunctionDetectionPipeline extends OpenCvPipeline {
     public static boolean maskedView = false;
-    public static int yellowLowH = 95;//20;
+    public static int yellowLowH = 92;//20;
     public static int yellowLowS = 125;//175;
     public static int yellowLowV = 120;
     public static int yellowHighH = 100;//30;
     public static int yellowHighS = 255;
     public static int yellowHighV = 255;
-    public static double junctionMinWidth = .040;
+    public static double junctionMinWidth = .037;
     public static double junctionMinHeight = .15;
     public static double junctionMaxWidth = .12;
     public static double junctionMaxHeight = 1.1;

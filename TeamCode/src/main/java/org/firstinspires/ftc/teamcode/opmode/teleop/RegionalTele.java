@@ -44,6 +44,7 @@ public class RegionalTele extends LinearOpMode {
     double horizontalDriver = 0.0;
 
     public boolean back = true;
+    boolean aligning = false;
 
     public double distance = 0;
 
@@ -93,8 +94,8 @@ public class RegionalTele extends LinearOpMode {
         double totalError = 0.0;
         double lastError = 0.0;
 
-        int slidesTop = 680;
-        int slidesMiddle = 310;
+        int slidesTop = 682;
+        int slidesMiddle = 302;
         int safe = 50;
 
         int clear = 920;
@@ -126,7 +127,11 @@ public class RegionalTele extends LinearOpMode {
         robot.intakeOuttake.horizontal.backwardLeft.setPosition(BACKWARD_LEFT_IN);
         robot.intakeOuttake.horizontal.backwardRight.setPosition(BACKWARD_RIGHT_IN);
 
-        robot.intakeOuttake.arm.arm.setPosition(ARM_REST);
+        //robot.intakeOuttake.arm.arm.setPosition(ARM_REST);
+
+        while (opModeInInit()) {
+            robot.update();
+        }
 
         waitForStart();
 
@@ -394,7 +399,7 @@ public class RegionalTele extends LinearOpMode {
                         driverTurret = 0;
                         armNeutral = false;
                         firstTime = true;
-                        robot.intakeOuttake.arm.setAligner(false);
+                        robot.intakeOuttake.arm.setAligner(true);
                     }
 
                     break;
@@ -467,6 +472,8 @@ public class RegionalTele extends LinearOpMode {
                     hdistance = true;
 
                     if (firstTime) {
+                        aligning = true;
+
                         double y_difference = junction.getY() - poseEstimate.getX();
                         double x_difference = junction.getX() + poseEstimate.getY();
                         double theta = Math.atan2(y_difference, x_difference) - Math.PI / 2;
@@ -504,23 +511,27 @@ public class RegionalTele extends LinearOpMode {
                         visionTimer.reset();
                         turretStill = true;
                     }
+                    Target target;
                     if (visionCorrection && turretStill && visionTimer.time() > 200 //&& Math.abs(robot.turret.quadratureEncoder.getCurrentPosition() - turretTarget) < 10
-                            && Math.abs(robot.turret.quadratureEncoder.getRawVelocity()) < 5 && pipeline.getJunctions().size() > 0) {
+                            && Math.abs(robot.turret.quadratureEncoder.getRawVelocity()) < 5 && (target = pipeline.getJunctionTeleop()) != null) {
                         visionCorrection = false;
                         visionCorrected = true;
                         turretStill = false;
-                        turretTarget = -robot.turret.quadratureEncoder.getCurrentPosition() - Turret.radiansToTicks(Math.toRadians(pipeline.getJunctionTeleop().offset));
+                        turretTarget = -robot.turret.quadratureEncoder.getCurrentPosition() - Turret.radiansToTicks(Math.toRadians(target.offset));
                     }
 
-                    if (distance > 250) {
-                        if (visionTimer.time() > 350 && visionTimer.time() < distance/2+250)
-                            robot.intakeOuttake.arm.aligner.setPosition(MECH_ALIGN_BACK);
-                    }
+//                    if (distance > 250) {
+//                        if (visionTimer.time() > 350 && visionTimer.time() < distance/2+250)
+//                            robot.intakeOuttake.arm.aligner.setPosition(MECH_ALIGN_BACK);
+//                    }
 
 //                    if (back && FSMTimer.milliseconds() > Math.abs(distance))
 //                        robot.intakeOuttake.arm.setAligner(true);
-                    if (justPressed1.x())
-                        robot.intakeOuttake.arm.setAligner(!robot.intakeOuttake.arm.isAligning());
+
+                    if(justPressed1.x())
+                        aligning = !aligning;
+
+                    robot.intakeOuttake.arm.setAligner(aligning, FSMTimer.time());
 
                     switch (mySlides) {
                         case LOW:
@@ -575,7 +586,7 @@ public class RegionalTele extends LinearOpMode {
                             break;
                     }
 
-                    if (Turret.getWithin() && Math.abs((slidesTargetPos + driverSlides) - robot.vertical.v2.getCurrentPosition()) < 100 && visionCorrected) {
+                    if (Turret.getWithin() && Math.abs((slidesTargetPos + driverSlides) - robot.vertical.v2.getCurrentPosition()) < 100) {
                         robot.intakeOuttake.horizontal.setTarget(distance + horizontalDriver);
                         robot.intakeOuttake.horizontal.update();
                     }
