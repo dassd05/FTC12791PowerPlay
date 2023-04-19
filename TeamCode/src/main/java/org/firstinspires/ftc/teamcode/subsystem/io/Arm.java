@@ -20,11 +20,12 @@ public class Arm {
 
     public static double CLAW_OPEN = .35;
     public static double CLAW_CLOSE = .56;
+    public static double CLAW_CAP = .53;
 
     public static double MECH_ALIGN_OPEN = 1;
     public static double MECH_ALIGN_CLOSE = .81;
     public static double MECH_ALIGN_PREP = .84;
-    public static double MECH_ALIGN_BACK = .97;
+    public static double MECH_ALIGN_EXTRA = .79;
 
     boolean intakeWrist = true;
 
@@ -119,6 +120,17 @@ public class Arm {
         if (time > cut) {
             if (aligning)
                 aligner.setPosition(MECH_ALIGN_CLOSE);
+            else
+                aligner.setPosition(MECH_ALIGN_OPEN);
+        }
+        else
+            aligner.setPosition(MECH_ALIGN_PREP);
+    }
+
+    public void setAligner(boolean aligning, double time, double cut, boolean extra) {
+        if (time > cut) {
+            if (aligning)
+                aligner.setPosition(MECH_ALIGN_EXTRA);
             else
                 aligner.setPosition(MECH_ALIGN_OPEN);
         }

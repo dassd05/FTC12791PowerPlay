@@ -60,8 +60,8 @@ public final class Constants {
         public static double FORWARD_LEFT_OUT = .095;
         public static double FORWARD_RIGHT_IN = .000; // diff = .665
         public static double FORWARD_RIGHT_OUT = .665;
-        public static double BACKWARD_LEFT_IN = .23; // diff = .555
-        public static double BACKWARD_LEFT_OUT = .785;
+        public static double BACKWARD_LEFT_IN = .215; // diff = .555
+        public static double BACKWARD_LEFT_OUT = .77;
         public static double BACKWARD_RIGHT_IN = .98; // diff = .565
         public static double BACKWARD_RIGHT_OUT = .425;
 

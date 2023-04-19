@@ -104,7 +104,7 @@ public class JudgingShowcase extends LinearOpMode {
                 robot.intakeOuttake.arm.wrist.setPosition(WRIST_OUTTAKE);
 
             if (gamepad1.dpad_up)
-                targetPos = 300;
+                targetPos = 450;
             if (gamepad1.dpad_down) {
                 targetPos = 0;
                 claw = true;

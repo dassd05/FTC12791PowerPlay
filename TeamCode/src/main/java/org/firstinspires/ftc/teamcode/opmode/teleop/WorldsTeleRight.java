@@ -32,8 +32,8 @@ import org.openftc.easyopencv.OpenCvCameraRotation;
 
 import java.util.List;
 
-@TeleOp(name = "WorldsTeleLeft", group = "0")
-public class RegionalTeleLeft extends LinearOpMode {
+@TeleOp(name = "WorldsTeleRight", group = "0")
+public class WorldsTeleRight extends LinearOpMode {
 
     public static double P = .007, I = 7e-11 , D = 400;
 
@@ -145,7 +145,7 @@ public class RegionalTeleLeft extends LinearOpMode {
         while (opModeIsActive()) {
 
             if (gamepad2.left_bumper && justPressed2.right_bumper() || justPressed2.left_bumper() && gamepad2.right_bumper)
-                drive.setPoseEstimate(new Pose2d(0, -24.25, Math.toRadians(180)));
+                drive.setPoseEstimate(new Pose2d(0, -24.25 - 24, Math.toRadians(180)));
 
             Pose2d poseEstimate = drive.getPoseEstimate();
 
@@ -514,7 +514,7 @@ public class RegionalTeleLeft extends LinearOpMode {
                         robot.update();
 
                         firstTime = false;
-                        visionCorrection = junction != B2 && junction != C2;
+                        visionCorrection = junction != D2 && junction != C2;
                         visionCorrected = false;
                         turretStill = false;
                         visionTimer.reset();
@@ -527,7 +527,7 @@ public class RegionalTeleLeft extends LinearOpMode {
                         turretStill = true;
                     }
                     List<Target> targets;
-                    if (visionCorrection && turretStill && visionTimer.time() > (junction == B2 || junction == C2 ? 200 : 200)
+                    if (visionCorrection && turretStill && visionTimer.time() > (junction == D2 || junction == C2 ? 200 : 200)
                             //&& Math.abs(robot.turret.quadratureEncoder.getCurrentPosition() - turretTarget) < 10
                             && Math.abs(robot.turret.quadratureEncoder.getRawVelocity()) < 5 && (targets = pipeline.getJunctionsTeleop()).size() > 0) {
                         visionCorrection = false;
