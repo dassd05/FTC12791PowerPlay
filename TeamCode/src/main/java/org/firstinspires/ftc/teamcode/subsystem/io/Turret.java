@@ -15,7 +15,7 @@ import org.firstinspires.ftc.teamcode.util.Encoder;
 @Config
 public class Turret {
 //    public static double ABSOLUTE_FORWARD = .87; // volts. ccw is decreasing
-    public static double ABSOLUTE_FORWARD = .81;
+    public static double ABSOLUTE_FORWARD = .78;
     //public static PIDCoefficients PID = new PIDCoefficients(2.2, 7e-7, 0);
     public static PIDCoefficients PID = new PIDCoefficients(6, 0, 0);
     public static double INTEGRAL_CAP = .55;

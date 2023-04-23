@@ -19,11 +19,11 @@ public class Arm {
     boolean open = true;
 
     public static double CLAW_OPEN = .35;
-    public static double CLAW_CLOSE = .56;
+    public static double CLAW_CLOSE = .56;//.55;
     public static double CLAW_CAP = .53;
 
-    public static double MECH_ALIGN_OPEN = 1;
-    public static double MECH_ALIGN_CLOSE = .81;
+    public static double MECH_ALIGN_OPEN = .97;
+    public static double MECH_ALIGN_CLOSE = .79;
     public static double MECH_ALIGN_PREP = .84;
     public static double MECH_ALIGN_EXTRA = .79;
 

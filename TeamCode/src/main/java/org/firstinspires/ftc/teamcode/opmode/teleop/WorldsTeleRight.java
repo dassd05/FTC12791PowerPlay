@@ -96,9 +96,9 @@ public class WorldsTeleRight extends LinearOpMode {
         double totalError = 0.0;
         double lastError = 0.0;
 
-        int slidesTop = 682;
-        int slidesMiddle = 302;
-        int safe = 50;
+        int slidesTop = 682 - 50;
+        int slidesMiddle = 302 - 50;
+        int safe = 50 - 50;
 
         int clear = 920;
         //TODO: fix
@@ -106,6 +106,8 @@ public class WorldsTeleRight extends LinearOpMode {
         boolean deployed = false;
 
         boolean firstTime = true;
+
+        boolean cap = false;
 
         int autoIntake = 0;
         boolean waitTurret = false;
@@ -145,7 +147,7 @@ public class WorldsTeleRight extends LinearOpMode {
         while (opModeIsActive()) {
 
             if (gamepad2.left_bumper && justPressed2.right_bumper() || justPressed2.left_bumper() && gamepad2.right_bumper)
-                drive.setPoseEstimate(new Pose2d(0, -24.25 - 24, Math.toRadians(180)));
+                drive.setPoseEstimate(new Pose2d(0, -48.25, Math.toRadians(180)));
 
             Pose2d poseEstimate = drive.getPoseEstimate();
 
@@ -287,9 +289,7 @@ public class WorldsTeleRight extends LinearOpMode {
                         robot.intakeOuttake.arm.wrist.setPosition(WRIST_OUTTAKE);
                     }
 
-                    if (FSMTimer.time() > 1500) {
-                        robot.intakeOuttake.arm.setAligner(false);
-                    }
+                    robot.intakeOuttake.arm.setAligner(!(FSMTimer.time() > 2500));
 
                     boolean reset = false;
 
@@ -415,8 +415,7 @@ public class WorldsTeleRight extends LinearOpMode {
                     if(justPressed1.x())
                         aligning = !aligning;
 
-                    robot.intakeOuttake.arm.setAligner(aligning, FSMTimer.time(), 800);
-
+                    robot.intakeOuttake.arm.setAligner(aligning);
 
                     switch (mySlides) {
                         case LOW:
@@ -477,10 +476,16 @@ public class WorldsTeleRight extends LinearOpMode {
                         FSMTimer.reset();
 //                        if (mySlides != Slides.LOW)
                         myState = State.SCORE;
+                        cap = false;
 //                        else
 //                            myState = State.DEEXTEND;
                     }
                     linkageAuto = true;
+
+                    if (gamepad2.left_bumper && gamepad2.dpad_down) {
+                        myState = State.UNDO;
+                    }
+
                     break;
                 case UP_AUTOMATIC:
                     hdistance = true;
@@ -548,7 +553,7 @@ public class WorldsTeleRight extends LinearOpMode {
                     if(justPressed1.x())
                         aligning = !aligning;
 
-                    robot.intakeOuttake.arm.setAligner(aligning, FSMTimer.time());
+                    robot.intakeOuttake.arm.setAligner(aligning);
 
                     switch (mySlides) {
                         case LOW:
@@ -613,9 +618,15 @@ public class WorldsTeleRight extends LinearOpMode {
                         FSMTimer.reset();
 //                        if (mySlides != Slides.LOW)
                         myState = State.SCORE;
+                        cap = false;
 //                        else
 //                            myState = State.DEEXTEND;
                     }
+
+                    if (gamepad2.left_bumper && gamepad2.dpad_down) {
+                        myState = State.UNDO;
+                    }
+
                     linkageAuto = false;
                     break;
                 case SCORE:
@@ -629,8 +640,16 @@ public class WorldsTeleRight extends LinearOpMode {
 //                        // todo heading estimate bad
 //                    }
 
+                    if (!firstTime)
+                        if (justPressed2.left_bumper())
+                            cap = true;
+
                     if (mySlides == Slides.LOW) {
-                        robot.intakeOuttake.arm.claw.setPosition(CLAW_OPEN);
+                        if (cap) {
+                            robot.intakeOuttake.arm.claw.setPosition(CLAW_CAP);
+                        }
+                        else
+                            robot.intakeOuttake.arm.claw.setPosition(CLAW_OPEN);
                     }
                     else {
                         if (firstTime)
@@ -662,6 +681,24 @@ public class WorldsTeleRight extends LinearOpMode {
                         hdistance = false;
                         myState = State.DEEXTEND;
                     }
+
+                    if (cap) {
+                        if (justPressed1.left_bumper()) {
+                            robot.intakeOuttake.arm.claw.setPosition(CLAW_CAP);
+                        } else {
+                            if (robot.intakeOuttake.arm.claw.getPosition() == CLAW_CAP) {
+                                if (myTimer.time() > 500) {
+                                    robot.intakeOuttake.arm.arm.setPosition(ARM_REST);
+                                    firstTime = true;
+                                    FSMTimer.reset();
+                                    myState = State.UP;
+                                }
+                            } else {
+                                FSMTimer.reset();
+                            }
+                        }
+                    }
+
                     break;
                 case DEEXTEND:
                     slidesTargetPos = safe;
@@ -672,10 +709,10 @@ public class WorldsTeleRight extends LinearOpMode {
                     if (waitTurret && FSMTimer.time() > 750)
                         turretTarget = 0;
 
-                    if (FSMTimer.time() < 350)
+                    if (FSMTimer.time() < 500)
                         robot.intakeOuttake.arm.claw.setPosition(CLAW_OPEN);
 
-                    if (FSMTimer.time() < 750 && FSMTimer.time() > 350) {
+                    if (FSMTimer.time() < 750 && FSMTimer.time() > 500) {
                         robot.intakeOuttake.arm.claw.setPosition(CLAW_CLOSE);
                         robot.intakeOuttake.arm.wrist.setPosition(WRIST_SAFE);
                     } else {
@@ -719,6 +756,150 @@ public class WorldsTeleRight extends LinearOpMode {
                         myState = State.REST;
                     }
                     break;
+                case UNDO:
+                    slidesTargetPos = safe;
+
+                    robot.intakeOuttake.arm.claw.setPosition(CLAW_CLOSE);
+                    robot.intakeOuttake.arm.wrist.setPosition(WRIST_OUTTAKE);
+
+                    if (Math.abs(robot.intakeOuttake.horizontal.getPosition()) > 300)
+                        waitTurret = true;
+                    if (waitTurret && FSMTimer.time() > 750)
+                        turretTarget = 0;
+
+                    robot.intakeOuttake.arm.arm.setPosition(ARM_REST);
+
+                    robot.intakeOuttake.horizontal.backwardLeft.setPosition(BACKWARD_LEFT_IN);
+                    robot.intakeOuttake.horizontal.backwardRight.setPosition(BACKWARD_RIGHT_IN);
+
+                    robot.intakeOuttake.horizontal.forwardRight.setPosition(FORWARD_RIGHT_IN);
+                    robot.intakeOuttake.horizontal.forwardLeft.setPosition(FORWARD_LEFT_IN);
+
+                    robot.intakeOuttake.arm.setAligner(false);
+
+                    reset = false;
+
+                    if (gamepad1.dpad_down) {
+                        reset = true;
+                        mySlides = Slides.LOW;
+                        myState = State.UP;
+                    }
+                    if (gamepad1.dpad_up) {
+                        reset = true;
+                        mySlides = Slides.HIGH;
+                        myState = State.UP;
+                    }
+                    if (gamepad1.dpad_right || gamepad1.dpad_left) {
+                        reset = true;
+                        mySlides = Slides.MIDDLE;
+                        myState = State.UP;
+                    }
+
+                    if (gamepad2.y) {
+                        reset = true;
+                        back = true;
+                        mySlides = Slides.HIGH;
+                        if (justPressed2.dpad_down()) {
+                            junction = C2;
+                            FSMTimer.reset();
+                            myState = State.UP_AUTOMATIC;
+                        } else if (justPressed2.dpad_left()) {
+                            junction = B3;
+                            FSMTimer.reset();
+                            myState = State.UP_AUTOMATIC;
+                        } else if (justPressed2.dpad_right()) {
+                            junction = D3;
+                            FSMTimer.reset();
+                            myState = State.UP_AUTOMATIC;
+                        } else if (justPressed2.dpad_up()) {
+                            junction = C4;
+                            FSMTimer.reset();
+                            myState = State.UP_AUTOMATIC;
+                        }
+                    } else if (gamepad2.x) {
+                        reset = true;
+                        back = true;
+                        mySlides = Slides.MIDDLE;
+                        if (gamepad2.dpad_down && justPressed2.dpad_left() || gamepad2.dpad_left && justPressed2.dpad_down()) {
+                            junction = B2;
+                            FSMTimer.reset();
+                            myState = State.UP_AUTOMATIC;
+                        } else if (gamepad2.dpad_down && justPressed2.dpad_right() || gamepad2.dpad_right && justPressed2.dpad_down()) {
+                            junction = D2;
+                            FSMTimer.reset();
+                            myState = State.UP_AUTOMATIC;
+                        } else if (gamepad2.dpad_up && justPressed2.dpad_left() || gamepad2.dpad_left && justPressed2.dpad_up()) {
+                            junction = B4;
+                            FSMTimer.reset();
+                            myState = State.UP_AUTOMATIC;
+                        } else if (gamepad2.dpad_up && justPressed2.dpad_right() || gamepad2.dpad_right && justPressed2.dpad_up()) {
+                            junction = D4;
+                            FSMTimer.reset();
+                            myState = State.UP_AUTOMATIC;
+                        }
+                    } else if (gamepad2.a) {
+                        reset = true;
+                        back = true;
+                        mySlides = Slides.LOW;
+                        if (gamepad2.dpad_down && justPressed2.dpad_left() || gamepad2.dpad_left && justPressed2.dpad_down()) {
+                            junction = B1;
+                            FSMTimer.reset();
+                            myState = State.UP_AUTOMATIC;
+                        } else if (gamepad2.dpad_down && justPressed2.dpad_right() || gamepad2.dpad_right && justPressed2.dpad_down()) {
+                            junction = D1;
+                            FSMTimer.reset();
+                            myState = State.UP_AUTOMATIC;
+                        } else if (gamepad2.dpad_up && justPressed2.dpad_left() || gamepad2.dpad_left && justPressed2.dpad_up()) {
+                            junction = A2;
+                            FSMTimer.reset();
+                            myState = State.UP_AUTOMATIC;
+                        } else if (gamepad2.dpad_up && justPressed2.dpad_right() || gamepad2.dpad_right && justPressed2.dpad_up()) {
+                            junction = E2;
+                            FSMTimer.reset();
+                            myState = State.UP_AUTOMATIC;
+                        }
+                    } else if (gamepad2.b) {
+                        reset = true;
+                        back = true;
+                        mySlides = Slides.LOW;
+                        if (gamepad2.dpad_up && justPressed2.dpad_left() || gamepad2.dpad_left && justPressed2.dpad_up()) {
+                            junction = B5;
+                            FSMTimer.reset();
+                            myState = State.UP_AUTOMATIC;
+                        } else if (gamepad2.dpad_up && justPressed2.dpad_right() || gamepad2.dpad_right && justPressed2.dpad_up()) {
+                            junction = D5;
+                            FSMTimer.reset();
+                            myState = State.UP_AUTOMATIC;
+                        } else if (gamepad2.dpad_down && justPressed2.dpad_left() || gamepad2.dpad_left && justPressed2.dpad_down()) {
+                            junction = A4;
+                            FSMTimer.reset();
+                            myState = State.UP_AUTOMATIC;
+                        } else if (gamepad2.dpad_down && justPressed2.dpad_right() || gamepad2.dpad_right && justPressed2.dpad_down()) {
+                            junction = E4;
+                            FSMTimer.reset();
+                            myState = State.UP_AUTOMATIC;
+                        }
+                    }
+
+                    if (reset) {
+                        driverArm = 0;
+                        driverSlides = 0;
+                        driverTurret = 0;
+                        armNeutral = false;
+                        firstTime = true;
+                        robot.intakeOuttake.arm.setAligner(true);
+                    }
+
+//                    if (FSMTimer.time() > 750) {
+//                        driverTurret = 0;
+//                        horizontalDriver = 0;
+//                        driverArm = 0;
+//                        driverSlides = 0;
+//                        waitTurret = false;
+//                        FSMTimer.reset();
+//                        myState = State.REST;
+//                    }
+                    break;
             }
 
             long timeDelta = System.nanoTime() - lastTime;
@@ -733,7 +914,7 @@ public class WorldsTeleRight extends LinearOpMode {
                 else
                     horizontalDriver += timeDelta / 1e9 * .175 * (gamepad1.right_trigger > .5 ? 1.3 : gamepad1.left_trigger > .5 ? -1.3 : 0);
             }
-            driverSlides += timeDelta / 1e9 * 300 * (gamepad2.dpad_up ? 1 : gamepad2.dpad_down ? -1 : 0);
+            driverSlides += timeDelta / 1e9 * 150 * (gamepad2.dpad_up ? 1 : gamepad2.dpad_down ? -1 : 0);
             if (myState == State.UP_AUTOMATIC || myState == State.UP)
                 robot.intakeOuttake.arm.adjustAlignerDegrees(timeDelta / 1e9 * 10 * (-gamepad2.left_trigger + gamepad2.right_trigger));
 
@@ -799,7 +980,8 @@ public class WorldsTeleRight extends LinearOpMode {
         INTAKE_DRIVER,
         SCORE_PREP,
         SCORE,
-        DEEXTEND
+        DEEXTEND,
+        UNDO
     }
     public State myState;
 
