@@ -32,8 +32,8 @@ import org.openftc.easyopencv.OpenCvCameraRotation;
 
 import java.util.List;
 
-@TeleOp(name = "WorldsTeleLeft", group = "0")
-public class WorldsTeleLeft extends LinearOpMode {
+@TeleOp(name = "WorldsTele", group = "0")
+public class WorldsTele extends LinearOpMode {
 
     public static double P = .007, I = 7e-11 , D = 400;
 
@@ -100,7 +100,7 @@ public class WorldsTeleLeft extends LinearOpMode {
         int slidesMiddle = 302 - 50;
         int safe = 50 - 50;
 
-        int clear = 920;
+        int clear = 300;
         //TODO: fix
 
         boolean deployed = false;
@@ -126,6 +126,8 @@ public class WorldsTeleLeft extends LinearOpMode {
         boolean visionCorrection = true;
         boolean visionCorrected = false;
 
+        boolean b2 = false;
+
         robot.intakeOuttake.horizontal.forwardRight.setPosition(FORWARD_RIGHT_IN);
         robot.intakeOuttake.horizontal.forwardLeft.setPosition(FORWARD_LEFT_IN);
         robot.intakeOuttake.horizontal.backwardLeft.setPosition(BACKWARD_LEFT_IN);
@@ -150,6 +152,9 @@ public class WorldsTeleLeft extends LinearOpMode {
                 drive.setPoseEstimate(new Pose2d(0, -24.25, Math.toRadians(180)));
 
             Pose2d poseEstimate = drive.getPoseEstimate();
+
+            b2 = (Math.hypot((D2.getY() - poseEstimate.getX()), (D2.getX() + poseEstimate.getY())) < (Math.hypot((B2.getY() - poseEstimate.getX()), (B2.getX() + poseEstimate.getY()))));
+
 
 //            if (justPressed1.x()) robot.butterfly.setState(Butterfly.State.MECANUM);
             if (justPressed1.b() && !gamepad1.start)
@@ -226,13 +231,13 @@ public class WorldsTeleLeft extends LinearOpMode {
                     robot.intakeOuttake.arm.setAligner(true);
 
                     if (autoIntake == 0) {
-                        if (FSMTimer.time() < 700) {
+                        if (FSMTimer.time() < 500) {
                             if (linkageAuto) {
-                                robot.intakeOuttake.horizontal.backwardLeft.setPosition(linearProfile(700, FSMTimer.time(), 700, (BACKWARD_LEFT_IN + BACKWARD_LEFT_OUT) / 2, backLeftIntaking));
-                                robot.intakeOuttake.horizontal.backwardRight.setPosition(linearProfile(700, FSMTimer.time(), 700, (BACKWARD_RIGHT_IN + BACKWARD_RIGHT_OUT) / 2, backRightIntaking));
+                                robot.intakeOuttake.horizontal.backwardLeft.setPosition(linearProfile(500, FSMTimer.time(), 500, (BACKWARD_LEFT_IN + BACKWARD_LEFT_OUT) / 2, backLeftIntaking));
+                                robot.intakeOuttake.horizontal.backwardRight.setPosition(linearProfile(500, FSMTimer.time(), 500, (BACKWARD_RIGHT_IN + BACKWARD_RIGHT_OUT) / 2, backRightIntaking));
                             } else {
-                                robot.intakeOuttake.horizontal.backwardLeft.setPosition(linearProfile(700, FSMTimer.time(), 700, BACKWARD_LEFT_IN, backLeftIntaking));
-                                robot.intakeOuttake.horizontal.backwardRight.setPosition(linearProfile(700, FSMTimer.time(), 700, BACKWARD_RIGHT_IN, backRightIntaking));
+                                robot.intakeOuttake.horizontal.backwardLeft.setPosition(linearProfile(500, FSMTimer.time(), 500, BACKWARD_LEFT_IN, backLeftIntaking));
+                                robot.intakeOuttake.horizontal.backwardRight.setPosition(linearProfile(500, FSMTimer.time(), 500, BACKWARD_RIGHT_IN, backRightIntaking));
                             }
                         } else {
                             if (horizontalDriver < 0) {
@@ -274,22 +279,22 @@ public class WorldsTeleLeft extends LinearOpMode {
                     break;
 
                 case SCORE_PREP:
-                    if (FSMTimer.time() < 1200 && FSMTimer.time() > 500) {
-                        robot.intakeOuttake.horizontal.backwardLeft.setPosition(linearProfile(700, FSMTimer.time(), 1200, backLeftIntaking, BACKWARD_LEFT_IN));
-                        robot.intakeOuttake.horizontal.backwardRight.setPosition(linearProfile(700, FSMTimer.time(), 1200, backRightIntaking, BACKWARD_RIGHT_IN));
+                    if (FSMTimer.time() < 950 && FSMTimer.time() > 350) {
+                        robot.intakeOuttake.horizontal.backwardLeft.setPosition(linearProfile(600, FSMTimer.time(), 950, backLeftIntaking, BACKWARD_LEFT_IN));
+                        robot.intakeOuttake.horizontal.backwardRight.setPosition(linearProfile(600, FSMTimer.time(), 950, backRightIntaking, BACKWARD_RIGHT_IN));
                     }
                     robot.intakeOuttake.arm.claw.setPosition(CLAW_CLOSE);
 
-                    if (FSMTimer.time() > 675 && FSMTimer.time() < 1175)
-                        robot.intakeOuttake.arm.arm.setPosition(linearProfile(500, FSMTimer.time(), 1175, ARM_INTAKE, (ARM_REST)));
-                    if (FSMTimer.time() > 1175)
+                    if (FSMTimer.time() > 425 && FSMTimer.time() < 925)
+                        robot.intakeOuttake.arm.arm.setPosition(linearProfile(500, FSMTimer.time(), 925, ARM_INTAKE, (ARM_REST)));
+                    if (FSMTimer.time() > 925)
                         robot.intakeOuttake.arm.arm.setPosition(ARM_REST);
 
-                    if (FSMTimer.time() > 1000) {
+                    if (FSMTimer.time() > 750) {
                         robot.intakeOuttake.arm.wrist.setPosition(WRIST_OUTTAKE);
                     }
 
-                    robot.intakeOuttake.arm.setAligner(!(FSMTimer.time() > 2500));
+                    robot.intakeOuttake.arm.setAligner(!(FSMTimer.time() > 1150));
 
                     boolean reset = false;
 
@@ -483,6 +488,7 @@ public class WorldsTeleLeft extends LinearOpMode {
                     linkageAuto = true;
 
                     if (gamepad2.left_bumper && gamepad2.dpad_down) {
+                        FSMTimer.reset();
                         myState = State.UNDO;
                     }
 
@@ -519,7 +525,10 @@ public class WorldsTeleLeft extends LinearOpMode {
                         robot.update();
 
                         firstTime = false;
-                        visionCorrection = junction != B2 && junction != C2;
+                        if (b2)
+                            visionCorrection = junction != D2 && junction != C2;
+                        else
+                            visionCorrection = junction != B2 && junction != C2;
                         visionCorrected = false;
                         turretStill = false;
                         visionTimer.reset();
@@ -532,14 +541,26 @@ public class WorldsTeleLeft extends LinearOpMode {
                         turretStill = true;
                     }
                     List<Target> targets;
-                    if (visionCorrection && turretStill && visionTimer.time() > (junction == B2 || junction == C2 ? 200 : 200)
-                            //&& Math.abs(robot.turret.quadratureEncoder.getCurrentPosition() - turretTarget) < 10
-                            && Math.abs(robot.turret.quadratureEncoder.getRawVelocity()) < 5 && (targets = pipeline.getJunctionsTeleop()).size() > 0) {
-                        visionCorrection = false;
-                        visionCorrected = true;
-                        turretStill = false;
-                        turretTarget = -robot.turret.quadratureEncoder.getCurrentPosition() - Turret.radiansToTicks(Math.toRadians(
-                                targets.size() == 1 ? targets.get(0).offset : targets.get(0).rect.width > targets.get(1).rect.width ? targets.get(0).offset : targets.get(1).offset));
+                    if (b2) {
+                        if (visionCorrection && turretStill && visionTimer.time() > (junction == D2 || junction == C2 ? 200 : 200)
+                                //&& Math.abs(robot.turret.quadratureEncoder.getCurrentPosition() - turretTarget) < 10
+                                && Math.abs(robot.turret.quadratureEncoder.getRawVelocity()) < 5 && (targets = pipeline.getJunctionsTeleop()).size() > 0) {
+                            visionCorrection = false;
+                            visionCorrected = true;
+                            turretStill = false;
+                            turretTarget = -robot.turret.quadratureEncoder.getCurrentPosition() - Turret.radiansToTicks(Math.toRadians(
+                                    targets.size() == 1 ? targets.get(0).offset : targets.get(0).rect.width > targets.get(1).rect.width ? targets.get(0).offset : targets.get(1).offset));
+                        }
+                    } else {
+                        if (visionCorrection && turretStill && visionTimer.time() > (junction == B2 || junction == C2 ? 200 : 200)
+                                //&& Math.abs(robot.turret.quadratureEncoder.getCurrentPosition() - turretTarget) < 10
+                                && Math.abs(robot.turret.quadratureEncoder.getRawVelocity()) < 5 && (targets = pipeline.getJunctionsTeleop()).size() > 0) {
+                            visionCorrection = false;
+                            visionCorrected = true;
+                            turretStill = false;
+                            turretTarget = -robot.turret.quadratureEncoder.getCurrentPosition() - Turret.radiansToTicks(Math.toRadians(
+                                    targets.size() == 1 ? targets.get(0).offset : targets.get(0).rect.width > targets.get(1).rect.width ? targets.get(0).offset : targets.get(1).offset));
+                        }
                     }
 
 //                    if (distance > 250) {
@@ -624,6 +645,7 @@ public class WorldsTeleLeft extends LinearOpMode {
                     }
 
                     if (gamepad2.left_bumper && gamepad2.dpad_down) {
+                        FSMTimer.reset();
                         myState = State.UNDO;
                     }
 
@@ -757,25 +779,28 @@ public class WorldsTeleLeft extends LinearOpMode {
                     }
                     break;
                 case UNDO:
-                    slidesTargetPos = safe;
+
+                    if (FSMTimer.time() > 350)
+                        slidesTargetPos = safe;
 
                     robot.intakeOuttake.arm.claw.setPosition(CLAW_CLOSE);
                     robot.intakeOuttake.arm.wrist.setPosition(WRIST_OUTTAKE);
 
-                    if (Math.abs(robot.intakeOuttake.horizontal.getPosition()) > 300)
+                    if (Math.abs(robot.intakeOuttake.horizontal.getPosition()) > 200)
                         waitTurret = true;
                     if (waitTurret && FSMTimer.time() > 750)
                         turretTarget = 0;
 
-                    robot.intakeOuttake.arm.arm.setPosition(ARM_REST);
+                    if (FSMTimer.time() > 600) {
+                        robot.intakeOuttake.arm.arm.setPosition(ARM_REST);
+                        robot.intakeOuttake.arm.setAligner(false);
+                    }
 
                     robot.intakeOuttake.horizontal.backwardLeft.setPosition(BACKWARD_LEFT_IN);
                     robot.intakeOuttake.horizontal.backwardRight.setPosition(BACKWARD_RIGHT_IN);
 
                     robot.intakeOuttake.horizontal.forwardRight.setPosition(FORWARD_RIGHT_IN);
                     robot.intakeOuttake.horizontal.forwardLeft.setPosition(FORWARD_LEFT_IN);
-
-                    robot.intakeOuttake.arm.setAligner(false);
 
                     reset = false;
 

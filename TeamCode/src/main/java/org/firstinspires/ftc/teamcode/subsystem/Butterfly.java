@@ -149,9 +149,16 @@ public class Butterfly {
     }
 
     public void drive(double forward, double turn) {
-        if (getState() == State.STANDSTILL) brake();
-        else if (getState() == State.MECANUM) drive(forward, 0, turn);
-        else setMotorPowers(tank.setDrivePower(new Pose2d(forward, 0, turn)));
+        /*if (getState() == State.STANDSTILL) brake();
+        else*/ if (getState() == State.MECANUM) drive(forward, 0, turn);
+        else {
+            double limiter = Math.max(Math.abs(forward) + Math.abs(turn), 1);
+
+            frontLeftPower = (forward + turn) / limiter;
+            backLeftPower = (forward + turn) / limiter;
+            backRightPower = (forward - turn) / limiter;
+            frontRightPower = (forward - turn) / limiter;
+        }
 
         // non rr
         // scales motor power proportionally so it doesn't exceed 1
@@ -166,7 +173,7 @@ public class Butterfly {
     public void drive(double forward, double strafe, double turn) {
         if (getState() != State.MECANUM) drive(forward, turn);
         else {
-            setMotorPowers(mecanum.setDrivePower(new Pose2d(forward, strafe, turn)));
+            //setMotorPowers(mecanum.setDrivePower(new Pose2d(forward, strafe, turn)));
 
             // non rr
 //        strafe *= 1.1; // Counteract imperfect strafing maybe~~

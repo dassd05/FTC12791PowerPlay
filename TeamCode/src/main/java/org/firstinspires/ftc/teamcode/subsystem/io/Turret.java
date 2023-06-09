@@ -15,9 +15,9 @@ import org.firstinspires.ftc.teamcode.util.Encoder;
 @Config
 public class Turret {
 //    public static double ABSOLUTE_FORWARD = .87; // volts. ccw is decreasing
-    public static double ABSOLUTE_FORWARD = .78;
+    public static double ABSOLUTE_FORWARD = 1.12;
     //public static PIDCoefficients PID = new PIDCoefficients(2.2, 7e-7, 0);
-    public static PIDCoefficients PID = new PIDCoefficients(6, 0, 0);
+    public static PIDCoefficients PID = new PIDCoefficients(2.2, 0, 30000000);
     public static double INTEGRAL_CAP = .55;
 
 
@@ -120,7 +120,7 @@ public class Turret {
 
             // todo temp
             long time = System.nanoTime();
-            double error = ABSOLUTE_FORWARD - voltage;
+            double error = -ABSOLUTE_FORWARD + voltage;
             if (error * lastError <= 0) totalError = 0;
             else totalError += (error - lastError) * (time - lastTime);
             double d = (error - lastError) / (time - lastTime);
@@ -194,7 +194,7 @@ public class Turret {
 
             // todo temp
             long time = System.nanoTime();
-            double error = ABSOLUTE_FORWARD - voltage;
+            double error = -ABSOLUTE_FORWARD + voltage;
             if (error * lastError <= 0) totalError = 0;
             else totalError += (error - lastError) * (time - lastTime);
             double d = (error - lastError) / (time - lastTime);

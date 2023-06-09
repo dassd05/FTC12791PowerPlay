@@ -34,7 +34,7 @@ import org.openftc.easyopencv.OpenCvSwitchableWebcam;
 import java.util.ArrayList;
 import java.util.List;
 
-@Autonomous (name = "RegionalAuton RIGHT", group = "0", preselectTeleOp = "WorldsTeleRight")
+@Autonomous (name = "Worlds Auton RIGHT", group = "0", preselectTeleOp = "WorldsTele")
 
 public class RightRegionalAuton extends LinearOpMode {
 
@@ -133,13 +133,17 @@ public class RightRegionalAuton extends LinearOpMode {
 
         //SignalDetectionPipeline.ParkPosition parkPosition = SignalDetectionPipeline.ParkPosition.MIDDLE;
 
-        Pose2d pose1 = new Pose2d(0,60,0);
-        Pose2d pose1_2 = new Pose2d(-3,47,-45);
-        Pose2d pose2 = new Pose2d(8,52,-90);
+        double rightOffset = 75.5;
 
-        Pose2d left = new Pose2d(-24,50.5,0);
-        Pose2d right = new Pose2d(24,50.5,0);
-        Pose2d middle = new Pose2d(0,50.5,0);
+        drive.setPoseEstimate(new Pose2d(0, -rightOffset,0));
+
+        Pose2d pose1 = new Pose2d(0 + rightOffset,60,0);
+        Pose2d pose1_2 = new Pose2d(-3 + rightOffset,47,-45);
+        Pose2d pose2 = new Pose2d(8 + rightOffset,50.5,-90);
+
+        Pose2d left = new Pose2d(-24 + rightOffset,50.5,0);
+        Pose2d right = new Pose2d(24 + rightOffset,50.5,0);
+        Pose2d middle = new Pose2d(0 + rightOffset,50.5,0);
 
         int cycles = -1;
 

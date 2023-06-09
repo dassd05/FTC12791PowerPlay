@@ -34,7 +34,7 @@ import org.openftc.easyopencv.OpenCvSwitchableWebcam;
 import java.util.ArrayList;
 import java.util.List;
 
-@Autonomous (name = "RegionalAuton", group = "0", preselectTeleOp = "WorldsTeleLeft")
+@Autonomous (name = "Worlds Auton Left", group = "0", preselectTeleOp = "WorldsTele")
 
 public class RegionalAuton extends LinearOpMode {
 
