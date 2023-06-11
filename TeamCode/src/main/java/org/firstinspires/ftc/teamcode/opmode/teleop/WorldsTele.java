@@ -360,20 +360,24 @@ public class WorldsTele extends LinearOpMode {
                         reset = true;
                         back = true;
                         mySlides = Slides.LOW;
-                        if (gamepad2.dpad_down && justPressed2.dpad_left() || gamepad2.dpad_left && justPressed2.dpad_down()) {
-                            junction = B1;
-                            FSMTimer.reset();
-                            myState = State.UP_AUTOMATIC;
-                        } else if (gamepad2.dpad_down && justPressed2.dpad_right() || gamepad2.dpad_right && justPressed2.dpad_down()) {
-                            junction = D1;
-                            FSMTimer.reset();
-                            myState = State.UP_AUTOMATIC;
-                        } else if (gamepad2.dpad_up && justPressed2.dpad_left() || gamepad2.dpad_left && justPressed2.dpad_up()) {
+//                        if (justPressed2.dpad_left() || gamepad2.dpad_left && justPressed2.dpad_down()) {
+                        if (justPressed2.dpad_left()) {
                             junction = A2;
                             FSMTimer.reset();
                             myState = State.UP_AUTOMATIC;
-                        } else if (gamepad2.dpad_up && justPressed2.dpad_right() || gamepad2.dpad_right && justPressed2.dpad_up()) {
-                            junction = E2;
+//                        } else if (gamepad2.dpad_down && justPressed2.dpad_right() || gamepad2.dpad_right && justPressed2.dpad_down()) {
+                        } else if (justPressed2.dpad_down()) {
+                            junction = B1;
+                            FSMTimer.reset();
+                            myState = State.UP_AUTOMATIC;
+//                        } else if (gamepad2.dpad_up && justPressed2.dpad_left() || gamepad2.dpad_left && justPressed2.dpad_up()) {
+                        } else if (justPressed2.dpad_up()) {
+                            junction = D5;
+                            FSMTimer.reset();
+                            myState = State.UP_AUTOMATIC;
+//                        } else if (gamepad2.dpad_up && justPressed2.dpad_right() || gamepad2.dpad_right && justPressed2.dpad_up()) {
+                        } else if (justPressed2.dpad_right()) {
+                            junction = E4;
                             FSMTimer.reset();
                             myState = State.UP_AUTOMATIC;
                         }
@@ -381,20 +385,24 @@ public class WorldsTele extends LinearOpMode {
                         reset = true;
                         back = true;
                         mySlides = Slides.LOW;
-                        if (gamepad2.dpad_up && justPressed2.dpad_left() || gamepad2.dpad_left && justPressed2.dpad_up()) {
-                            junction = B5;
-                            FSMTimer.reset();
-                            myState = State.UP_AUTOMATIC;
-                        } else if (gamepad2.dpad_up && justPressed2.dpad_right() || gamepad2.dpad_right && justPressed2.dpad_up()) {
-                            junction = D5;
-                            FSMTimer.reset();
-                            myState = State.UP_AUTOMATIC;
-                        } else if (gamepad2.dpad_down && justPressed2.dpad_left() || gamepad2.dpad_left && justPressed2.dpad_down()) {
+//                        if (gamepad2.dpad_up && justPressed2.dpad_left() || gamepad2.dpad_left && justPressed2.dpad_up()) {
+                        if (justPressed2.dpad_left()) {
                             junction = A4;
                             FSMTimer.reset();
                             myState = State.UP_AUTOMATIC;
-                        } else if (gamepad2.dpad_down && justPressed2.dpad_right() || gamepad2.dpad_right && justPressed2.dpad_down()) {
-                            junction = E4;
+//                        } else if (gamepad2.dpad_up && justPressed2.dpad_right() || gamepad2.dpad_right && justPressed2.dpad_up()) {
+                        } else if (justPressed2.dpad_right()) {
+                            junction = E2;
+                            FSMTimer.reset();
+                            myState = State.UP_AUTOMATIC;
+//                        } else if (gamepad2.dpad_down && justPressed2.dpad_left() || gamepad2.dpad_left && justPressed2.dpad_down()) {
+                        } else if (justPressed2.dpad_down()) {
+                            junction = D2;
+                            FSMTimer.reset();
+                            myState = State.UP_AUTOMATIC;
+//                        } else if (gamepad2.dpad_down && justPressed2.dpad_right() || gamepad2.dpad_right && justPressed2.dpad_down()) {
+                        } else if (justPressed2.dpad_up()) {
+                            junction = B5;
                             FSMTimer.reset();
                             myState = State.UP_AUTOMATIC;
                         }
@@ -487,7 +495,7 @@ public class WorldsTele extends LinearOpMode {
                     }
                     linkageAuto = true;
 
-                    if (gamepad2.left_bumper && gamepad2.dpad_down) {
+                    if (gamepad2.left_trigger > .5 /*&& gamepad2.dpad_down*/) {
                         FSMTimer.reset();
                         myState = State.UNDO;
                     }
@@ -644,7 +652,7 @@ public class WorldsTele extends LinearOpMode {
 //                            myState = State.DEEXTEND;
                     }
 
-                    if (gamepad2.left_bumper && gamepad2.dpad_down) {
+                    if (gamepad2.left_trigger > .5 /*&& gamepad2.dpad_down*/) {
                         FSMTimer.reset();
                         myState = State.UNDO;
                     }
@@ -662,9 +670,17 @@ public class WorldsTele extends LinearOpMode {
 //                        // todo heading estimate bad
 //                    }
 
-                    if (!firstTime)
-                        if (justPressed2.left_bumper())
+                    if (gamepad2.left_trigger > .5 /*&& gamepad2.dpad_down*/) {
+                        FSMTimer.reset();
+                        myState = State.UNDO;
+                    }
+
+                    if (!firstTime) {
+                        if (justPressed2.left_bumper()) {
                             cap = true;
+                            FSMTimer.reset();
+                        }
+                    }
 
                     if (mySlides == Slides.LOW) {
                         if (cap) {
@@ -677,6 +693,12 @@ public class WorldsTele extends LinearOpMode {
                         if (firstTime)
 //                            slidesTargetPos -= 500;
                             robot.intakeOuttake.arm.arm.setPosition(robot.intakeOuttake.arm.arm.getPosition() - .08);
+
+                        if (cap) {
+                            if (FSMTimer.time() > 200)
+                                robot.intakeOuttake.arm.arm.setPosition(ARM_ANGLED);
+                            robot.intakeOuttake.arm.claw.setPosition(CLAW_CAP);
+                        }
                     }
                     if (justPressed1.dpad_up())
 //                        slidesTargetPos += 500;
@@ -704,22 +726,22 @@ public class WorldsTele extends LinearOpMode {
                         myState = State.DEEXTEND;
                     }
 
-                    if (cap) {
-                        if (justPressed1.left_bumper()) {
-                            robot.intakeOuttake.arm.claw.setPosition(CLAW_CAP);
-                        } else {
-                            if (robot.intakeOuttake.arm.claw.getPosition() == CLAW_CAP) {
-                                if (myTimer.time() > 500) {
-                                    robot.intakeOuttake.arm.arm.setPosition(ARM_REST);
-                                    firstTime = true;
-                                    FSMTimer.reset();
-                                    myState = State.UP;
-                                }
-                            } else {
-                                FSMTimer.reset();
-                            }
-                        }
-                    }
+//                    if (cap) {
+//                        if (justPressed1.left_bumper()) {
+//                            robot.intakeOuttake.arm.claw.setPosition(CLAW_CAP);
+//                        } else {
+//                            if (robot.intakeOuttake.arm.claw.getPosition() == CLAW_CAP) {
+//                                if (myTimer.time() > 500) {
+//                                    robot.intakeOuttake.arm.arm.setPosition(ARM_REST);
+//                                    firstTime = true;
+//                                    FSMTimer.reset();
+//                                    myState = State.UP;
+//                                }
+//                            } else {
+//                                FSMTimer.reset();
+//                            }
+//                        }
+//                    }
 
                     break;
                 case DEEXTEND:
@@ -790,6 +812,10 @@ public class WorldsTele extends LinearOpMode {
                         waitTurret = true;
                     if (waitTurret && FSMTimer.time() > 750)
                         turretTarget = 0;
+
+                    if (mySlides != Slides.LOW)
+                        if (FSMTimer.time() < 600)
+                            robot.intakeOuttake.arm.arm.setPosition(ARM_ANGLED);
 
                     if (FSMTimer.time() > 600) {
                         robot.intakeOuttake.arm.arm.setPosition(ARM_REST);
