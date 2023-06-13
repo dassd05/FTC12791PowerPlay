@@ -495,7 +495,11 @@ public class WorldsTele extends LinearOpMode {
                     }
                     linkageAuto = true;
 
-                    if (gamepad2.left_trigger > .5 /*&& gamepad2.dpad_down*/) {
+                    if (gamepad2.right_bumper /*&& gamepad2.dpad_down*/) {
+                        driverTurret = 0;
+                        horizontalDriver = 0;
+                        driverArm = 0;
+                        driverSlides = 0;
                         FSMTimer.reset();
                         myState = State.UNDO;
                     }
@@ -596,9 +600,9 @@ public class WorldsTele extends LinearOpMode {
                                 slidesTargetPos = clear;
                                 robot.intakeOuttake.arm.wrist.setPosition(WRIST_INTAKE);
                                 if (FSMTimer.time() < 400)
-                                    robot.intakeOuttake.arm.arm.setPosition(linearProfile(400, FSMTimer.time(), 400, ARM_REST, ARM_INTAKE));
+                                    robot.intakeOuttake.arm.arm.setPosition(linearProfile(400, FSMTimer.time(), 400, ARM_REST, ARM_INTAKE - .08));
                                 else
-                                    robot.intakeOuttake.arm.arm.setPosition(ARM_INTAKE + driverArm);
+                                    robot.intakeOuttake.arm.arm.setPosition(ARM_INTAKE - .08 + driverArm);
                             }
                             break;
                         case MIDDLE:
@@ -652,7 +656,11 @@ public class WorldsTele extends LinearOpMode {
 //                            myState = State.DEEXTEND;
                     }
 
-                    if (gamepad2.left_trigger > .5 /*&& gamepad2.dpad_down*/) {
+                    if (gamepad2.right_bumper /*&& gamepad2.dpad_down*/) {
+                        driverTurret = 0;
+                        horizontalDriver = 0;
+                        driverArm = 0;
+                        driverSlides = 0;
                         FSMTimer.reset();
                         myState = State.UNDO;
                     }
@@ -670,7 +678,11 @@ public class WorldsTele extends LinearOpMode {
 //                        // todo heading estimate bad
 //                    }
 
-                    if (gamepad2.left_trigger > .5 /*&& gamepad2.dpad_down*/) {
+                    if (gamepad2.right_bumper /*&& gamepad2.dpad_down*/) {
+                        driverTurret = 0;
+                        horizontalDriver = 0;
+                        driverArm = 0;
+                        driverSlides = 0;
                         FSMTimer.reset();
                         myState = State.UNDO;
                     }
@@ -892,20 +904,24 @@ public class WorldsTele extends LinearOpMode {
                         reset = true;
                         back = true;
                         mySlides = Slides.LOW;
-                        if (gamepad2.dpad_down && justPressed2.dpad_left() || gamepad2.dpad_left && justPressed2.dpad_down()) {
-                            junction = B1;
-                            FSMTimer.reset();
-                            myState = State.UP_AUTOMATIC;
-                        } else if (gamepad2.dpad_down && justPressed2.dpad_right() || gamepad2.dpad_right && justPressed2.dpad_down()) {
-                            junction = D1;
-                            FSMTimer.reset();
-                            myState = State.UP_AUTOMATIC;
-                        } else if (gamepad2.dpad_up && justPressed2.dpad_left() || gamepad2.dpad_left && justPressed2.dpad_up()) {
+//                        if (justPressed2.dpad_left() || gamepad2.dpad_left && justPressed2.dpad_down()) {
+                        if (justPressed2.dpad_left()) {
                             junction = A2;
                             FSMTimer.reset();
                             myState = State.UP_AUTOMATIC;
-                        } else if (gamepad2.dpad_up && justPressed2.dpad_right() || gamepad2.dpad_right && justPressed2.dpad_up()) {
-                            junction = E2;
+//                        } else if (gamepad2.dpad_down && justPressed2.dpad_right() || gamepad2.dpad_right && justPressed2.dpad_down()) {
+                        } else if (justPressed2.dpad_down()) {
+                            junction = B1;
+                            FSMTimer.reset();
+                            myState = State.UP_AUTOMATIC;
+//                        } else if (gamepad2.dpad_up && justPressed2.dpad_left() || gamepad2.dpad_left && justPressed2.dpad_up()) {
+                        } else if (justPressed2.dpad_up()) {
+                            junction = D5;
+                            FSMTimer.reset();
+                            myState = State.UP_AUTOMATIC;
+//                        } else if (gamepad2.dpad_up && justPressed2.dpad_right() || gamepad2.dpad_right && justPressed2.dpad_up()) {
+                        } else if (justPressed2.dpad_right()) {
+                            junction = E4;
                             FSMTimer.reset();
                             myState = State.UP_AUTOMATIC;
                         }
@@ -913,20 +929,24 @@ public class WorldsTele extends LinearOpMode {
                         reset = true;
                         back = true;
                         mySlides = Slides.LOW;
-                        if (gamepad2.dpad_up && justPressed2.dpad_left() || gamepad2.dpad_left && justPressed2.dpad_up()) {
-                            junction = B5;
-                            FSMTimer.reset();
-                            myState = State.UP_AUTOMATIC;
-                        } else if (gamepad2.dpad_up && justPressed2.dpad_right() || gamepad2.dpad_right && justPressed2.dpad_up()) {
-                            junction = D5;
-                            FSMTimer.reset();
-                            myState = State.UP_AUTOMATIC;
-                        } else if (gamepad2.dpad_down && justPressed2.dpad_left() || gamepad2.dpad_left && justPressed2.dpad_down()) {
+//                        if (gamepad2.dpad_up && justPressed2.dpad_left() || gamepad2.dpad_left && justPressed2.dpad_up()) {
+                        if (justPressed2.dpad_left()) {
                             junction = A4;
                             FSMTimer.reset();
                             myState = State.UP_AUTOMATIC;
-                        } else if (gamepad2.dpad_down && justPressed2.dpad_right() || gamepad2.dpad_right && justPressed2.dpad_down()) {
-                            junction = E4;
+//                        } else if (gamepad2.dpad_up && justPressed2.dpad_right() || gamepad2.dpad_right && justPressed2.dpad_up()) {
+                        } else if (justPressed2.dpad_right()) {
+                            junction = E2;
+                            FSMTimer.reset();
+                            myState = State.UP_AUTOMATIC;
+//                        } else if (gamepad2.dpad_down && justPressed2.dpad_left() || gamepad2.dpad_left && justPressed2.dpad_down()) {
+                        } else if (justPressed2.dpad_down()) {
+                            junction = D2;
+                            FSMTimer.reset();
+                            myState = State.UP_AUTOMATIC;
+//                        } else if (gamepad2.dpad_down && justPressed2.dpad_right() || gamepad2.dpad_right && justPressed2.dpad_down()) {
+                        } else if (justPressed2.dpad_up()) {
+                            junction = B5;
                             FSMTimer.reset();
                             myState = State.UP_AUTOMATIC;
                         }
@@ -956,9 +976,9 @@ public class WorldsTele extends LinearOpMode {
             long timeDelta = System.nanoTime() - lastTime;
             driverTurret += (int) (cube(gamepad2.right_stick_x) * (timeDelta / 1e9) * 700 / Math.max(Math.abs(robot.intakeOuttake.horizontal.getPosition()), 150) * 150);
             if (back)
-                driverArm -= cube(gamepad2.left_stick_y) * timeDelta / 1e9 * .2;
+                driverArm -= cube(gamepad2.left_stick_y) * timeDelta / 1e9 * .16;
             else
-                driverArm += cube(gamepad2.left_stick_y) * timeDelta / 1e9 * .2;
+                driverArm += cube(gamepad2.left_stick_y) * timeDelta / 1e9 * .16;
             if (myState != State.SCORE_PREP) {
                 if (myState == State.UP_AUTOMATIC || myState == State.SCORE)
                     horizontalDriver += timeDelta / 1e9 * (gamepad1.right_trigger > .5 ? 270 : gamepad1.left_trigger > .5 ? -270 : 0);
