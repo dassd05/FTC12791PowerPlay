@@ -29,27 +29,30 @@ public class RTPTest extends LinearOpMode {
         drive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         drive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
+        boolean mecanum = true;
+
         waitForStart();
         robot.butterfly.setState(Butterfly.State.MECANUM);
 
 
         while (opModeIsActive()) {
-            if (justPressed.x()) robot.butterfly.setState(Butterfly.State.MECANUM);
-            if (justPressed.y()) robot.butterfly.setState(Butterfly.State.TRACTION);
-            if (justPressed.b() && !gamepad1.start) robot.butterfly.setState(Butterfly.State.STANDSTILL);
+
+            if (justPressed.a())
+                mecanum = !mecanum;
+
+            if (mecanum)
+                robot.butterfly.setState(Butterfly.State.MECANUM);
+            else
+                robot.butterfly.setState(Butterfly.State.STANDSTILL);
 
             drive.update();
 
             Pose2d poseEstimate = drive.getPoseEstimate();
 
-            if (gamepad1.a) {
-                robot.butterfly.runToPosition(10.0, 15.0, 45,  0.85, 0.85, (-poseEstimate.getY()), poseEstimate.getX(), poseEstimate.getHeading());
-            } else {
-                double[] fields = { -Math.cbrt(gamepad1.left_stick_y), Math.cbrt(gamepad1.left_stick_x), Math.cbrt(gamepad1.right_stick_x) };
-                robot.butterfly.drive(fields[0], fields[1], fields[2]);
-            }
-
-
+            if (robot.butterfly.getState() == Butterfly.State.MECANUM)
+                robot.butterfly.runToPosition(0,0,0,.5,.5, -poseEstimate.getY(), poseEstimate.getX(), poseEstimate.getHeading(), true);
+            else
+                robot.butterfly.runToPosition(0,0,0,0,.5, -poseEstimate.getY(), poseEstimate.getX(), poseEstimate.getHeading(), true);
 
             robot.update();
             justPressed.update();
