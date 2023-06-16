@@ -526,7 +526,7 @@ public class WorldsTele extends LinearOpMode {
                         }
 
                         if (back)
-                            distance = Math.hypot(x_difference, y_difference) * 25.4 - (mySlides == Slides.LOW ? 400 : 300);
+                            distance = Math.hypot(x_difference, y_difference) * 25.4 - 300;
                         else {
                             distance = -(Math.hypot(x_difference, y_difference) * 25.4) + 260;
                         }
@@ -560,7 +560,7 @@ public class WorldsTele extends LinearOpMode {
                             visionCorrection = false;
                             visionCorrected = true;
                             turretStill = false;
-                            turretTarget = -robot.turret.quadratureEncoder.getCurrentPosition() - Turret.radiansToTicks(Math.toRadians(
+                            turretTarget = robot.turret.pos - Turret.radiansToTicks(Math.toRadians(
                                     targets.size() == 1 ? targets.get(0).offset : targets.get(0).rect.width > targets.get(1).rect.width ? targets.get(0).offset : targets.get(1).offset));
                         }
                     } else {
@@ -570,7 +570,7 @@ public class WorldsTele extends LinearOpMode {
                             visionCorrection = false;
                             visionCorrected = true;
                             turretStill = false;
-                            turretTarget = -robot.turret.quadratureEncoder.getCurrentPosition() - Turret.radiansToTicks(Math.toRadians(
+                            turretTarget = robot.turret.pos - Turret.radiansToTicks(Math.toRadians(
                                     targets.size() == 1 ? targets.get(0).offset : targets.get(0).rect.width > targets.get(1).rect.width ? targets.get(0).offset : targets.get(1).offset));
                         }
                     }
@@ -588,6 +588,13 @@ public class WorldsTele extends LinearOpMode {
 
                     robot.intakeOuttake.arm.setAligner(aligning);
 
+                    if (!firstTime) {
+                        if (justPressed2.left_bumper()) {
+                            cap = true;
+                            FSMTimer.reset();
+                        }
+                    }
+
                     switch (mySlides) {
                         case LOW:
                             if (back) {
@@ -595,15 +602,18 @@ public class WorldsTele extends LinearOpMode {
                                 if (FSMTimer.time() < 400)
                                     robot.intakeOuttake.arm.arm.setPosition(linearProfile(400, FSMTimer.time(), 400, ARM_REST, ARM_ANGLED));
                                 else
-                                    robot.intakeOuttake.arm.arm.setPosition(ARM_OUTTAKE + driverArm);
+                                    robot.intakeOuttake.arm.arm.setPosition(ARM_OUTTAKE + .02 + driverArm);
                             }  else {
                                 slidesTargetPos = clear;
                                 robot.intakeOuttake.arm.wrist.setPosition(WRIST_INTAKE);
                                 if (FSMTimer.time() < 400)
                                     robot.intakeOuttake.arm.arm.setPosition(linearProfile(400, FSMTimer.time(), 400, ARM_REST, ARM_INTAKE - .08));
                                 else
-                                    robot.intakeOuttake.arm.arm.setPosition(ARM_INTAKE - .08 + driverArm);
+                                    robot.intakeOuttake.arm.arm.setPosition(ARM_INTAKE + .02 + driverArm);
                             }
+
+                            if (cap)
+                                robot.intakeOuttake.arm.claw.setPosition(CLAW_CAP);
                             break;
                         case MIDDLE:
                             if (back) {
@@ -659,6 +669,7 @@ public class WorldsTele extends LinearOpMode {
                     if (gamepad2.right_bumper /*&& gamepad2.dpad_down*/) {
                         driverTurret = 0;
                         horizontalDriver = 0;
+                        distance = 0;
                         driverArm = 0;
                         driverSlides = 0;
                         FSMTimer.reset();
@@ -708,7 +719,7 @@ public class WorldsTele extends LinearOpMode {
 
                         if (cap) {
                             if (FSMTimer.time() > 200)
-                                robot.intakeOuttake.arm.arm.setPosition(ARM_ANGLED);
+                                robot.intakeOuttake.arm.arm.setPosition(ARM_REST);
                             robot.intakeOuttake.arm.claw.setPosition(CLAW_CAP);
                         }
                     }
@@ -820,19 +831,16 @@ public class WorldsTele extends LinearOpMode {
                     robot.intakeOuttake.arm.claw.setPosition(CLAW_CLOSE);
                     robot.intakeOuttake.arm.wrist.setPosition(WRIST_OUTTAKE);
 
-                    if (Math.abs(robot.intakeOuttake.horizontal.getPosition()) > 200)
-                        waitTurret = true;
-                    if (waitTurret && FSMTimer.time() > 750)
+                    if (FSMTimer.time() > 750)
                         turretTarget = 0;
 
-                    if (mySlides != Slides.LOW)
-                        if (FSMTimer.time() < 600)
-                            robot.intakeOuttake.arm.arm.setPosition(ARM_ANGLED);
-
-                    if (FSMTimer.time() > 600) {
+                    if (FSMTimer.time() < 750)
+                        robot.intakeOuttake.arm.arm.setPosition(linearProfile(750, FSMTimer.time(), 750, ARM_ANGLED, ARM_REST));
+                    else
                         robot.intakeOuttake.arm.arm.setPosition(ARM_REST);
-                        robot.intakeOuttake.arm.setAligner(false);
-                    }
+
+                    robot.intakeOuttake.arm.setAligner(!(FSMTimer.time() > 950));
+
 
                     robot.intakeOuttake.horizontal.backwardLeft.setPosition(BACKWARD_LEFT_IN);
                     robot.intakeOuttake.horizontal.backwardRight.setPosition(BACKWARD_RIGHT_IN);

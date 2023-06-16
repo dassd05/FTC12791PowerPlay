@@ -7,6 +7,7 @@ import static org.firstinspires.ftc.teamcode.subsystem.io.Arm.*;
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.geometry.Vector2d;
+import com.acmerobotics.roadrunner.util.Angle;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -16,6 +17,7 @@ import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
 import org.firstinspires.ftc.teamcode.opmode.PoseStorage;
 import org.firstinspires.ftc.teamcode.opmode.teleop.TestTeleop;
+import org.firstinspires.ftc.teamcode.opmode.teleop.WorldsTele;
 import org.firstinspires.ftc.teamcode.subsystem.Butterfly;
 import org.firstinspires.ftc.teamcode.subsystem.Constants;
 import org.firstinspires.ftc.teamcode.subsystem.Robot;
@@ -38,9 +40,16 @@ import java.util.List;
 
 public class DefenseAuton extends LinearOpMode {
 
+    public static Vector2d stack = new Vector2d(-32, 51);
+
     public static double P = .007, I = 7e-11 , D = 400;
 
     public double targetPos = 0.0;
+
+    public boolean back = true;
+    boolean aligning = false;
+
+    public double distance = 0;
 
     public double coneOffset = 47;
     public double webcamOffset = 50;
@@ -193,7 +202,7 @@ public class DefenseAuton extends LinearOpMode {
                         }
                     }
 
-                    if (myTimer.time() > 700)
+                    if (myTimer.time() > 850)
                         robot.intakeOuttake.arm.arm.setPosition((ARM_REST + ARM_OUTTAKE) / 2);
 
                     break;
@@ -210,7 +219,40 @@ public class DefenseAuton extends LinearOpMode {
                     robot.butterfly.runToPosition(pose3.getX(), pose3.getY(), pose3.getHeading(),
                             .85, .85, -poseEstimate.getY(), poseEstimate.getX(),
                             poseEstimate.getHeading(), true);
+
+
+                    aligning = true;
+
+                    double y_difference = stack.getY() - poseEstimate.getX();
+                    double x_difference = stack.getX() + poseEstimate.getY();
+                    double theta = Math.atan2(y_difference, x_difference) - Math.PI / 2;
+
+                    double turretTargetRad = (Angle.normDelta((back ? theta + Math.PI : theta) - poseEstimate.getHeading()));
+
+                    if (Math.abs(turretTargetRad) > Math.PI / 2) {
+                        back = false;
+                        if (turretTargetRad < 0)
+                            turretTargetRad += Math.PI;
+                        else
+                            turretTargetRad -= Math.PI;
+                    }
+
+                    if (back)
+                        distance = Math.hypot(x_difference, y_difference) * 25.4 - 300;
+                    else {
+                        distance = -(Math.hypot(x_difference, y_difference) * 25.4) + 260;
+                    }
+
+                    turret = -Turret.radiansToTicks(turretTargetRad);
+
+                    if (Turret.getWithin() && Math.abs(targetPos - robot.vertical.v2.getCurrentPosition()) < 100 /*&& (junction != B2 && junction != C2 || visionCorrected)*/) {
+                        robot.intakeOuttake.horizontal.setTarget(distance);
+                        robot.intakeOuttake.horizontal.update();
+                    }
+
+
                     break;
+
             }
 
 
