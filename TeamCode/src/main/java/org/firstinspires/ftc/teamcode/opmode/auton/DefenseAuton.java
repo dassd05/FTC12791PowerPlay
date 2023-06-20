@@ -40,7 +40,7 @@ import java.util.List;
 
 public class DefenseAuton extends LinearOpMode {
 
-    public static Vector2d stack = new Vector2d(-32, 49);
+    public static Vector2d stack = new Vector2d(-32, 49.25);
 
     public static double P = .007, I = 7e-11 , D = 400;
 
@@ -55,7 +55,7 @@ public class DefenseAuton extends LinearOpMode {
     public double webcamOffset = 50;
     public double safeClear = 170; //440 //TODO: fix
     //public double slidesUp = 1440;
-    public double slidesUp = 660/*665*/;
+    public double slidesUp = 655/*665*/;
 
     public int turret = 0;
 
@@ -255,10 +255,18 @@ public class DefenseAuton extends LinearOpMode {
 
                             robot.intakeOuttake.arm.setAligner(true);
 
-                            if (myTimer.time() < 400) {
-                                robot.intakeOuttake.horizontal.setTarget(distance + 35);
+                            if (cycles < 2) {
+                                if (myTimer.time() < 400) {
+                                    robot.intakeOuttake.horizontal.setTarget(distance + 35);
+                                } else {
+                                    robot.intakeOuttake.horizontal.setTarget(distance + 10);
+                                }
                             } else {
-                                robot.intakeOuttake.horizontal.setTarget(distance + 7);
+                                if (myTimer.time() < 400) {
+                                    robot.intakeOuttake.horizontal.setTarget(distance + 60);
+                                } else {
+                                    robot.intakeOuttake.horizontal.setTarget(distance + 10);
+                                }
                             }
 
                             if (cycles < 0) {
@@ -303,7 +311,7 @@ public class DefenseAuton extends LinearOpMode {
 
                             robot.intakeOuttake.arm.claw.setPosition(CLAW_CLOSE);
 
-                            if (myTimer.time() > 225 && reached) {
+                            if (myTimer.time() > 250 && reached) {
                                 targetPos += safeClear;
                                 reached = false;
                             }
@@ -322,6 +330,7 @@ public class DefenseAuton extends LinearOpMode {
                                 robot.intakeOuttake.horizontal.backwardLeft.setPosition(BACKWARD_LEFT_IN);
                                 robot.intakeOuttake.horizontal.backwardRight.setPosition(BACKWARD_RIGHT_IN);
 
+                                targetPos = slidesUp;
                                 turret = -Turret.radiansToTicks(turretTargetRad);
                                 robot.intakeOuttake.arm.arm.setPosition(ARM_ANGLED);
                                 firstTime = true;
@@ -348,7 +357,8 @@ public class DefenseAuton extends LinearOpMode {
                                 if (myTimer.time() > 400)
                                     robot.intakeOuttake.horizontal.update();
                             } else {
-                                robot.intakeOuttake.horizontal.update();
+                                if (myTimer.time() > 300)
+                                    robot.intakeOuttake.horizontal.update();
                             }
                             turret = -Turret.radiansToTicks(turretTargetRad);
 
@@ -430,8 +440,10 @@ public class DefenseAuton extends LinearOpMode {
                             }
                             break;
                     }
-                    if (cycles == 5)
+                    if (cycles == 5) {
                         state = State.PARK;
+                        reached = false;
+                    }
 
                     break;
 
@@ -451,24 +463,36 @@ public class DefenseAuton extends LinearOpMode {
                     robot.intakeOuttake.horizontal.forwardRight.setPosition(FORWARD_RIGHT_IN);
                     robot.intakeOuttake.horizontal.forwardLeft.setPosition(FORWARD_LEFT_IN);
 
-                    switch (tagOfInterest.id) {
-                        case 1:
-                            robot.butterfly.runToPosition(left.getX(), left.getY(), left.getHeading(),
-                                    .85, .85, -poseEstimate.getY(), poseEstimate.getX(),
-                                    poseEstimate.getHeading());
-                            break;
+                    if (!reached) {
+                        robot.butterfly.runToPosition(middle.getX(), middle.getY(), middle.getHeading(),
+                                .85, 1, -poseEstimate.getY(), poseEstimate.getX(),
+                                poseEstimate.getHeading());
 
-                        case 3:
-                            robot.butterfly.runToPosition(right.getX(), right.getY(), right.getHeading(),
-                                    .85, .85, -poseEstimate.getY(), poseEstimate.getX(),
-                                    poseEstimate.getHeading());
-                            break;
+                        if (robot.butterfly.positionReached || myTimer.time() > 900)
+                            reached = true;
 
-                        case 2:
-                            robot.butterfly.runToPosition(middle.getX(), middle.getY(), middle.getHeading(),
-                                    .85, 1, -poseEstimate.getY(), poseEstimate.getX(),
-                                    poseEstimate.getHeading());
-                            break;
+                    }
+
+                    if (reached) {
+                        switch (tagOfInterest.id) {
+                            case 1:
+                                robot.butterfly.runToPosition(left.getX(), left.getY(), left.getHeading(),
+                                        .85, .85, -poseEstimate.getY(), poseEstimate.getX(),
+                                        poseEstimate.getHeading());
+                                break;
+
+                            case 3:
+                                robot.butterfly.runToPosition(right.getX(), right.getY(), right.getHeading(),
+                                        .85, .85, -poseEstimate.getY(), poseEstimate.getX(),
+                                        poseEstimate.getHeading());
+                                break;
+
+                            case 2:
+                                robot.butterfly.runToPosition(middle.getX(), middle.getY(), middle.getHeading(),
+                                        .85, 1, -poseEstimate.getY(), poseEstimate.getX(),
+                                        poseEstimate.getHeading());
+                                break;
+                        }
                     }
                     break;
 
