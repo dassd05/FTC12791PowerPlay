@@ -32,8 +32,8 @@ import org.openftc.easyopencv.OpenCvCameraRotation;
 
 import java.util.List;
 
-@TeleOp(name = "WorldsTele", group = "0")
-public class WorldsTele extends LinearOpMode {
+@TeleOp(name = "FinalMTITele", group = "0")
+public class FinalMTITele extends LinearOpMode {
 
     public static double P = .007, I = 7e-11 , D = 400;
 

@@ -23,7 +23,7 @@ public class Arm {
     public static double CLAW_CAP = .53;
 
     public static double MECH_ALIGN_OPEN = .97;
-    public static double MECH_ALIGN_CLOSE = .79;
+    public static double MECH_ALIGN_CLOSE = .77;
     public static double MECH_ALIGN_PREP = .84;
     public static double MECH_ALIGN_EXTRA = .79;
 

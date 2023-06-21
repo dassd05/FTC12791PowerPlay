@@ -27,9 +27,9 @@ import org.openftc.easyopencv.OpenCvCameraRotation;
 
 import java.util.ArrayList;
 
-@Autonomous (name = "Defense Auton Left", group = "0", preselectTeleOp = "FinalMTITele")
+@Autonomous (name = "Regular Left", group = "0", preselectTeleOp = "FinalMTITele")
 
-public class DefenseAuton extends LinearOpMode {
+public class NewMTILeftAuto extends LinearOpMode {
 
     public static Vector2d stack = new Vector2d(-32, 49.25);
 
@@ -99,9 +99,9 @@ public class DefenseAuton extends LinearOpMode {
 
         boolean firstTime = true;
 
-        Pose2d pose1 = new Pose2d(0,38,0);
-        Pose2d pose2 = new Pose2d(-12.75,55,35);
-        Pose2d pose3 = new Pose2d(-7.25, 62, 117);
+        Pose2d pose1 = new Pose2d(0,60,0);
+        Pose2d pose1_2 = new Pose2d(3,47,45);
+        Pose2d pose2 = new Pose2d(-8,50.5,90);
 
         Pose2d left = new Pose2d(-24,50.5,0);
         Pose2d right = new Pose2d(24,50.5,0);
@@ -179,41 +179,47 @@ public class DefenseAuton extends LinearOpMode {
                 case FORWARD:
                     if (!reached) {
                         robot.butterfly.runToPosition(pose1.getX(), pose1.getY(), pose1.getHeading(),
-                                .95, .85, -poseEstimate.getY(), poseEstimate.getX(),
+                                .85, .85, -poseEstimate.getY(), poseEstimate.getX(),
                                 poseEstimate.getHeading());
-                        if (robot.butterfly.positionReached || myTimer.time() > 1500)
+                        if (robot.butterfly.positionReached || myTimer.time() > 2000)
                             reached = true;
                     }
                     if (reached) {
-                        robot.butterfly.runToPosition(pose2.getX(), pose2.getY(), pose2.getHeading(),
-                                .35, .9, -poseEstimate.getY(), poseEstimate.getX(),
-                                poseEstimate.getHeading(), true);
+                        robot.butterfly.runToPosition(pose1_2.getX(), pose1_2.getY(), pose1_2.getHeading(),
+                                .85, .6, -poseEstimate.getY(), poseEstimate.getX(),
+                                poseEstimate.getHeading());
 
                         robot.intakeOuttake.arm.arm.setPosition((ARM_REST + ARM_OUTTAKE) / 2);
 
-                        if (robot.butterfly.positionReached || myTimer.time() > 2300) {
-                            reached = false;
+                        //robot.intakeOuttake.horizontal.backwardLeft.setPosition((BACKWARD_LEFT_IN + BACKWARD_LEFT_OUT) / 2);
+                        //robot.intakeOuttake.horizontal.backwardRight.setPosition((BACKWARD_RIGHT_IN + BACKWARD_RIGHT_OUT) / 2);
+
+                        if (robot.butterfly.positionReached || myTimer.time() > 3000) {
                             myTimer.reset();
                             state = State.POSITION;
                         }
                     }
 
-                    if (myTimer.time() > 850)
+                    if (myTimer.time() > 1000)
                         robot.intakeOuttake.arm.arm.setPosition((ARM_REST + ARM_OUTTAKE) / 2);
 
                     break;
 
                 case POSITION:
-                    robot.butterfly.runToPosition(pose3.getX(), pose3.getY(), pose3.getHeading(),
-                            .6, .95, -poseEstimate.getY(), poseEstimate.getX(),
-                            poseEstimate.getHeading());
-                    if (robot.butterfly.positionReached || myTimer.time() > 1200) {
+//                    robot.intakeOuttake.horizontal.backwardLeft.setPosition((BACKWARD_LEFT_IN + BACKWARD_LEFT_OUT) / 2);
+//                    robot.intakeOuttake.horizontal.backwardRight.setPosition((BACKWARD_RIGHT_IN + BACKWARD_RIGHT_OUT) / 2);
+
+                    robot.butterfly.runToPosition(pose2.getX(), pose2.getY(), pose2.getHeading(),
+                            .45, 1, -poseEstimate.getY(), poseEstimate.getX(),
+                            poseEstimate.getHeading(), true);
+                    if (robot.butterfly.positionReached || myTimer.time() > 2000) {
                         myTimer.reset();
                         state = State.SCORE;
                     }
                     break;
+
                 case SCORE:
-                    robot.butterfly.runToPosition(pose3.getX(), pose3.getY(), pose3.getHeading(),
+                    robot.butterfly.runToPosition(pose2.getX(), pose2.getY(), pose2.getHeading(),
                             .85, .85, -poseEstimate.getY(), poseEstimate.getX(),
                             poseEstimate.getHeading(), true);
 
@@ -383,7 +389,7 @@ public class DefenseAuton extends LinearOpMode {
 
                             break;
                         case REST:
-                             junction = stack;
+                            junction = stack;
 
                             if (myTimer.time() < 400)
                                 robot.intakeOuttake.arm.arm.setPosition(ARM_OUTTAKE);
@@ -453,36 +459,24 @@ public class DefenseAuton extends LinearOpMode {
                     robot.intakeOuttake.horizontal.forwardRight.setPosition(FORWARD_RIGHT_IN);
                     robot.intakeOuttake.horizontal.forwardLeft.setPosition(FORWARD_LEFT_IN);
 
-                    if (!reached) {
-                        robot.butterfly.runToPosition(middle.getX(), middle.getY(), middle.getHeading(),
-                                .85, 1, -poseEstimate.getY(), poseEstimate.getX(),
-                                poseEstimate.getHeading());
+                    switch (tagOfInterest.id) {
+                        case 1:
+                            robot.butterfly.runToPosition(left.getX(), left.getY(), left.getHeading(),
+                                    .85, .85, -poseEstimate.getY(), poseEstimate.getX(),
+                                    poseEstimate.getHeading());
+                            break;
 
-                        if (robot.butterfly.positionReached || myTimer.time() > 900)
-                            reached = true;
+                        case 3:
+                            robot.butterfly.runToPosition(right.getX(), right.getY(), right.getHeading(),
+                                    .85, .85, -poseEstimate.getY(), poseEstimate.getX(),
+                                    poseEstimate.getHeading());
+                            break;
 
-                    }
-
-                    if (reached) {
-                        switch (tagOfInterest.id) {
-                            case 1:
-                                robot.butterfly.runToPosition(left.getX(), left.getY(), left.getHeading(),
-                                        .85, .85, -poseEstimate.getY(), poseEstimate.getX(),
-                                        poseEstimate.getHeading());
-                                break;
-
-                            case 3:
-                                robot.butterfly.runToPosition(right.getX(), right.getY(), right.getHeading(),
-                                        .85, .85, -poseEstimate.getY(), poseEstimate.getX(),
-                                        poseEstimate.getHeading());
-                                break;
-
-                            case 2:
-                                robot.butterfly.runToPosition(middle.getX(), middle.getY(), middle.getHeading(),
-                                        .85, 1, -poseEstimate.getY(), poseEstimate.getX(),
-                                        poseEstimate.getHeading());
-                                break;
-                        }
+                        case 2:
+                            robot.butterfly.runToPosition(middle.getX(), middle.getY(), middle.getHeading(),
+                                    .85, 1, -poseEstimate.getY(), poseEstimate.getX(),
+                                    poseEstimate.getHeading());
+                            break;
                     }
                     break;
 
