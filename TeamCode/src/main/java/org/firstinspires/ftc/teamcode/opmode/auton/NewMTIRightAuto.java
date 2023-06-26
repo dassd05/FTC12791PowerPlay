@@ -41,7 +41,7 @@ public class NewMTIRightAuto extends LinearOpMode {
 
     public double distance = 0;
 
-    public double coneOffset = 47;
+    public double coneOffset = 47 + 20;
     public double webcamOffset = 50;
     public double safeClear = 170; //440 //TODO: fix
     //public double slidesUp = 1440;
@@ -65,12 +65,12 @@ public class NewMTIRightAuto extends LinearOpMode {
         drive.setPoseEstimate(new Pose2d(0, -rightOffset,0));
 
         Pose2d pose1 = new Pose2d(0 + rightOffset,60,0);
-        Pose2d pose1_2 = new Pose2d(-3 + rightOffset,47,-45);
-        Pose2d pose2 = new Pose2d(8 + rightOffset,50.5,-90);
+        Pose2d pose1_2 = new Pose2d(-3 + rightOffset,46,-45);
+        Pose2d pose2 = new Pose2d(8 + rightOffset,49.5,-90);
 
-        Pose2d left = new Pose2d(-24 + rightOffset,50.5,0);
-        Pose2d right = new Pose2d(24 + rightOffset,50.5,0);
-        Pose2d middle = new Pose2d(0 + rightOffset,50.5,0);
+        Pose2d left = new Pose2d(-24 + rightOffset,49.5,0);
+        Pose2d right = new Pose2d(24 + rightOffset,49.5,0);
+        Pose2d middle = new Pose2d(0 + rightOffset,49.5,0);
 
         OpenCvCamera camera;
         AprilTagDetectionPipeline aprilTagDetectionPipeline;
@@ -249,39 +249,43 @@ public class NewMTIRightAuto extends LinearOpMode {
                         case EXTEND:
                             junction = stack;
 
-                            targetPos = (5 - cycles) * coneOffset + webcamOffset;
+                            targetPos = (6 - cycles) * coneOffset + webcamOffset;
 
                             robot.intakeOuttake.arm.setAligner(true);
+
+                            double adjustment = myTimer.time();
 
                             if (cycles < 2) {
                                 if (myTimer.time() < 400) {
                                     robot.intakeOuttake.horizontal.setTarget(distance + 35);
                                 } else {
-                                    robot.intakeOuttake.horizontal.setTarget(distance + 10);
+                                    if (myTimer.time() < 700)
+                                        robot.intakeOuttake.horizontal.setTarget(distance - 10 + (700 - adjustment) / 10.0);
+                                    else
+                                        robot.intakeOuttake.horizontal.setTarget(distance - 60);
                                 }
                             } else {
-                                if (myTimer.time() < 400) {
-                                    robot.intakeOuttake.horizontal.setTarget(distance + 60);
-                                } else {
-                                    robot.intakeOuttake.horizontal.setTarget(distance + 10);
-                                }
+                                if (myTimer.time() < 700)
+                                    robot.intakeOuttake.horizontal.setTarget(distance - 10 + (700 - adjustment) / 10.0);
+                                else
+                                    robot.intakeOuttake.horizontal.setTarget(distance - 60);
                             }
 
                             if (cycles < 0) {
                                 if (myTimer.time() > 0 && myTimer.time() < 300)
                                     robot.intakeOuttake.arm.arm.setPosition(linearProfile(300, myTimer.time(), 300, (ARM_REST + ARM_INTAKE) / 2, ARM_INTAKE - .06));
                                 else if (myTimer.time() >= 300)
-                                    robot.intakeOuttake.arm.arm.setPosition(ARM_INTAKE);
+                                    robot.intakeOuttake.arm.arm.setPosition(ARM_INTAKE + .083);
                             } else if (cycles < 2) {
                                 if (myTimer.time() > 0 && myTimer.time() < 300)
                                     robot.intakeOuttake.arm.arm.setPosition(linearProfile(300, myTimer.time(), 300, (ARM_REST + ARM_INTAKE) / 2, ARM_INTAKE + .004 - .06));
                                 else if (myTimer.time() >= 300)
-                                    robot.intakeOuttake.arm.arm.setPosition(ARM_INTAKE + .007);
+                                    robot.intakeOuttake.arm.arm.setPosition(ARM_INTAKE + .007 + .08);
                             } else {
                                 if (myTimer.time() > 0 && myTimer.time() < 300)
                                     robot.intakeOuttake.arm.arm.setPosition(linearProfile(300, myTimer.time(), 300, (ARM_REST + ARM_INTAKE) / 2, ARM_INTAKE + .01 - .06));
                                 else if (myTimer.time() >= 300)
-                                    robot.intakeOuttake.arm.arm.setPosition(ARM_INTAKE + .011);
+                                    robot.intakeOuttake.arm.arm.setPosition(ARM_INTAKE + .011 + .08);
                             }
 
                             if (myTimer.time() > 100) {

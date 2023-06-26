@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.opmode.teleop;
 import static org.firstinspires.ftc.teamcode.subsystem.Constants.DEPLOYMENT.*;
 import static org.firstinspires.ftc.teamcode.subsystem.Constants.JUNCTIONS.*;
 import static org.firstinspires.ftc.teamcode.subsystem.io.Arm.*;
+import static org.firstinspires.ftc.teamcode.subsystem.io.Arm.ARM_ANGLED_TELE;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
@@ -180,12 +181,12 @@ public class FinalMTITele extends LinearOpMode {
                         robot.intakeOuttake.arm.claw.setPosition(CLAW_CLOSE);
 
                     if (armNeutral)
-                        robot.intakeOuttake.arm.arm.setPosition(ARM_REST);
+                        robot.intakeOuttake.arm.arm.setPosition(ARM_REST_TELE);
                     else {
                         if (linkageAuto)
-                            robot.intakeOuttake.arm.arm.setPosition(ARM_INTAKE);
+                            robot.intakeOuttake.arm.arm.setPosition(ARM_INTAKE_TELE);
                         else
-                            robot.intakeOuttake.arm.arm.setPosition((ARM_INTAKE + ARM_REST) / 2);
+                            robot.intakeOuttake.arm.arm.setPosition((ARM_INTAKE_TELE + ARM_REST_TELE) / 2);
                     }
 
                     robot.intakeOuttake.arm.wrist.setPosition(WRIST_INTAKE);
@@ -223,7 +224,7 @@ public class FinalMTITele extends LinearOpMode {
 
                     if (FSMTimer.time() > 150) {
                         robot.intakeOuttake.arm.claw.setPosition(CLAW_OPEN);
-                        robot.intakeOuttake.arm.arm.setPosition(ARM_INTAKE);
+                        robot.intakeOuttake.arm.arm.setPosition(ARM_INTAKE_TELE - driverArm);
 
                         robot.intakeOuttake.arm.wrist.setPosition(WRIST_INTAKE);
                     }
@@ -286,9 +287,9 @@ public class FinalMTITele extends LinearOpMode {
                     robot.intakeOuttake.arm.claw.setPosition(CLAW_CLOSE);
 
                     if (FSMTimer.time() > 425 && FSMTimer.time() < 925)
-                        robot.intakeOuttake.arm.arm.setPosition(linearProfile(500, FSMTimer.time(), 925, ARM_INTAKE, (ARM_REST)));
+                        robot.intakeOuttake.arm.arm.setPosition(linearProfile(500, FSMTimer.time(), 925, ARM_INTAKE_TELE, (ARM_REST_TELE)));
                     if (FSMTimer.time() > 925)
-                        robot.intakeOuttake.arm.arm.setPosition(ARM_REST);
+                        robot.intakeOuttake.arm.arm.setPosition(ARM_REST_TELE);
 
                     if (FSMTimer.time() > 750) {
                         robot.intakeOuttake.arm.wrist.setPosition(WRIST_OUTTAKE);
@@ -435,25 +436,25 @@ public class FinalMTITele extends LinearOpMode {
                             slidesTargetPos = safe;
 
                             if (FSMTimer.time() < 400)
-                                robot.intakeOuttake.arm.arm.setPosition(linearProfile(400, FSMTimer.time(), 400, ARM_REST, ARM_ANGLED));
+                                robot.intakeOuttake.arm.arm.setPosition(linearProfile(400, FSMTimer.time(), 400, ARM_REST_TELE, ARM_ANGLED_TELE));
                             else
-                                robot.intakeOuttake.arm.arm.setPosition(ARM_OUTTAKE + driverArm);
+                                robot.intakeOuttake.arm.arm.setPosition(ARM_OUTTAKE_TELE + driverArm);
                             break;
                         case MIDDLE:
                             slidesTargetPos = slidesMiddle;
 
                             if (FSMTimer.time() < 700)
-                                robot.intakeOuttake.arm.arm.setPosition(linearProfile(700, FSMTimer.time(), 800, ARM_REST, ARM_ANGLED));
+                                robot.intakeOuttake.arm.arm.setPosition(linearProfile(700, FSMTimer.time(), 800, ARM_REST_TELE, ARM_ANGLED_TELE));
                             else
-                                robot.intakeOuttake.arm.arm.setPosition(ARM_ANGLED + driverArm);
+                                robot.intakeOuttake.arm.arm.setPosition(ARM_ANGLED_TELE + driverArm);
                             break;
                         case HIGH:
                             slidesTargetPos = slidesTop;
 
                             if (FSMTimer.time() < 1000)
-                                robot.intakeOuttake.arm.arm.setPosition(linearProfile(1000, FSMTimer.time(), 800, ARM_REST, ARM_ANGLED));
+                                robot.intakeOuttake.arm.arm.setPosition(linearProfile(1000, FSMTimer.time(), 800, ARM_REST_TELE, ARM_ANGLED_TELE));
                             else
-                                robot.intakeOuttake.arm.arm.setPosition(ARM_ANGLED + driverArm);
+                                robot.intakeOuttake.arm.arm.setPosition(ARM_ANGLED_TELE + driverArm);
                             break;
                     }
 
@@ -600,16 +601,16 @@ public class FinalMTITele extends LinearOpMode {
                             if (back) {
                                 robot.intakeOuttake.arm.wrist.setPosition(WRIST_OUTTAKE);
                                 if (FSMTimer.time() < 400)
-                                    robot.intakeOuttake.arm.arm.setPosition(linearProfile(400, FSMTimer.time(), 400, ARM_REST, ARM_ANGLED));
+                                    robot.intakeOuttake.arm.arm.setPosition(linearProfile(400, FSMTimer.time(), 400, ARM_REST_TELE, ARM_ANGLED_TELE));
                                 else
-                                    robot.intakeOuttake.arm.arm.setPosition(ARM_OUTTAKE + .02 + driverArm);
+                                    robot.intakeOuttake.arm.arm.setPosition(ARM_OUTTAKE_TELE + .02 + driverArm);
                             }  else {
                                 slidesTargetPos = clear;
                                 robot.intakeOuttake.arm.wrist.setPosition(WRIST_INTAKE);
                                 if (FSMTimer.time() < 400)
-                                    robot.intakeOuttake.arm.arm.setPosition(linearProfile(400, FSMTimer.time(), 400, ARM_REST, ARM_INTAKE - .08));
+                                    robot.intakeOuttake.arm.arm.setPosition(linearProfile(400, FSMTimer.time(), 400, ARM_REST_TELE, ARM_INTAKE_TELE - .08));
                                 else
-                                    robot.intakeOuttake.arm.arm.setPosition(ARM_INTAKE + .02 + driverArm);
+                                    robot.intakeOuttake.arm.arm.setPosition(ARM_INTAKE_TELE + .02 + driverArm);
                             }
 
                             if (cap)
@@ -620,16 +621,16 @@ public class FinalMTITele extends LinearOpMode {
                                 slidesTargetPos = slidesMiddle;
                                 robot.intakeOuttake.arm.wrist.setPosition(WRIST_OUTTAKE);
                                 if (FSMTimer.time() < 700)
-                                    robot.intakeOuttake.arm.arm.setPosition(linearProfile(700, FSMTimer.time(), 800, ARM_REST, ARM_ANGLED));
+                                    robot.intakeOuttake.arm.arm.setPosition(linearProfile(700, FSMTimer.time(), 800, ARM_REST_TELE, ARM_ANGLED_TELE));
                                 else
-                                    robot.intakeOuttake.arm.arm.setPosition(ARM_ANGLED + driverArm);
+                                    robot.intakeOuttake.arm.arm.setPosition(ARM_ANGLED_TELE + driverArm);
                             } else {
                                 slidesTargetPos = slidesMiddle + clear;
                                 robot.intakeOuttake.arm.wrist.setPosition(WRIST_INTAKE);
                                 if (FSMTimer.time() < 700)
-                                    robot.intakeOuttake.arm.arm.setPosition(linearProfile(700, FSMTimer.time(), 800, ARM_REST, ARM_INTAKE));
+                                    robot.intakeOuttake.arm.arm.setPosition(linearProfile(700, FSMTimer.time(), 800, ARM_REST_TELE, ARM_INTAKE_TELE));
                                 else
-                                    robot.intakeOuttake.arm.arm.setPosition(ARM_INTAKE + driverArm);
+                                    robot.intakeOuttake.arm.arm.setPosition(ARM_INTAKE_TELE + driverArm);
                             }
                             break;
                         case HIGH:
@@ -637,16 +638,16 @@ public class FinalMTITele extends LinearOpMode {
                                 slidesTargetPos = slidesTop;
                                 robot.intakeOuttake.arm.wrist.setPosition(WRIST_OUTTAKE);
                                 if (FSMTimer.time() < 1000)
-                                    robot.intakeOuttake.arm.arm.setPosition(linearProfile(1000, FSMTimer.time(), 800, ARM_REST, ARM_ANGLED));
+                                    robot.intakeOuttake.arm.arm.setPosition(linearProfile(1000, FSMTimer.time(), 800, ARM_REST_TELE, ARM_ANGLED_TELE));
                                 else
-                                    robot.intakeOuttake.arm.arm.setPosition(ARM_ANGLED + driverArm);
+                                    robot.intakeOuttake.arm.arm.setPosition(ARM_ANGLED_TELE + driverArm);
                             } else {
                                 slidesTargetPos = slidesTop + clear;
                                 robot.intakeOuttake.arm.wrist.setPosition(WRIST_INTAKE);
                                 if (FSMTimer.time() < 1000)
-                                    robot.intakeOuttake.arm.arm.setPosition(linearProfile(1000, FSMTimer.time(), 800, ARM_REST, ARM_INTAKE));
+                                    robot.intakeOuttake.arm.arm.setPosition(linearProfile(1000, FSMTimer.time(), 800, ARM_REST_TELE, ARM_INTAKE_TELE));
                                 else
-                                    robot.intakeOuttake.arm.arm.setPosition(ARM_INTAKE + driverArm);
+                                    robot.intakeOuttake.arm.arm.setPosition(ARM_INTAKE_TELE + driverArm);
                             }
                             break;
                     }
@@ -719,7 +720,7 @@ public class FinalMTITele extends LinearOpMode {
 
                         if (cap) {
                             if (FSMTimer.time() > 200)
-                                robot.intakeOuttake.arm.arm.setPosition(ARM_REST);
+                                robot.intakeOuttake.arm.arm.setPosition(ARM_REST_TELE);
                             robot.intakeOuttake.arm.claw.setPosition(CLAW_CAP);
                         }
                     }
@@ -790,14 +791,14 @@ public class FinalMTITele extends LinearOpMode {
                     if (robot.intakeOuttake.horizontal.forwardLeft.getPosition() > (FORWARD_LEFT_IN * 3 + FORWARD_LEFT_OUT) / 4) {
                         if (linkageAuto) {
                             if (FSMTimer.time() < 750)
-                                robot.intakeOuttake.arm.arm.setPosition(linearProfile(750, FSMTimer.time(), 750, ARM_ANGLED, ARM_INTAKE));
+                                robot.intakeOuttake.arm.arm.setPosition(linearProfile(750, FSMTimer.time(), 750, ARM_ANGLED_TELE, ARM_INTAKE_TELE));
                             else
-                                robot.intakeOuttake.arm.arm.setPosition(ARM_INTAKE);
+                                robot.intakeOuttake.arm.arm.setPosition(ARM_INTAKE_TELE);
                         } else {
                             if (FSMTimer.time() < 750)
-                                robot.intakeOuttake.arm.arm.setPosition(linearProfile(750, FSMTimer.time(), 750, ARM_ANGLED, ARM_REST));
+                                robot.intakeOuttake.arm.arm.setPosition(linearProfile(750, FSMTimer.time(), 750, ARM_ANGLED_TELE, ARM_REST_TELE));
                             else
-                                robot.intakeOuttake.arm.arm.setPosition(ARM_REST);
+                                robot.intakeOuttake.arm.arm.setPosition(ARM_REST_TELE);
                         }
                     }
 
@@ -835,9 +836,9 @@ public class FinalMTITele extends LinearOpMode {
                         turretTarget = 0;
 
                     if (FSMTimer.time() < 750)
-                        robot.intakeOuttake.arm.arm.setPosition(linearProfile(750, FSMTimer.time(), 750, ARM_ANGLED, ARM_REST));
+                        robot.intakeOuttake.arm.arm.setPosition(linearProfile(750, FSMTimer.time(), 750, ARM_ANGLED_TELE, ARM_REST_TELE));
                     else
-                        robot.intakeOuttake.arm.arm.setPosition(ARM_REST);
+                        robot.intakeOuttake.arm.arm.setPosition(ARM_REST_TELE);
 
                     robot.intakeOuttake.arm.setAligner(!(FSMTimer.time() > 950));
 

@@ -8,10 +8,16 @@ import com.qualcomm.robotcore.util.Range;
 @Config
 public class Arm {
 //    public static double ARM_OFFSET = 0;
-    public static double ARM_INTAKE = .78;
-    public static double ARM_REST = .36;
-    public static double ARM_OUTTAKE = .22; //old .38
-    public static double ARM_ANGLED = .30;
+    public static double ARM_INTAKE = .815;//.78;
+    public static double ARM_REST = .395;//.36;
+    public static double ARM_OUTTAKE = .255;//.22; //old .38
+    public static double ARM_ANGLED = .335;//.30;
+
+
+    public static double ARM_INTAKE_TELE = .78;
+    public static double ARM_REST_TELE = .36;
+    public static double ARM_OUTTAKE_TELE = .22; //old .38
+    public static double ARM_ANGLED_TELE = .30;
 
     public static double ARM_LENGTH = 250;
     public static double ARM_HORIZONTAL_LENGTH = 346.17;
@@ -21,6 +27,7 @@ public class Arm {
     public static double CLAW_OPEN = .35;
     public static double CLAW_CLOSE = .56;//.55;
     public static double CLAW_CAP = .53;
+    public static double CLAW_AUTO = .39;
 
     public static double MECH_ALIGN_OPEN = .97;
     public static double MECH_ALIGN_CLOSE = .77;

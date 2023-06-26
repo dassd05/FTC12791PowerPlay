@@ -31,7 +31,7 @@ import java.util.ArrayList;
 
 public class DefenseAuton extends LinearOpMode {
 
-    public static Vector2d stack = new Vector2d(-32, 49.25);
+    public static Vector2d stack = new Vector2d(-32, 50.25);
 
     public static double P = .007, I = 7e-11 , D = 400;
 
@@ -42,10 +42,10 @@ public class DefenseAuton extends LinearOpMode {
     public double distance = 0;
 
     public double coneOffset = 47;
-    public double webcamOffset = 50;
+    public double webcamOffset = 50 + 20;
     public double safeClear = 170; //440 //TODO: fix
     //public double slidesUp = 1440;
-    public double slidesUp = 655/*665*/;
+    public double slidesUp = 645/*665*/;
 
     public int turret = 0;
 
@@ -103,9 +103,10 @@ public class DefenseAuton extends LinearOpMode {
         Pose2d pose2 = new Pose2d(-12.75,55,35);
         Pose2d pose3 = new Pose2d(-7.25, 62, 117);
 
-        Pose2d left = new Pose2d(-24,50.5,0);
-        Pose2d right = new Pose2d(24,50.5,0);
-        Pose2d middle = new Pose2d(0,50.5,0);
+        Pose2d park = new Pose2d(-18,45,0);
+        Pose2d left = new Pose2d(-24,49.5,0);
+        Pose2d right = new Pose2d(24,49.5,0);
+        Pose2d middle = new Pose2d(0,49.5,0);
 
         int cycles = -1;
 
@@ -241,22 +242,29 @@ public class DefenseAuton extends LinearOpMode {
                         case EXTEND:
                             junction = stack;
 
-                            targetPos = (5 - cycles) * coneOffset + webcamOffset;
+                            if (cycles == 0)
+                                targetPos = (6 - cycles) * coneOffset + webcamOffset + 20;
+                            else
+                                targetPos = (6 - cycles) * coneOffset + webcamOffset;
 
                             robot.intakeOuttake.arm.setAligner(true);
 
+                            double adjustment = myTimer.time();
+
                             if (cycles < 2) {
-                                if (myTimer.time() < 400) {
-                                    robot.intakeOuttake.horizontal.setTarget(distance + 35);
-                                } else {
-                                    robot.intakeOuttake.horizontal.setTarget(distance + 10);
-                                }
+//                                if (myTimer.time() < 400) {
+//                                    robot.intakeOuttake.horizontal.setTarget(distance + 35);
+//                                } else {
+                                if (myTimer.time() < 700)
+                                    robot.intakeOuttake.horizontal.setTarget(distance - 40 + (700 - adjustment) / 10.0);
+                                else
+                                    robot.intakeOuttake.horizontal.setTarget(distance - 70);
+                                //}
                             } else {
-                                if (myTimer.time() < 400) {
-                                    robot.intakeOuttake.horizontal.setTarget(distance + 60);
-                                } else {
-                                    robot.intakeOuttake.horizontal.setTarget(distance + 10);
-                                }
+                                if (myTimer.time() < 700)
+                                    robot.intakeOuttake.horizontal.setTarget(distance - 40 + (700 - adjustment) / 10.0);
+                                else
+                                    robot.intakeOuttake.horizontal.setTarget(distance - 70);
                             }
 
                             if (cycles < 0) {
@@ -454,11 +462,11 @@ public class DefenseAuton extends LinearOpMode {
                     robot.intakeOuttake.horizontal.forwardLeft.setPosition(FORWARD_LEFT_IN);
 
                     if (!reached) {
-                        robot.butterfly.runToPosition(middle.getX(), middle.getY(), middle.getHeading(),
-                                .85, 1, -poseEstimate.getY(), poseEstimate.getX(),
+                        robot.butterfly.runToPosition(park.getX(), park.getY(), park.getHeading(),
+                                .85, .75, -poseEstimate.getY(), poseEstimate.getX(),
                                 poseEstimate.getHeading());
 
-                        if (robot.butterfly.positionReached || myTimer.time() > 900)
+                        if (robot.butterfly.positionReached || myTimer.time() > 1100)
                             reached = true;
 
                     }

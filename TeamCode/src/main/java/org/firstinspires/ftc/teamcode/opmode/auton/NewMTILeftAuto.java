@@ -42,7 +42,7 @@ public class NewMTILeftAuto extends LinearOpMode {
     public double distance = 0;
 
     public double coneOffset = 47;
-    public double webcamOffset = 50;
+    public double webcamOffset = 50 + 20;
     public double safeClear = 170; //440 //TODO: fix
     //public double slidesUp = 1440;
     public double slidesUp = 655/*665*/;
@@ -100,12 +100,12 @@ public class NewMTILeftAuto extends LinearOpMode {
         boolean firstTime = true;
 
         Pose2d pose1 = new Pose2d(0,60,0);
-        Pose2d pose1_2 = new Pose2d(3,47,45);
-        Pose2d pose2 = new Pose2d(-8,50.5,90);
+        Pose2d pose1_2 = new Pose2d(3,46,45);
+        Pose2d pose2 = new Pose2d(-8,49.5,90);
 
-        Pose2d left = new Pose2d(-24,50.5,0);
-        Pose2d right = new Pose2d(24,50.5,0);
-        Pose2d middle = new Pose2d(0,50.5,0);
+        Pose2d left = new Pose2d(-24,49.5,0);
+        Pose2d right = new Pose2d(24,49.5,0);
+        Pose2d middle = new Pose2d(0,49.5,0);
 
         int cycles = -1;
 
@@ -156,13 +156,14 @@ public class NewMTILeftAuto extends LinearOpMode {
 
         waitForStart();
         robot.intakeOuttake.arm.claw.setPosition(CLAW_CLOSE);
+        //robot.intakeOuttake.arm.aligner.setPwmDisable();
+
         myTimer.reset();
 
         boolean reached = false;
 
         long lastTime = System.nanoTime();
 
-        waitForStart();
         resetRuntime();
 
         state = State.FORWARD;
@@ -177,6 +178,8 @@ public class NewMTILeftAuto extends LinearOpMode {
 
             switch (state) {
                 case FORWARD:
+//                    if (myTimer.time() > 300)
+//                        robot.intakeOuttake.arm.claw.setPwmDisable();
                     if (!reached) {
                         robot.butterfly.runToPosition(pose1.getX(), pose1.getY(), pose1.getHeading(),
                                 .85, .85, -poseEstimate.getY(), poseEstimate.getX(),
@@ -188,6 +191,10 @@ public class NewMTILeftAuto extends LinearOpMode {
                         robot.butterfly.runToPosition(pose1_2.getX(), pose1_2.getY(), pose1_2.getHeading(),
                                 .85, .6, -poseEstimate.getY(), poseEstimate.getX(),
                                 poseEstimate.getHeading());
+
+
+//                        if (myTimer.time() > 2200)
+//                            robot.intakeOuttake.arm.setAligner(true);
 
                         robot.intakeOuttake.arm.arm.setPosition((ARM_REST + ARM_OUTTAKE) / 2);
 
@@ -219,6 +226,8 @@ public class NewMTILeftAuto extends LinearOpMode {
                     break;
 
                 case SCORE:
+                    //robot.intakeOuttake.arm.aligner.setPwmDisable();
+
                     robot.butterfly.runToPosition(pose2.getX(), pose2.getY(), pose2.getHeading(),
                             .85, .85, -poseEstimate.getY(), poseEstimate.getX(),
                             poseEstimate.getHeading(), true);
@@ -245,51 +254,58 @@ public class NewMTILeftAuto extends LinearOpMode {
 
                     switch (score) {
                         case EXTEND:
+                            //robot.intakeOuttake.arm.claw.setPwmEnable();
+
                             junction = stack;
 
-                            targetPos = (5 - cycles) * coneOffset + webcamOffset;
+                            targetPos = (6 - cycles) * coneOffset + webcamOffset;
 
                             robot.intakeOuttake.arm.setAligner(true);
 
+                            double adjustment = myTimer.time();
+
                             if (cycles < 2) {
-                                if (myTimer.time() < 400) {
-                                    robot.intakeOuttake.horizontal.setTarget(distance + 35);
-                                } else {
-                                    robot.intakeOuttake.horizontal.setTarget(distance + 10);
-                                }
+//                                if (myTimer.time() < 400) {
+//                                    robot.intakeOuttake.horizontal.setTarget(distance + 35);
+//                                } else {
+                                    if (myTimer.time() < 700)
+                                        robot.intakeOuttake.horizontal.setTarget(distance - 40 + (700 - adjustment) / 10.0);
+                                    else
+                                        robot.intakeOuttake.horizontal.setTarget(distance - 70);
+                                //}
                             } else {
-                                if (myTimer.time() < 400) {
-                                    robot.intakeOuttake.horizontal.setTarget(distance + 60);
-                                } else {
-                                    robot.intakeOuttake.horizontal.setTarget(distance + 10);
-                                }
+                                if (myTimer.time() < 700)
+                                    robot.intakeOuttake.horizontal.setTarget(distance - 40 + (700 - adjustment) / 10.0);
+                                else
+                                    robot.intakeOuttake.horizontal.setTarget(distance - 70);
                             }
 
                             if (cycles < 0) {
                                 if (myTimer.time() > 0 && myTimer.time() < 300)
                                     robot.intakeOuttake.arm.arm.setPosition(linearProfile(300, myTimer.time(), 300, (ARM_REST + ARM_INTAKE) / 2, ARM_INTAKE - .06));
                                 else if (myTimer.time() >= 300)
-                                    robot.intakeOuttake.arm.arm.setPosition(ARM_INTAKE);
+                                    robot.intakeOuttake.arm.arm.setPosition(ARM_INTAKE + .083);
                             } else if (cycles < 2) {
                                 if (myTimer.time() > 0 && myTimer.time() < 300)
                                     robot.intakeOuttake.arm.arm.setPosition(linearProfile(300, myTimer.time(), 300, (ARM_REST + ARM_INTAKE) / 2, ARM_INTAKE + .004 - .06));
                                 else if (myTimer.time() >= 300)
-                                    robot.intakeOuttake.arm.arm.setPosition(ARM_INTAKE + .007);
+                                    robot.intakeOuttake.arm.arm.setPosition(ARM_INTAKE + .007 + .08);
                             } else {
                                 if (myTimer.time() > 0 && myTimer.time() < 300)
                                     robot.intakeOuttake.arm.arm.setPosition(linearProfile(300, myTimer.time(), 300, (ARM_REST + ARM_INTAKE) / 2, ARM_INTAKE + .01 - .06));
                                 else if (myTimer.time() >= 300)
-                                    robot.intakeOuttake.arm.arm.setPosition(ARM_INTAKE + .011);
+                                    robot.intakeOuttake.arm.arm.setPosition(ARM_INTAKE + .011 + .08);
                             }
 
                             if (myTimer.time() > 100) {
                                 robot.intakeOuttake.arm.wrist.setPosition(WRIST_INTAKE);
-                                if (myTimer.time() > 250) {
-                                    robot.intakeOuttake.arm.claw.setPosition(CLAW_OPEN);
+                                if (myTimer.time() > 200 && myTimer.time() < 740) {
+                                    robot.intakeOuttake.arm.claw.setPosition(CLAW_AUTO);
                                 }
                             }
 
-                            if (myTimer.time() > 785) {
+                            if (myTimer.time() > 750) {
+                                //robot.intakeOuttake.arm.claw.setPosition(CLAW_CLOSE);
                                 robot.intakeOuttake.arm.claw.setPosition(CLAW_CLOSE);
                                 myTimer.reset();
                                 reached = true;
@@ -305,6 +321,10 @@ public class NewMTILeftAuto extends LinearOpMode {
                             robot.intakeOuttake.horizontal.forwardRight.setPosition(FORWARD_RIGHT_IN);
                             robot.intakeOuttake.horizontal.forwardLeft.setPosition(FORWARD_LEFT_IN);
 
+//                            if (myTimer.time() > 375)
+//                                robot.intakeOuttake.arm.claw.setPwmDisable();
+//                            else
+//                                robot.intakeOuttake.arm.claw.setPosition(CLAW_CLOSE);
                             robot.intakeOuttake.arm.claw.setPosition(CLAW_CLOSE);
 
                             if (myTimer.time() > 250 && reached) {
@@ -367,6 +387,9 @@ public class NewMTILeftAuto extends LinearOpMode {
                             break;
                         case EXTENDSCORE:
 
+//                            if (myTimer.time() > 400)
+//                                robot.intakeOuttake.arm.claw.setPwmEnable();
+
                             if (myTimer.time() <= 475)
                                 robot.intakeOuttake.horizontal.setTarget(distance + 50);
 
@@ -397,20 +420,26 @@ public class NewMTILeftAuto extends LinearOpMode {
                             robot.intakeOuttake.horizontal.backwardLeft.setPosition(BACKWARD_LEFT_IN);
                             robot.intakeOuttake.horizontal.backwardRight.setPosition(BACKWARD_RIGHT_IN);
 
-                            if (myTimer.time() > 0 && myTimer.time() < 400)
+                            robot.intakeOuttake.horizontal.forwardRight.setPosition((FORWARD_RIGHT_IN));
+                            robot.intakeOuttake.horizontal.forwardLeft.setPosition((FORWARD_LEFT_IN));
+
+                            if (myTimer.time() > 0 && myTimer.time() < 400) {
+//                                robot.intakeOuttake.arm.claw.setPwmEnable();
                                 robot.intakeOuttake.arm.claw.setPosition(CLAW_OPEN);
+                            }
 
                             if (myTimer.time() > 300 && myTimer.time() < 500) {
-                                robot.intakeOuttake.horizontal.forwardLeft.setPosition(linearProfile(200, myTimer.time(), 500, ((FORWARD_LEFT_OUT + FORWARD_LEFT_IN) / 2 - .085), FORWARD_LEFT_IN));
-                                robot.intakeOuttake.horizontal.forwardRight.setPosition(linearProfile(200, myTimer.time(), 500, ((FORWARD_RIGHT_OUT + FORWARD_RIGHT_IN) / 2 + .085), FORWARD_RIGHT_IN));
+//                                robot.intakeOuttake.horizontal.forwardLeft.setPosition(linearProfile(200, myTimer.time(), 500, ((FORWARD_LEFT_OUT + FORWARD_LEFT_IN) / 2 - .085), FORWARD_LEFT_IN));
+//                                robot.intakeOuttake.horizontal.forwardRight.setPosition(linearProfile(200, myTimer.time(), 500, ((FORWARD_RIGHT_OUT + FORWARD_RIGHT_IN) / 2 + .085), FORWARD_RIGHT_IN));
 
                                 robot.intakeOuttake.arm.wrist.setPosition(WRIST_SAFE);
-                            } else if (myTimer.time() > 500) {
-                                robot.intakeOuttake.horizontal.forwardRight.setPosition((FORWARD_RIGHT_IN));
-                                robot.intakeOuttake.horizontal.forwardLeft.setPosition((FORWARD_LEFT_IN));
+//                            } else if (myTimer.time() > 500) {
+//                                robot.intakeOuttake.horizontal.forwardRight.setPosition((FORWARD_RIGHT_IN));
+//                                robot.intakeOuttake.horizontal.forwardLeft.setPosition((FORWARD_LEFT_IN));
                             }
 
                             if (myTimer.time() > 700)
+                                //robot.intakeOuttake.arm.claw.setPwmDisable();
                                 robot.intakeOuttake.arm.claw.setPosition(CLAW_CLOSE);
 
                             if (myTimer.time() > 650) {
@@ -430,6 +459,7 @@ public class NewMTILeftAuto extends LinearOpMode {
                                 robot.intakeOuttake.horizontal.backwardLeft.setPosition((BACKWARD_LEFT_IN + BACKWARD_LEFT_OUT) / 2);
 
                                 robot.intakeOuttake.arm.arm.setPosition(ARM_REST);
+                                robot.intakeOuttake.arm.wrist.setPosition(WRIST_INTAKE);
                                 cycles += 1;
                                 myTimer.reset();
                                 score = Score.EXTEND;
@@ -445,6 +475,7 @@ public class NewMTILeftAuto extends LinearOpMode {
 
                 case PARK:
 
+                    //robot.intakeOuttake.arm.aligner.setPwmEnable();
                     robot.intakeOuttake.arm.setAligner(false);
 
                     robot.intakeOuttake.arm.wrist.setPosition(WRIST_INTAKE);
@@ -462,13 +493,13 @@ public class NewMTILeftAuto extends LinearOpMode {
                     switch (tagOfInterest.id) {
                         case 1:
                             robot.butterfly.runToPosition(left.getX(), left.getY(), left.getHeading(),
-                                    .85, .85, -poseEstimate.getY(), poseEstimate.getX(),
+                                    .85, 1, -poseEstimate.getY(), poseEstimate.getX(),
                                     poseEstimate.getHeading());
                             break;
 
                         case 3:
                             robot.butterfly.runToPosition(right.getX(), right.getY(), right.getHeading(),
-                                    .85, .85, -poseEstimate.getY(), poseEstimate.getX(),
+                                    .85, 1, -poseEstimate.getY(), poseEstimate.getX(),
                                     poseEstimate.getHeading());
                             break;
 

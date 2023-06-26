@@ -143,11 +143,11 @@ public final class Constants {
                     "right"
             };
             public static final String[] SERVOS = new String[] {
-                    "wrist",
                     "frontLeft",
                     "backLeft",
                     "backwardRight",
                     "forwardRight",
+                    "align",
                     "claw"
             };
             // analog port 2/3 is axon analog
@@ -162,7 +162,7 @@ public final class Constants {
             public static final String[] SERVOS = new String[] {
                     "arm",
                     "forwardLeft",
-                    "aligner",
+                    "wrist",
                     "frontRight",
                     "backwardLeft",
                     "backRight"
